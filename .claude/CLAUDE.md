@@ -278,14 +278,21 @@ Then propose creating knowledge package if information is reusable.
 
 **Feature development:**
 
-- `/plan <id>` - Complete planning workflow (requirements → research → design → plan)
-- `/implement <id>` - Execute implementation tasks from plan
+- `/plan <id>` - Complete planning workflow (requirements → research → design → plan) [Sonnet]
+- `/epic [prompt|id]` - Fast-track planning (requirements + plan only, research/design in-memory) [Sonnet]
+- `/implement <id>` - Execute implementation tasks from plan [Haiku - 92% cost savings]
+- `/task "description"` - Standalone quick fix (implement + document after-action report) [Sonnet]
+- `/next` - Discover what you were working on (scans epics, tasks, git, files) [Haiku]
 
-**Utilities:**
+**Model strategy:** Sonnet for planning/decisions, Haiku for execution. Override available: "Use Sonnet for TASK-003"
 
-- `/jira-report [jql-query]` - Generate categorized JIRA task reports
-- `/sentry-cid [date-range]` - Analyze Sentry events for data leaks
-- `/repo-health-check` - Comprehensive repository health assessment
+**Knowledge system:**
+
+- `/knowledge-validate` - Validate knowledge vault structure and quality
+- `/knowledge-port [source-vault-path]` - Migrate knowledge vault from old structure to new infrastructure/patterns/domain layout
+- `/knowledge-init` - Initialize knowledge vault structure with tech stack detection
+- `/knowledge-extract <source-file-or-url>` - Extract knowledge from existing documentation or conversations
+- `/knowledge-create [description or --from-content <file>]` - Create new knowledge package with AI-guided categorization
 
 ## Workflow Setup
 
@@ -297,6 +304,27 @@ Then propose creating knowledge package if information is reusable.
 2. Run `/plan <id>` (creates requirements.md, research.md, tech-design.md, plan.md)
 3. Review all generated docs
 4. Run `/implement <id>` to execute the plan
+
+## Working With Epics (Natural Language)
+
+**Epic tasks and subtasks use natural conversation, not command parameters:**
+
+**Add task to epic:**
+```
+"Add a task to epic-0001: Fix button styling in header"
+```
+
+**Add subtask to current task:**
+```
+"Create a subtask for TASK-003: Fix regex validation bug"
+```
+
+**Work on specific task:**
+```
+"Implement TASK-003 from epic-0001"
+```
+
+**Why natural language?** Claude has conversation context. No need for command parameters or state tracking.
 
 ## CLI Tools
 

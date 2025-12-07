@@ -8,6 +8,22 @@ model: haiku
 
 Start implementing plan for: "$ARGUMENTS"
 
+## Model Selection
+
+**Default: Haiku** (cost-efficient for executing detailed plans)
+
+**Rationale:**
+- The plan contains detailed instructions from Sonnet-generated tech-design
+- Implementation is "follow the plan" work, not complex decision-making
+- Checkpoint system catches issues after each task (low risk)
+- 92% cost savings enables longer productive work sessions
+
+**When to override to Sonnet:**
+User can request Sonnet for specific complex tasks:
+- "Use Sonnet for TASK-003" - Complex refactoring requiring deep code understanding
+- "Switch to Sonnet" - If Haiku quality is consistently poor
+- "Use Sonnet for the rest" - For remaining tasks in epic
+
 **CRITICAL**: When exploring existing code in `/apps/` or `/libs/` during implementation, you MUST use Serena MCP tools (`mcp__serena__*`) exclusively. Only use Read for non-code files or when you're about to Edit/Write a code file.
 
 ## Steps
@@ -123,49 +139,93 @@ mcp__serena__find_symbol({
 - ✅ Read: Docs, configs, package.json, non-code files
 - ✅ Read: Code files you're about to Edit/Write
 
-### 5. Execute All Tasks
+### 5. Execute Tasks (One at a Time)
 
-Execute all tasks in the plan sequentially:
+**CRITICAL**: Execute ONE task at a time, then STOP for user testing.
 
-1. Find first TODO task
+**For each task:**
+
+1. Find next TODO task
 2. Update task status to IN_PROGRESS in plan.md
 3. Implement the task (write code, tests, etc.)
-4. Update task status to COMPLETED in plan.md
-5. Continue to next task
-6. Repeat until all tasks completed
+4. Run automated verification (tests, typecheck, lint, build)
+5. Update task status to COMPLETED in plan.md
+6. **STOP and ask user to test**
 
 **CRITICAL**: You MUST update plan.md task statuses as you progress:
 - Before starting task: TODO → IN_PROGRESS
 - After completing task: IN_PROGRESS → COMPLETED
 - Use the Edit tool to modify plan.md
 
-**Example**:
+**Workflow per task:**
 ```markdown
 # Starting Task 1
 → Edit plan.md: "**Status**: TODO" → "**Status**: IN_PROGRESS"
 → Implement the task
+→ Run automated checks (tests, typecheck, lint)
 → Edit plan.md: "**Status**: IN_PROGRESS" → "**Status**: COMPLETED"
+→ STOP - Ask user to test
 
-# Move to Task 2
+# User tests, gives feedback
+→ If issues found: Fix them
+→ If approved: Continue to Task 2
+
+# Starting Task 2
 → Edit plan.md: "**Status**: TODO" → "**Status**: IN_PROGRESS"
 → Implement the task
-→ Edit plan.md: "**Status**: IN_PROGRESS" → "**Status**: COMPLETED"
+→ ...
 ```
 
-### 6. Progress Reporting (Compressed)
+**Why stop after each task?**
+- Vertical slices deliver user value incrementally
+- Each task should be testable independently
+- Catch issues early before building on broken foundation
+- Get user feedback on direction before continuing
 
-After each task completion, use compressed format:
+### 6. Testing Checkpoint (MANDATORY)
+
+After completing each task, STOP and present testing checkpoint:
+
 ```
 ✅ TASK-00X completed ([X]/[N] tasks)
-Files: [count] files modified
-Verification: [Quick one-line verification method]
-Next: [TASK-00Y name] or "All tasks complete"
+
+**What was implemented:**
+- [Brief description of what was built]
+- [Key functionality added]
+
+**Files modified:**
+- [List of changed files with brief description]
+
+**Automated verification:**
+- ✅ Unit tests: [X/Y passed]
+- ✅ Type check: Passed
+- ✅ Linter: Passed
+- ✅ Build: Passed
+
+**Manual testing needed:**
+Please test the following:
+1. [Specific thing to test with expected behavior]
+2. [Another thing to test]
+3. [Edge case to verify]
+
+**How to test:**
+[Brief instructions on how to run/view the feature]
+Example: "Run `npx nx serve client`, navigate to /users, click 'Add User'"
+
+---
+
+**Ready for testing. Please verify and let me know:**
+1. "Continue" - Move to next task
+2. "Fix [issue]" - I'll fix the issue before continuing
+3. "Stop" - Pause implementation here
 ```
 
 **Suppress verbose outputs**:
 - Lint/build outputs: Only show errors, summarize success
 - Example: `✅ synergy-client lint passed` instead of full nx output
 - Keep TypeScript errors if they occur, but summarize success
+
+**Do NOT continue to next task until user responds.**
 
 ## Code Quality Standards
 
@@ -192,12 +252,14 @@ Next: [TASK-00Y name] or "All tasks complete"
 - ✅ Use Serena MCP for code exploration
 - ✅ Apply loaded knowledge patterns
 - ✅ Write tests alongside code
-- ✅ Execute ALL tasks in sequence
+- ✅ Execute ONE task at a time (not all tasks)
+- ✅ STOP after each task for user testing
 - ✅ Update task statuses in plan.md as you progress
 - ✅ Challenge your code for issues
 - ✅ Add error handling
 - ✅ Run quality checks (build, tests, lint, typecheck)
-- ✅ Provide clear progress updates after each task
+- ✅ Provide testing checkpoint with clear instructions
+- ✅ Wait for user approval before continuing to next task
 
 **NEVER**:
 - ❌ Write code without loading knowledge
@@ -220,28 +282,56 @@ If a task fails:
 3. STOP execution
 4. Suggest: Fix issue, then run `/implement` again to retry
 
-## Example Output (Compressed Format)
+## Example Output (With Testing Checkpoints)
 
 ```
 🚀 Starting implementation for {project-id}
 Plan: 8 tasks total
 
+[Implements TASK-001...]
+
 ✅ TASK-001 completed (1/8)
-Files: 3 files modified
-Verification: Component renders correctly
-Next: TASK-002 - Add form validation
+
+**What was implemented:**
+- Created UserForm component with name and email fields
+- Added form state management with useState
+- Styled component using existing design system
+
+**Files modified:**
+- apps/client/src/components/UserForm.tsx (new)
+- apps/client/src/components/UserForm.spec.tsx (new)
+
+**Automated verification:**
+- ✅ Unit tests: 5/5 passed
+- ✅ Type check: Passed
+- ✅ Linter: Passed
+- ✅ Build: Passed
+
+**Manual testing needed:**
+1. Form renders with name and email inputs
+2. Inputs accept text properly
+3. Styling matches design system
+
+**How to test:**
+Run `npx nx serve client`, navigate to /users/new
+
+---
+
+**Ready for testing. Please verify and let me know:**
+1. "Continue" - Move to TASK-002
+2. "Fix [issue]" - I'll fix before continuing
+3. "Stop" - Pause here
+
+[User responds: "Continue"]
+
+[Implements TASK-002...]
 
 ✅ TASK-002 completed (2/8)
-Files: 2 files modified
-Verification: Validation errors display
-Next: TASK-003 - API integration
 
-[...continues...]
+[... checkpoint format repeats ...]
 
-✅ TASK-008 completed (8/8)
-Files: 1 file modified
-Verification: All tests pass
-Next: All tasks complete
+[After all tasks complete:]
 
 🎉 Implementation complete for {project-id}
+All 8 tasks completed and tested.
 ```

@@ -138,20 +138,23 @@ Answer first, elaborate if requested. For analysis questions: Quick answer (≤3
 
 **Commands:**
 
-1. **`/plan <id>`** command:
+1. **`/epic [prompt|id]`** command:
 
-- Loads relevant knowledge based on ticket analysis
+- Loads relevant knowledge based on ticket/prompt analysis
 - Creates requirements.md (business check, WHAT/WHY)
-- Creates research.md (technical investigation using Serena MCP)
-- Creates tech-design.md (high-level architecture)
+- Does research in-memory (technical investigation using Serena MCP)
+- Does tech-design in-memory (high-level architecture decisions)
 - Creates plan.md (implementation tasks breakdown)
+- Fast-track: Only 2 docs (requirements + plan), research/design kept in context
 
 2. **`/implement <id>`** command:
 
 - Loads relevant knowledge based on plan tasks
-- Executes all tasks from plan.md
+- Executes tasks ONE AT A TIME from plan.md
+- STOPS after each task for user testing (testing checkpoint)
 - Writes all code/tests (unit & integration ONLY, NOT e2e)
 - Updates task statuses in plan.md
+- Uses Haiku for 92% cost savings
 
 ## Knowledge System
 
@@ -171,19 +174,19 @@ Knowledge packages are modular coding standards and patterns. Commands load know
 **Commands use profiles + task types:**
 
 ```bash
-# /plan command example (routing task)
+# /epic command example (routing task)
 node .claude/knowledge/scripts/knowledge-search.mjs \
   --command-profile plan \
   --task-type routing_implementation \
-  --agent-name plan-command \
-  --agent-id "plan-feco-0000-123"
+  --agent-name epic-command \
+  --agent-id "epic-0001-$(date +%s)"
 
 # /implement command example (routing task)
 node .claude/knowledge/scripts/knowledge-search.mjs \
   --command-profile implementation \
   --task-type routing_implementation \
   --agent-name implementation-command \
-  --agent-id "implementation-feco-0000-123"
+  --agent-id "implementation-epic-0001-$(date +%s)"
 
 # Returns: core packages + routing packages
 ```
@@ -193,7 +196,7 @@ node .claude/knowledge/scripts/knowledge-search.mjs \
 - **plan profile**: routing_implementation, component_implementation, test_fixing, api_implementation, form_implementation
 - **implementation profile**: Same + data_table_implementation, state_management
 
-**Note**: Command profiles are configuration presets in `knowledge.json` that define which packages to load. The `/plan` command uses the `plan` profile and the `/implement` command uses the `implementation` profile for their knowledge loading configuration.
+**Note**: Command profiles are configuration presets in `knowledge.json` that define which packages to load. The `/epic` command uses the `plan` profile and the `/implement` command uses the `implementation` profile for their knowledge loading configuration.
 
 **Full list**: See `knowledge.json` → `command_profiles.[profile].always_load`
 
@@ -278,8 +281,7 @@ Then propose creating knowledge package if information is reusable.
 
 **Feature development:**
 
-- `/plan <id>` - Complete planning workflow (requirements → research → design → plan) [Sonnet]
-- `/epic [prompt|id]` - Fast-track planning (requirements + plan only, research/design in-memory) [Sonnet]
+- `/epic [prompt|id]` - Planning workflow (requirements + plan, research/design in-memory) [Sonnet]
 - `/implement <id>` - Execute implementation tasks from plan [Haiku - 92% cost savings]
 - `/task "description"` - Standalone quick fix (implement + document after-action report) [Sonnet]
 - `/next` - Discover what you were working on (scans epics, tasks, git, files) [Haiku]
@@ -296,14 +298,19 @@ Then propose creating knowledge package if information is reusable.
 
 ## Workflow Setup
 
-**Before starting**: Create `.claude/epics/[project-id]/ticket.md` with feature description.
-
 **Recommended flow**:
 
-1. Create ticket.md
-2. Run `/plan <id>` (creates requirements.md, research.md, tech-design.md, plan.md)
-3. Review all generated docs
-4. Run `/implement <id>` to execute the plan
+1. Run `/epic "description"` or `/epic epic-id`
+   - Creates epic-XXXX folder (auto-incremental)
+   - Generates requirements.md and plan.md
+   - Does research and tech-design in-memory (no docs, faster)
+
+2. Review generated requirements.md and plan.md
+
+3. Run `/implement epic-XXXX` to execute the plan
+   - Haiku executes tasks one at a time
+   - Testing checkpoint after each task
+   - 92% cost savings vs Sonnet
 
 ## Working With Epics (Natural Language)
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { appendFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -10,12 +9,10 @@ import {
   findPackageByName,
   estimateTokens,
 } from './knowledge-lib.mjs';
+import { initializeFromSearch } from '../hooks/unified-tracking.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const TRACKER_PATH = join(__dirname, '../tracker/tracker.jsonl');
-const METRICS_PATH = join(__dirname, '../tracker/metrics.jsonl');
 
 const parseArguments = (args) => {
   const result = {
@@ -26,10 +23,14 @@ const parseArguments = (args) => {
     help: false,
     agentName: null,
     agentId: null,
+    sessionId: null,
+    promptId: null,
     commandProfile: null,
     prompt: null,
     listCategories: false,
     listTags: false,
+    filePath: null,
+    maxResults: 15,
   };
 
   for (let i = 2; i < args.length; i++) {
@@ -87,6 +88,18 @@ const parseArguments = (args) => {
       continue;
     }
 
+    if (arg === '--session-id' && nextArg) {
+      result.sessionId = nextArg;
+      i++;
+      continue;
+    }
+
+    if (arg === '--prompt-id' && nextArg) {
+      result.promptId = nextArg;
+      i++;
+      continue;
+    }
+
     if (arg === '--command-profile' && nextArg) {
       result.commandProfile = nextArg;
       i++;
@@ -95,6 +108,18 @@ const parseArguments = (args) => {
 
     if (arg === '--prompt' && nextArg) {
       result.prompt = nextArg;
+      i++;
+      continue;
+    }
+
+    if (arg === '--file-path' && nextArg) {
+      result.filePath = nextArg;
+      i++;
+      continue;
+    }
+
+    if (arg === '--max-results' && nextArg) {
+      result.maxResults = parseInt(nextArg, 10);
       i++;
       continue;
     }
@@ -113,69 +138,104 @@ const formatTimestamp = (date) => {
   return `${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-// Extract category and filename from knowledge path
-const extractCategoryAndFile = (knowledgePath) => {
-  // Example: .ai/knowledge/core/react/react-components.md
-  // Returns: { category: 'core', file: 'react-components.md' }
-  const parts = knowledgePath.split('/');
-  const category = parts[3] || 'unknown'; // .ai/knowledge/[category]/...
-  const filename = parts[parts.length - 1] || 'unknown';
-  return { category, file: filename };
+/**
+ * Detect language from file path
+ * Returns: 'typescript', 'javascript', 'java', 'python', 'go', 'terraform', or null
+ */
+const detectLanguage = (filePath) => {
+  if (!filePath) return null;
+
+  const lowerPath = filePath.toLowerCase();
+
+  // TypeScript (most specific first)
+  if (lowerPath.match(/\.(ts|tsx)$/)) return 'typescript';
+
+  // JavaScript
+  if (lowerPath.match(/\.(js|jsx|mjs|cjs)$/)) return 'javascript';
+
+  // Java
+  if (lowerPath.match(/\.java$/)) return 'java';
+
+  // Python
+  if (lowerPath.match(/\.py$/)) return 'python';
+
+  // Go
+  if (lowerPath.match(/\.go$/)) return 'go';
+
+  // Terraform/HCL
+  if (lowerPath.match(/\.tf$/)) return 'terraform';
+
+  // Rust
+  if (lowerPath.match(/\.rs$/)) return 'rust';
+
+  // C#
+  if (lowerPath.match(/\.cs$/)) return 'csharp';
+
+  return null;
 };
 
-const trackKnowledgeLoad = (knowledgePath, agentName, agentId) => {
-  const timestamp = formatTimestamp(new Date());
-  const { category, file } = extractCategoryAndFile(knowledgePath);
+/**
+ * Calculate relevance score for a package based on tag matching
+ * Returns score between 0 and 1
+ */
+const calculateRelevanceScore = (packageData, searchTags, category, language) => {
+  // 1. Calculate tag match score (0-1.0)
+  const packageTags = (packageData.tags || []).map(t => t.toLowerCase());
+  const lowerSearchTags = searchTags.map(t => t.toLowerCase());
 
-  const logEntry = JSON.stringify({
-    category: category,
-    file: file,
-    agent_name: agentName,
-    agent_id: agentId,
-    timestamp: timestamp
-  }) + '\n';
+  let tagScore = 0;
+  let tagMatches = 0;
 
-  try {
-    appendFileSync(TRACKER_PATH, logEntry, 'utf-8');
-  } catch (error) {
-    console.error(`Warning: Failed to track knowledge load: ${error.message}`, { toStderr: true });
-  }
-};
-
-const trackMultipleKnowledge = (results, agentName, agentId) => {
-  if (!agentName || !agentId) {
-    console.error('Warning: --agent-name and --agent-id are required for tracking', { toStderr: true });
-    return;
+  for (const searchTag of lowerSearchTags) {
+    // Exact match
+    if (packageTags.includes(searchTag)) {
+      tagMatches += 1.0;
+    }
+    // Partial match
+    else if (packageTags.some(pt => pt.includes(searchTag) || searchTag.includes(pt))) {
+      tagMatches += 0.5;
+    }
   }
 
-  for (const result of results) {
-    trackKnowledgeLoad(result.knowledge_path, agentName, agentId);
+  if (lowerSearchTags.length > 0) {
+    tagScore = tagMatches / lowerSearchTags.length;
+  } else {
+    tagScore = 0.5; // No tags specified = moderate base score
   }
-};
 
-const trackMetrics = (args, results, tokenEstimate, allResults) => {
-  // Extract unique categories from loaded packages
-  const categories = [...new Set(allResults.map(r => r.category))].sort();
+  // 2. Language filtering (CRITICAL for standards packages)
+  const categoryLower = category.toLowerCase();
 
-  const metrics = {
-    timestamp: formatTimestamp(new Date()),
-    pack_returned: results.length,
-    pack_tracked: allResults.length, // Actual number of tracker.jsonl entries with this agent_id
-    tokens: tokenEstimate,
-    search_mode: args.commandProfile ? 'command-profile' : 'manual',
-    command_profile: args.commandProfile || null,
-    tags: args.tags.length > 0 ? args.tags : null,
-    categories: categories.length > 0 ? categories : null,
-    agent_name: args.agentName || null,
-    agent_id: args.agentId || null,
-    user_prompt: args.prompt || null,
-  };
+  // If we detected a language, filter language-specific standards
+  if (language) {
+    // Check if package is language-specific by category name
+    const languageIndicators = {
+      typescript: ['typescript', 'ts-'],
+      javascript: ['javascript', 'js-'],
+      java: ['java'],
+      python: ['python', 'py-'],
+      go: ['golang', 'go-'],
+      terraform: ['terraform', 'tf-'],
+      rust: ['rust'],
+      csharp: ['csharp', 'c#', 'dotnet']
+    };
 
-  try {
-    appendFileSync(METRICS_PATH, JSON.stringify(metrics) + '\n', 'utf-8');
-  } catch (error) {
-    // Silent fail - don't break search execution
+    // For standards/ and tooling/ packages, check language compatibility
+    if (categoryLower.startsWith('standards/') || categoryLower.startsWith('tooling/')) {
+      // Check if package mentions a different language
+      for (const [lang, indicators] of Object.entries(languageIndicators)) {
+        if (lang !== language) {
+          // If package category contains a different language indicator, reject it
+          if (indicators.some(indicator => categoryLower.includes(indicator))) {
+            return 0; // HARD REJECT - wrong language
+          }
+        }
+      }
+    }
   }
+
+  // Return tag score (already 0-1.0)
+  return tagScore;
 };
 
 const matchesTags = (packageTags, searchTags) => {
@@ -320,24 +380,15 @@ const searchByProfile = (mapping, packageIndex, profile, additionalTags = []) =>
     }
   }
 
-  // Apply exclude_categories filter if specified
-  const excludeCategories = profile.exclude_categories || [];
-  if (excludeCategories.length > 0) {
-    return allResults.filter(result => {
-      // Use prefix matching to support hierarchical categories
-      // e.g., exclude_categories: ["business"] should exclude both "business" and "business/tokenization"
-      return !excludeCategories.some(excl =>
-        result.category === excl || result.category.startsWith(excl + '/')
-      );
-    });
-  }
-
   return allResults;
 };
 
 const searchKnowledge = (mapping, filters) => {
   const results = [];
-  const { tags, text, agent, category } = filters;
+  const { tags, text, agent, category, filePath, prompt, maxResults } = filters;
+
+  // Detect language from file path
+  const language = detectLanguage(filePath);
 
   let categoriesToSearch;
 
@@ -372,6 +423,9 @@ const searchKnowledge = (mapping, filters) => {
         continue;
       }
 
+      // Calculate relevance score with language filtering
+      const relevanceScore = calculateRelevanceScore(packageData, tags, cat, language);
+
       results.push({
         name,
         category: cat,
@@ -381,11 +435,18 @@ const searchKnowledge = (mapping, filters) => {
         required_knowledge: packageData.required_knowledge ?? [],
         optional_knowledge: packageData.optional_knowledge ?? [],
         knowledge_path: packageData.knowledge_path ?? `${mapping.skills_location}/${cat}/${name}/${name}.md`,
+        relevance_score: parseFloat(relevanceScore.toFixed(3)),
+        detected_language: language,
       });
     }
   }
 
-  return results;
+  // Sort by relevance score (highest first)
+  results.sort((a, b) => b.relevance_score - a.relevance_score);
+
+  // Apply maxResults limit (default 15)
+  const limit = maxResults || 15;
+  return results.slice(0, limit);
 };
 
 const formatOutput = (results, filters, mapping, packageIndex) => {
@@ -433,6 +494,8 @@ OPTIONS:
   --text <text>             Search by description text (case-insensitive)
   --agent <agent>           Filter by agent name (partial match)
   --category <cat>          Filter by category (exact match: technical/frameworks, business/trading)
+  --file-path <path>        File path for language detection (e.g., /path/to/file.spec.tsx)
+  --max-results <number>    Maximum results to return (default: 15)
   --agent-name <name>       Agent name for tracking (enables automatic tracking)
   --agent-id <id>           Agent ID for tracking (enables automatic tracking)
   --prompt <text>           User prompt for tracking (populated by hooks)
@@ -473,6 +536,17 @@ MANUAL SEARCH MODE:
   node knowledge-search.mjs --category technical
   node knowledge-search.mjs --tags routing --agent-name implementation-agent --agent-id task-123
 
+DOMAIN-AWARE SEARCH (NEW):
+  # Automatically detects frontend domain and prioritizes frontend packages
+  node knowledge-search.mjs --tags testing,flaky-tests \\
+    --file-path /path/to/OrderHistory.spec.tsx \\
+    --prompt "Check if this test is flaky"
+
+  # Limit to top 10 results
+  node knowledge-search.mjs --tags testing --max-results 10
+
+  # Results include relevance_score and detected_language fields
+
 OUTPUT:
   Structured JSON with matching knowledge packages, dependencies, and token estimate
   When --agent-name and --agent-id are provided, tracking is logged to .claude/knowledge/tracker/tracker.jsonl
@@ -483,30 +557,33 @@ OUTPUT:
 };
 
 const listCategories = (mapping) => {
-  const metadata = mapping.metadata;
-  if (!metadata || !metadata.categories) {
-    console.error(JSON.stringify({ error: 'Metadata not found in knowledge.json' }, null, 2));
-    process.exit(1);
-  }
+  const categories = Object.keys(mapping.knowledge).sort();
 
   const output = {
-    count: metadata.categories.length,
-    categories: metadata.categories
+    count: categories.length,
+    categories: categories
   };
 
   console.log(JSON.stringify(output, null, 2));
 };
 
 const listTags = (mapping) => {
-  const metadata = mapping.metadata;
-  if (!metadata || !metadata.tags) {
-    console.error(JSON.stringify({ error: 'Metadata not found in knowledge.json' }, null, 2));
-    process.exit(1);
+  const tagsSet = new Set();
+
+  // Extract all tags from all packages
+  for (const category of Object.values(mapping.knowledge)) {
+    for (const pkg of Object.values(category)) {
+      if (pkg.tags && Array.isArray(pkg.tags)) {
+        pkg.tags.forEach(tag => tagsSet.add(tag));
+      }
+    }
   }
 
+  const tags = Array.from(tagsSet).sort();
+
   const output = {
-    count: metadata.tags.length,
-    tags: metadata.tags
+    count: tags.length,
+    tags: tags
   };
 
   console.log(JSON.stringify(output, null, 2));
@@ -593,16 +670,23 @@ const main = () => {
       console.error('');
     }
 
-    // Track knowledge loads (mandatory when agent-name and agent-id are provided)
+    // Track knowledge loads with unified tracking
     if (args.agentName && args.agentId) {
-      trackMultipleKnowledge(allResults, args.agentName, args.agentId);
+      const categories = [...new Set(allResults.map(r => r.category))].sort();
+      const consideredPackages = allResults.map(r => r.name);
+
+      initializeFromSearch({
+        agentId: args.agentId,
+        agentName: args.agentName,
+        sessionId: args.sessionId || null,
+        prompt: args.prompt || null,
+        tags: args.tags || [],
+        categories,
+        consideredPackages,
+      });
     }
 
     const output = formatOutput(results, args, mapping, packageIndex);
-
-    // Parse output to get token estimate
-    const outputData = JSON.parse(output);
-    trackMetrics(args, results, outputData.token_estimate || 0, allResults);
 
     console.log(output);
 

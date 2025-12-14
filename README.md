@@ -1,8 +1,6 @@
 # OpenCode → Claude Code Replication Project
 
-> **🚨 QUICK START**: Hit a setup error? See **[START-HERE.md](START-HERE.md)** for instant fix!
->
-> **Need pnpm?** Run: `npm install -g pnpm` then `pnpm install`
+> **🚨 QUICK START**: Need pnpm? Run: `npm install -g pnpm` then `pnpm install`
 
 ## 📋 Project Overview
 
@@ -18,29 +16,32 @@ This project documents a comprehensive analysis of **OpenCode** and **Claude Cod
 
 ```
 nori/
+├── documentation/                    # All technical documentation
+│   ├── claude-code-architecture-guide.md  # Master architectural guide (4,700 lines)
+│   ├── hooks-comparison.md          # Hooks system deep dive (1,800 lines)
+│   ├── skills-comparison.md         # Skills system analysis (1,600 lines)
+│   ├── agents-comparison.md         # Agent system comparison (2,000 lines)
+│   ├── commands-comparison.md       # Command system breakdown (1,400 lines)
+│   ├── tools-comparison.md          # Tool system analysis (2,500 lines)
+│   ├── context-management-comparison.md  # Context window strategies (2,000 lines)
+│   ├── MASTER-ROADMAP.md            # Consolidated implementation plan (1,500 lines)
+│   └── GAP-ANALYSIS.md              # Known vs unknown assessment (1,200 lines)
+│
 ├── opencode-fork/                    # Modified OpenCode (Claude-only)
 │   ├── ARCHITECTURE.md              # Complete architecture documentation
 │   ├── FEATURES.md                  # Comprehensive feature inventory
 │   ├── CHANGES.md                   # All modifications made
 │   └── ANTHROPIC-ONLY-SETUP.md      # Setup guide for Claude-only mode
 │
-├── anthropic-repos/                  # Anthropic SDK and resources
-│   ├── anthropic-sdk-typescript/    # Official TypeScript SDK
-│   ├── courses/                     # Anthropic courses
-│   └── prompt-eng-interactive-tutorial/
+├── base_repositories/                # Reference repositories
+│   ├── opencode-fork/               # Base OpenCode fork
+│   └── anthropic-repos/             # Anthropic SDK and resources
+│       ├── anthropic-sdk-typescript/
+│       ├── courses/
+│       └── prompt-eng-interactive-tutorial/
 │
-├── claude-code-architecture-guide.md # Master architectural guide
-│
-├── hooks-comparison.md              # Hooks system deep dive
-├── skills-comparison.md             # Skills system analysis
-├── agents-comparison.md             # Agent system comparison
-├── commands-comparison.md           # Command system breakdown
-├── tools-comparison.md              # Tool system analysis
-├── context-management-comparison.md # Context window strategies
-│
-├── MASTER-ROADMAP.md                # Consolidated implementation plan
-├── GAP-ANALYSIS.md                  # Known vs unknown assessment
-└── README.md                        # This file
+├── CLAUDE.md                         # Project instructions for Claude Code
+└── README.md                         # This file (project overview)
 ```
 
 ## 🎯 Key Deliverables
@@ -60,6 +61,8 @@ nori/
 
 ### 2. Comprehensive Comparison Documents
 
+**Location**: `documentation/`
+
 | Document | Focus | Pages | Status |
 |----------|-------|-------|--------|
 | **hooks-comparison.md** | Hook systems (10 events vs 4 events) | 45+ | ✅ Complete |
@@ -73,7 +76,7 @@ nori/
 
 ### 3. Master Roadmap
 
-**Location**: `MASTER-ROADMAP.md`
+**Location**: `documentation/MASTER-ROADMAP.md`
 
 **Contents**:
 - Executive summary with priority matrix
@@ -92,7 +95,7 @@ nori/
 
 ### 4. Gap Analysis
 
-**Location**: `GAP-ANALYSIS.md`
+**Location**: `documentation/GAP-ANALYSIS.md`
 
 **Overall Confidence**: 68% (weighted average)
 
@@ -239,9 +242,9 @@ nori/
 - CLAUDE.md support
 - Documentation
 
-## 🧪 Testing Strategy for Tomorrow
+## 🧪 Testing Strategy
 
-The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
+The `documentation/GAP-ANALYSIS.md` includes 15 prioritized tests to validate assumptions:
 
 ### High Priority Tests:
 1. Hook invocation timing and data format
@@ -264,7 +267,7 @@ The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
 14. Deploy agent capabilities
 15. Performance benchmarks
 
-**Approach**: Run tests, document results, update confidence levels in GAP-ANALYSIS.md
+**Approach**: Run tests, document results, update confidence levels in `documentation/GAP-ANALYSIS.md`
 
 ## 📈 Success Metrics
 
@@ -295,10 +298,10 @@ The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
 
 ## 🚀 Next Steps
 
-### Tomorrow (Testing Day)
+### Next Actions
 
 1. **Run Validation Tests**:
-   - Use GAP-ANALYSIS.md test list
+   - Use `documentation/GAP-ANALYSIS.md` test list
    - Document all findings
    - Update confidence levels
 
@@ -308,14 +311,14 @@ The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
    - Compare performance to full OpenCode
 
 3. **Review Documentation**:
-   - Validate all comparison docs
+   - Validate all comparison docs in `documentation/`
    - Check implementation roadmap
    - Identify any gaps
 
 ### Week 1
 
 1. **Prioritize Features**:
-   - Review MASTER-ROADMAP.md
+   - Review `documentation/MASTER-ROADMAP.md`
    - Adjust based on test results
    - Get stakeholder buy-in
 
@@ -348,27 +351,26 @@ The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
 
 ## 📚 Documentation Index
 
-### Primary Documents
+### Technical Documentation (`documentation/`)
 
 1. **claude-code-architecture-guide.md** - Complete Claude Code architecture (4,700 lines)
-2. **MASTER-ROADMAP.md** - Consolidated implementation plan with timeline
-3. **GAP-ANALYSIS.md** - Knowledge gaps and confidence assessment
+2. **MASTER-ROADMAP.md** - Consolidated implementation plan with timeline (1,500 lines)
+3. **GAP-ANALYSIS.md** - Knowledge gaps and confidence assessment (1,200 lines)
+4. **hooks-comparison.md** - Hook systems: OpenCode (4 events) vs Claude Code (10 events) (1,800 lines)
+5. **skills-comparison.md** - Plugin-based vs native skills (1,600 lines)
+6. **agents-comparison.md** - Agent architecture and sub-agent systems (2,000 lines)
+7. **commands-comparison.md** - Slash command implementations (1,400 lines)
+8. **tools-comparison.md** - 19 vs 15+ tools with detailed analysis (2,500 lines)
+9. **context-management-comparison.md** - Context window strategies (2,000 lines)
 
-### Comparison Documents
+**Total**: ~18,700 lines of technical documentation
 
-4. **hooks-comparison.md** - Hook systems: OpenCode (4 events) vs Claude Code (10 events)
-5. **skills-comparison.md** - Plugin-based vs native skills
-6. **agents-comparison.md** - Agent architecture and sub-agent systems
-7. **commands-comparison.md** - Slash command implementations
-8. **tools-comparison.md** - 19 vs 15+ tools with detailed analysis
-9. **context-management-comparison.md** - Context window strategies
+### OpenCode Documentation (`opencode-fork/`)
 
-### OpenCode Documentation
-
-10. **opencode-fork/ARCHITECTURE.md** - Modified OpenCode architecture
-11. **opencode-fork/FEATURES.md** - Complete feature inventory
-12. **opencode-fork/CHANGES.md** - All modifications (550+ lines removed)
-13. **opencode-fork/ANTHROPIC-ONLY-SETUP.md** - Configuration guide
+10. **ARCHITECTURE.md** - Modified OpenCode architecture
+11. **FEATURES.md** - Complete feature inventory
+12. **CHANGES.md** - All modifications (550+ lines removed)
+13. **ANTHROPIC-ONLY-SETUP.md** - Configuration guide
 
 ## 🎓 Key Learnings
 
@@ -429,18 +431,18 @@ The GAP-ANALYSIS.md includes 15 prioritized tests to validate assumptions:
 
 This is a research and development project. To contribute:
 
-1. Review comparison documents for understanding
-2. Check MASTER-ROADMAP.md for priorities
+1. Review comparison documents in `documentation/` for understanding
+2. Check `documentation/MASTER-ROADMAP.md` for priorities
 3. Implement features following the roadmap
-4. Test thoroughly and update GAP-ANALYSIS.md
+4. Test thoroughly and update `documentation/GAP-ANALYSIS.md`
 5. Document findings and share with community
 
 ## 📞 Contact & Support
 
 For questions or feedback:
-- Review documentation first
-- Check GAP-ANALYSIS.md for known unknowns
-- Consult MASTER-ROADMAP.md for implementation guidance
+- Review documentation in `documentation/` first
+- Check `documentation/GAP-ANALYSIS.md` for known unknowns
+- Consult `documentation/MASTER-ROADMAP.md` for implementation guidance
 - Open issues in the OpenCode repository
 
 ---
@@ -461,6 +463,6 @@ For questions or feedback:
 
 **Status**: ✅ Research Complete | 📝 Documentation Complete | 🚀 Ready for Implementation
 
-**Last Updated**: December 4, 2025
+**Last Updated**: December 7, 2025
 
-**Next Milestone**: Testing day (tomorrow) - validate assumptions and update confidence levels
+**Documentation**: All technical docs organized in `documentation/` folder

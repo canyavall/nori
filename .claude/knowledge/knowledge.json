@@ -101,6 +101,22 @@
         "category": "infrastructure/mcp/serena"
       }
     },
+    "infrastructure/analysis": {
+      "claude-code-request-analysis": {
+        "tags": [
+          "mitmproxy",
+          "api-analysis",
+          "testing",
+          "claude-code",
+          "debugging",
+          "interception"
+        ],
+        "description": "Intercept Claude Code API requests using mitmproxy to analyze system prompts, tools, and quality factors.",
+        "required_knowledge": [],
+        "knowledge_path": ".claude/knowledge/vault/infrastructure/analysis/claude-code-request-analysis.md",
+        "category": "infrastructure/analysis"
+      }
+    },
     "patterns/architecture": {
       "claude-context-management": {
         "tags": [

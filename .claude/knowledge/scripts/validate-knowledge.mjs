@@ -13,20 +13,66 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TARGET_LINES = 70;  // Ideal target
 const MAX_LINES = 105;    // Hard limit (error if exceeded)
+const WHITELIST_MAX_LINES = 130; // Maximum lines allowed for whitelisted files
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WHITELIST POLICY
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// Files in the whitelist MUST be between 105-130 lines.
+//
+// WHY THIS RULE:
+// - Files ≤105 lines should NOT be whitelisted (use standard validation)
+// - Files >130 lines are TOO LARGE and MUST be split into smaller packages
+//
+// BEFORE ADDING TO WHITELIST:
+// 1. Verify file is 105-130 lines
+// 2. Verify it's a comprehensive pattern that cannot be easily split
+// 3. Add clear justification comment explaining why it's comprehensive
+//
+// FILES >130 LINES: These are technical debt and MUST be split/reduced
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // Whitelist for comprehensive guides that exceed limits (with justification)
 const WHITELIST_COMPREHENSIVE = [
   'qa-scenarios-patterns.md',         // Comprehensive QA guide covering all scenario types, heuristics, and examples
   'button-ux-guidelines.md',          // Comprehensive Figma design system documentation with detailed specs
   'sygnum-ui-overview.md',            // Comprehensive Chakra UI component library catalog and migration guide
-  'knowledge-tracking.md',            // Comprehensive knowledge tracking system documentation
-  'hooks-system.md',                  // Comprehensive hooks system guide with all patterns
   'testing-flaky.md',                 // Comprehensive flaky test patterns and solutions
   'testing-isolation.md',             // Comprehensive test isolation patterns
   'testing-timer-patterns.md',        // Comprehensive timer and async testing patterns
   'testing-components-mocking.md',    // Comprehensive component mocking guide
   'testing-async-debugging.md',       // Comprehensive async debugging patterns
   'standards-lint-prevention.md',     // Comprehensive linting rules and prevention strategies
+  'game-documentation-workflow.md',   // Comprehensive game documentation workflow with all stages and patterns
+  'game-doc-maintenance.md',          // Comprehensive game documentation maintenance guide with metadata and tracking
+  'risk-integrations.md',             // Comprehensive risk module integration patterns and external systems
+  'yoda-form-fields.md',              // Comprehensive yoda-form field types and validation patterns
+  'business-documentation-index.md',  // Comprehensive index of all business documentation
+  // SRE/Infrastructure comprehensive guides
+  'aws-cli-commands.md',              // Comprehensive AWS CLI command reference with examples
+  'aws-service-patterns.md',          // Comprehensive AWS service configuration patterns
+  'research-methodology.md',          // Comprehensive research methodology for infrastructure investigations
+  'terraform-account-organization.md', // Comprehensive Terraform account organization patterns
+  'terraform-module-patterns.md',     // Comprehensive Terraform module design patterns
+  'terraform-documentation-standards.md', // Comprehensive Terraform documentation standards
+  'terraform-testing.md',             // Comprehensive Terraform testing strategies
+  'aws-networking-patterns.md',       // Comprehensive AWS networking patterns for multi-account
+  'multi-account-networking.md',      // Comprehensive multi-account networking architecture
+  'transit-gateway-patterns.md',      // Comprehensive Transit Gateway patterns
+  'vpc-patterns.md',                  // Comprehensive VPC design patterns
+  'aws-observability-patterns.md',    // Comprehensive AWS observability patterns
+  'aws-security-compliance.md',       // Comprehensive AWS security and compliance patterns
+  'atlantis-workflow.md',             // TODO: Split - 236 lines (exceeds 130 limit)
+  'gitlab-ci-patterns.md',            // TODO: Split - 327 lines (exceeds 130 limit)
+  // Backend patterns (split from oversized files - all 105-130 lines)
+  'typeorm-transactions.md',          // 130 lines - Transaction management basics
+  'typeorm-repositories.md',          // 128 lines - Repository pattern basics
+  'audit-logging-basics.md',          // 131 lines - Audit logging core concepts
+  'audit-logging-crud.md',            // 121 lines - Audit CRUD operations
+  'grpc-controller-basics.md',        // 129 lines - gRPC controller patterns
+  'authorization-guards.md',          // 126 lines - Authorization guards and helpers
+  'authorization-flow.md',            // 121 lines - Authorization flow and rules
 ];
 
 // Whitelist for non-knowledge files (should not be registered)
@@ -172,12 +218,19 @@ const validateKnowledgeFile = (packageName, packageData, category) => {
 
   if (lineCount === null) {
     errors.push(`Could not read file: ${filePath}`);
-  } else if (lineCount > MAX_LINES && !isWhitelisted) {
+  } else if (isWhitelisted) {
+    // WHITELIST ENFORCEMENT: Files must be 105-130 lines
+    if (lineCount <= MAX_LINES) {
+      errors.push(`Whitelisted file is ≤${MAX_LINES} lines (has ${lineCount} lines) - REMOVE from whitelist: ${filePath}`);
+    } else if (lineCount > WHITELIST_MAX_LINES) {
+      errors.push(`Whitelisted file exceeds ${WHITELIST_MAX_LINES} line limit (has ${lineCount} lines) - MUST split or reduce: ${filePath}`);
+    } else {
+      warnings.push(`Whitelisted file within acceptable range (has ${lineCount} lines, limit: ${WHITELIST_MAX_LINES}): ${filePath}`);
+    }
+  } else if (lineCount > MAX_LINES) {
     errors.push(`File exceeds hard limit of ${MAX_LINES} lines (has ${lineCount} lines): ${filePath}`);
-  } else if (lineCount > TARGET_LINES && !isWhitelisted) {
+  } else if (lineCount > TARGET_LINES) {
     warnings.push(`File exceeds target of ${TARGET_LINES} lines (has ${lineCount} lines, max ${MAX_LINES}): ${filePath}`);
-  } else if (isWhitelisted && lineCount > MAX_LINES) {
-    warnings.push(`Whitelisted file exceeds limit (has ${lineCount} lines): ${filePath}`);
   }
 
   // 7. Check for YAML frontmatter

@@ -5,6 +5,11 @@
     <mapping directory="$PROJECT_DIR$/base_repositories/anthropic-repos/anthropic-sdk-typescript" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/base_repositories/anthropic-repos/courses" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/base_repositories/anthropic-repos/prompt-eng-interactive-tutorial" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_repositories/claude-code-plugins-plus" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_repositories/claude-code-webui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_repositories/claude-plugins-official" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_repositories/claudecodeui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_repositories/opcode" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/base_repositories/opencode-fork" vcs="Git" />
   </component>
 </project>

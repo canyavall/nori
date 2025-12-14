@@ -1,0 +1,56 @@
+{"timestamp":"2025-12-10T16:42:21.051Z","session_id":"session-1765384941051-4ah75txxb","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-10T16:42:21.052Z","session_id":"session-1765384941051-4ah75txxb","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T07:33:30.710Z","session_id":"session-1765438410710-qshzdv1c1","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T07:33:30.717Z","session_id":"session-1765438410710-qshzdv1c1","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T07:57:49.195Z","session_id":"session-1765439869195-1uxzsm3oa","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T07:57:49.197Z","session_id":"session-1765439869195-1uxzsm3oa","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T09:43:18.220Z","session_id":"session-1765446198220-4k8mxmxlb","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T09:43:18.229Z","session_id":"session-1765446198220-4k8mxmxlb","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T14:37:15.192Z","session_id":"session-1765463835192-t59akv0m7","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T14:37:15.195Z","session_id":"session-1765463835192-t59akv0m7","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T14:45:46.789Z","session_id":"session-1765464346789-zndlc750q","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T14:45:46.791Z","session_id":"session-1765464346789-zndlc750q","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T15:03:17.717Z","session_id":"session-1765465397717-sywbogje0","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T15:03:17.718Z","session_id":"session-1765465397717-sywbogje0","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T15:06:29.898Z","session_id":"session-1765465589898-z03yakuw4","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T15:06:29.900Z","session_id":"session-1765465589898-z03yakuw4","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T16:16:11.155Z","session_id":"session-1765469771154-bw40cii1q","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T16:16:11.156Z","session_id":"session-1765469771154-bw40cii1q","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T16:24:18.507Z","session_id":"session-1765470258507-7oe0so8gb","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T16:24:18.509Z","session_id":"session-1765470258507-7oe0so8gb","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T16:38:43.272Z","session_id":"session-1765471123272-1pvejr7lm","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T16:38:43.273Z","session_id":"session-1765471123272-1pvejr7lm","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-11T17:05:56.594Z","session_id":"session-1765472756594-c2kzfe9o4","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-11T17:05:56.596Z","session_id":"session-1765472756594-c2kzfe9o4","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T07:12:30.550Z","session_id":"session-1765523550550-5qluk55zp","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T07:12:30.553Z","session_id":"session-1765523550550-5qluk55zp","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:01:21.385Z","session_id":"session-1765526481385-lr9xn8dmc","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:01:21.389Z","session_id":"session-1765526481385-lr9xn8dmc","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:03:38.516Z","session_id":"session-1765526618516-9224o3q3t","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:03:38.517Z","session_id":"session-1765526618516-9224o3q3t","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:08:12.862Z","session_id":"session-1765526892862-78o1o94ot","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:08:12.863Z","session_id":"session-1765526892862-78o1o94ot","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:22:28.341Z","session_id":"session-1765527748341-6lmmpvp2w","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:22:28.343Z","session_id":"session-1765527748341-6lmmpvp2w","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:24:24.102Z","session_id":"session-1765527864102-qrjuxgtjg","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:24:24.145Z","session_id":"session-1765527864102-qrjuxgtjg","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T08:56:34.572Z","session_id":"session-1765529794572-zrhdgvwd1","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T08:56:34.575Z","session_id":"session-1765529794572-zrhdgvwd1","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T12:56:24.774Z","session_id":"session-1765544184774-qifmjne14","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T12:56:24.779Z","session_id":"session-1765544184774-qifmjne14","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-12T12:58:00.684Z","session_id":"session-1765544280684-6yuz3adzs","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-12T12:58:00.685Z","session_id":"session-1765544280684-6yuz3adzs","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-13T12:16:27.468Z","session_id":"session-1765628187468-nlogu50g2","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-13T12:16:27.469Z","session_id":"session-1765628187468-nlogu50g2","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-13T12:25:54.646Z","session_id":"session-1765628754646-i6f33zime","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-13T12:25:54.648Z","session_id":"session-1765628754646-i6f33zime","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-13T21:43:18.685Z","session_id":"session-1765662198685-k3yg4acjl","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-13T21:43:18.686Z","session_id":"session-1765662198685-k3yg4acjl","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-14T11:08:08.662Z","session_id":"session-1765710488662-0dgumzu5p","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-14T11:08:08.665Z","session_id":"session-1765710488662-0dgumzu5p","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-14T11:09:20.971Z","session_id":"session-1765710560971-dlggo0ziu","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-14T11:09:20.972Z","session_id":"session-1765710560971-dlggo0ziu","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-14T11:18:01.716Z","session_id":"session-1765711081716-md5r9iini","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-14T11:18:01.718Z","session_id":"session-1765711081716-md5r9iini","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}
+{"timestamp":"2025-12-14T11:19:09.419Z","session_id":"session-1765711149419-8d0bmz47g","event_type":"session_start","reason":"New Claude Code session initialized"}
+{"timestamp":"2025-12-14T11:19:09.420Z","session_id":"session-1765711149419-8d0bmz47g","event_type":"session_reset","reason":"Knowledge state and tracking files cleared"}

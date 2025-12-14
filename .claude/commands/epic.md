@@ -79,44 +79,13 @@ Wait for response, then write to ticket.md.
 
 ---
 
-## Step 1: Load Knowledge
+## Step 1: Requirements
 
 ### 1.1 Read Ticket
 
 Read `.claude/epics/{project_id}/ticket.md`
 
-### 1.2 Discover Tags
-
-```bash
-node .claude/knowledge/scripts/knowledge-search.mjs --list-tags
-```
-
-### 1.3 Select Relevant Tags
-
-Based on ticket analysis, select 2-4 tags from available tags.
-
-### 1.4 Load Knowledge
-
-```bash
-agent_id="epic-{project_id}-$(date +%s)"
-
-node .claude/knowledge/scripts/knowledge-search.mjs \
-  --command-profile plan \
-  --tags [selected-tags] \
-  --agent-name epic-command \
-  --agent-id "$agent_id" \
-  --prompt "[brief-ticket-summary]"
-```
-
-Read top 3-5 packages from JSON output.
-
-State: "Loaded: [package1], [package2], ..." OR "No relevant knowledge found"
-
----
-
-## Step 2: Requirements
-
-### 2.1 Detect Domain
+### 1.2 Detect Domain
 
 From ticket keywords (case-insensitive):
 
@@ -126,21 +95,21 @@ From ticket keywords (case-insensitive):
 - **Cash**: cash, fiat, SEPA, SWIFT, payment, settlement, bank account
 - **None**: refactor, move, fix, bug, test, route, component (without domain context)
 
-### 2.2 Validate Ticket
+### 1.3 Validate Ticket
 
 Check for:
 - Business context (for domain tasks)
 - Technical clarity (WHAT and WHY)
 - Scope boundaries
 
-### 2.3 Define Scope
+### 1.4 Define Scope
 
 Extract from ticket:
 - In-scope apps (with `apps/` prefix)
 - In-scope modules (if mentioned)
 - Out-of-scope items
 
-### 2.4 Write requirements.md
+### 1.5 Write requirements.md
 
 Write to `.claude/epics/{project_id}/requirements.md`:
 
@@ -197,11 +166,11 @@ Write to `.claude/epics/{project_id}/requirements.md`:
 
 ---
 
-## Step 3: Research (In-Memory)
+## Step 2: Research (In-Memory)
 
 **CRITICAL**: Do research work, **do NOT write research.md**. Keep findings in context.
 
-### 3.1 Time-Boxed Research (Max 5 iterations)
+### 2.1 Time-Boxed Research (Max 5 iterations)
 
 Use Serena MCP tools:
 - `mcp__serena__find_file` - Find files
@@ -228,17 +197,68 @@ Use Serena MCP tools:
 
 **Max 5 iterations total.**
 
-### 3.2 Keep Research Findings in Memory
+### 2.2 Keep Research Findings in Memory
 
-Remember for Step 4:
+Remember for Step 3 (knowledge loading) and Step 4 (tech-design):
 - Verified in-scope apps and modules
 - Existing file locations and paths
 - Discovered patterns (with file:line references)
 - Import dependencies
 - Test patterns
 - Type definitions
+- Actual technologies/frameworks used (e.g., React Router v6 vs v7, Chakra vs MUI)
+- Existing state management patterns discovered
 
 **Do NOT write research.md.**
+
+---
+
+## Step 3: Load Knowledge
+
+**CRITICAL**: Knowledge loading happens AFTER research so we know what's actually needed.
+
+### 3.1 Analyze Ticket + Research Findings
+
+Combine information from:
+- Ticket requirements (Step 1)
+- Research findings (Step 2) - actual patterns, frameworks, technologies discovered
+
+### 3.2 Discover Available Tags
+
+```bash
+node .claude/knowledge/scripts/knowledge-search.mjs --list-tags
+```
+
+### 3.3 Select Relevant Tags
+
+Based on **both ticket AND research findings**, select 2-4 tags from available tags.
+
+**Consider:**
+- What frameworks/libraries were actually found in research?
+- What patterns already exist in the codebase?
+- What specific features need to be implemented?
+- What testing patterns were discovered?
+
+### 3.4 Load Knowledge
+
+```bash
+agent_id="epic-{project_id}-$(date +%s)"
+
+node .claude/knowledge/scripts/knowledge-search.mjs \
+  --command-profile plan \
+  --tags [selected-tags] \
+  --agent-name epic-command \
+  --agent-id "$agent_id" \
+  --prompt "[brief-ticket-summary]"
+```
+
+Read top 3-5 packages from JSON output.
+
+### 3.5 State What Was Loaded
+
+"Loaded: [package1], [package2], ..." OR "No relevant knowledge found"
+
+**Why this matters:** Knowledge is now loaded based on actual codebase findings, not just ticket guesses. This ensures relevant, targeted knowledge for tech-design decisions.
 
 ---
 
@@ -246,13 +266,18 @@ Remember for Step 4:
 
 **CRITICAL**: Do tech-design work, **do NOT write tech-design.md**. Keep decisions in context.
 
-### 4.1 Use Research Findings
+### 4.1 Use Research Findings + Loaded Knowledge
 
-From Step 3 memory:
+From Step 2 (research) memory:
 - Current state (existing files)
 - Import dependencies
 - Discovered patterns
 - Test patterns
+
+From Step 3 (loaded knowledge):
+- Best practices for discovered patterns
+- Standard approaches for the frameworks/libraries found
+- Testing strategies that match the project's conventions
 
 ### 4.2 Make Design Decisions
 
@@ -429,7 +454,8 @@ Generated:
 - ✅ plan.md
 
 Completed (in-memory):
-- ✅ Research (findings used for plan)
+- ✅ Research (findings used to inform knowledge loading)
+- ✅ Knowledge loading (loaded based on ticket + research)
 - ✅ Tech-design (decisions used for plan)
 
 Location: .claude/epics/{project_id}/
@@ -446,6 +472,10 @@ Ask user if they want to review or proceed with implementation.
 **ALWAYS:**
 
 - ✅ Use Serena MCP for ALL code research
+- ✅ Do requirements FIRST (Step 1)
+- ✅ Do research SECOND (Step 2)
+- ✅ Load knowledge THIRD - after research (Step 3)
+- ✅ Base knowledge tag selection on BOTH ticket AND research findings
 - ✅ Keep research findings in memory (no research.md)
 - ✅ Keep tech-design decisions in memory (no tech-design.md)
 - ✅ Only write requirements.md and plan.md
@@ -456,6 +486,7 @@ Ask user if they want to review or proceed with implementation.
 
 **NEVER:**
 
+- ❌ Load knowledge before research (you won't know what to load!)
 - ❌ Write research.md
 - ❌ Write tech-design.md
 - ❌ Skip research work (just don't document it)

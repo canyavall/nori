@@ -82,8 +82,11 @@ export const resolvePath = (packageName, packageData, category, baseDir = KNOWLE
 /**
  * Build an index of all packages for O(1) lookups.
  *
+ * Supports both composite keys (category/name) and short names.
+ * Short names that appear in multiple categories are stored as arrays.
+ *
  * @param {Object} mapping - Knowledge mapping object
- * @returns {Map<string, {category: string, data: Object}>} Package index
+ * @returns {Map<string, {category: string, data: Object} | Array>} Package index
  */
 export const buildPackageIndex = (mapping) => {
   const index = new Map();
@@ -94,17 +97,18 @@ export const buildPackageIndex = (mapping) => {
     for (const [name, data] of Object.entries(packages)) {
       if (typeof data !== 'object' || !data) continue;
 
-      if (index.has(name)) {
-        // Duplicate package name detected
-        const existing = index.get(name);
-        console.warn(
-          `Warning: Duplicate package name "${name}" found in categories "${existing.category}" and "${category}". ` +
-          `First occurrence will be used.`
-        );
-        continue;
-      }
+      // Index by composite key for unambiguous lookups
+      const compositeKey = `${category}/${name}`;
+      index.set(compositeKey, { category, data });
 
-      index.set(name, { category, data });
+      // Also index by short name for backward compatibility
+      // Store as array to handle multiple packages with same name
+      const existing = index.get(name);
+      if (!existing) {
+        index.set(name, [{ category, data }]);
+      } else if (Array.isArray(existing)) {
+        existing.push({ category, data });
+      }
     }
   }
 
@@ -114,16 +118,64 @@ export const buildPackageIndex = (mapping) => {
 /**
  * Find a package by name using the package index.
  *
+ * Supports both composite keys (category/name) and short names.
+ * For ambiguous short names (appear in multiple categories), uses preferredCategory
+ * to disambiguate, or returns first match with a warning.
+ *
  * @param {Map} packageIndex - Package index from buildPackageIndex()
- * @param {string} packageName - Name of the package to find
+ * @param {string} packageName - Name of the package to find (or category/name composite)
+ * @param {string} [preferredCategory=null] - Optional category to prefer for ambiguous names
  * @returns {{name: string, category: string, data: Object} | null} Package info or null
  */
-export const findPackageByName = (packageIndex, packageName) => {
+export const findPackageByName = (packageIndex, packageName, preferredCategory = null) => {
+  // Try composite key first if category provided
+  if (preferredCategory) {
+    const compositeKey = `${preferredCategory}/${packageName}`;
+    const result = packageIndex.get(compositeKey);
+    if (result) {
+      return {
+        name: packageName,
+        category: result.category,
+        data: result.data,
+      };
+    }
+  }
+
+  // Try short name lookup
   const result = packageIndex.get(packageName);
   if (!result) {
     return null;
   }
 
+  // Handle array of matches (ambiguous package names)
+  if (Array.isArray(result)) {
+    let match;
+
+    if (result.length === 1) {
+      match = result[0];
+    } else {
+      // Multiple matches - prefer by category or use first
+      match = preferredCategory
+        ? result.find(r => r.category === preferredCategory) || result[0]
+        : result[0];
+
+      if (result.length > 1 && !preferredCategory) {
+        const categories = result.map(r => r.category).join('", "');
+        console.warn(
+          `Ambiguous package "${packageName}" found in categories "${categories}". ` +
+          `Using ${match.category}. Specify preferredCategory to disambiguate.`
+        );
+      }
+    }
+
+    return {
+      name: packageName,
+      category: match.category,
+      data: match.data,
+    };
+  }
+
+  // Legacy/composite key result
   return {
     name: packageName,
     category: result.category,
@@ -139,5 +191,143 @@ export const findPackageByName = (packageIndex, packageName) => {
  */
 export const estimateTokens = (text) => {
   return Math.ceil(text.length / AVG_CHARS_PER_TOKEN);
+};
+
+// Known file pattern tags
+export const EXTENSIONS = ['tsx', 'ts', 'jsx', 'js', 'mjs', 'cjs'];
+export const SUFFIXES = ['spec', 'test', 'hook', 'hooks', 'stories', 'story', 'form', 'mock', 'mocks', 'style', 'styles', 'route', 'routes', 'context', 'provider', 'dto', 'types', 'enum'];
+
+/**
+ * Build file_patterns configuration from package tags
+ *
+ * Scans all packages for file pattern tags and builds the mapping
+ * that was previously in knowledge.json file_patterns section.
+ *
+ * @param {Object} mapping - Knowledge mapping object
+ * @returns {Object} File patterns config { extensions: {...}, suffixes: {...} }
+ */
+export const buildFilePatternsFromTags = (mapping) => {
+  const filePatterns = {
+    extensions: {},
+    suffixes: {}
+  };
+
+  // Scan all packages for file pattern tags
+  for (const [category, packages] of Object.entries(mapping.knowledge || {})) {
+    for (const [pkgName, pkgData] of Object.entries(packages)) {
+      if (!pkgData.tags) continue;
+
+      for (const tag of pkgData.tags) {
+        // Check if tag is an extension
+        if (EXTENSIONS.includes(tag)) {
+          const pattern = `.${tag}`;
+          if (!filePatterns.extensions[pattern]) {
+            filePatterns.extensions[pattern] = {
+              packages: [],
+              description: `${tag.toUpperCase()} files`
+            };
+          }
+          filePatterns.extensions[pattern].packages.push(pkgName);
+        }
+
+        // Check if tag is a suffix
+        if (SUFFIXES.includes(tag)) {
+          const pattern = `.${tag}`;
+          if (!filePatterns.suffixes[pattern]) {
+            filePatterns.suffixes[pattern] = {
+              packages: [],
+              description: `${tag} files`
+            };
+          }
+          filePatterns.suffixes[pattern].packages.push(pkgName);
+        }
+      }
+    }
+  }
+
+  return filePatterns;
+};
+
+/**
+ * Parse file path to extract extension, suffix, and combination.
+ *
+ * @param {string} filePath - File path to parse
+ * @returns {{extension: string, suffix: string|null, combination: string|null, basename: string}} Parsed components
+ *
+ * @example
+ * parseFilePath("Button.test.tsx")
+ * // Returns: { extension: ".tsx", suffix: ".test", combination: ".test.tsx", basename: "Button.test.tsx" }
+ */
+export const parseFilePath = (filePath) => {
+  if (!filePath) {
+    return { extension: null, suffix: null, combination: null, basename: null };
+  }
+
+  // Get basename (last part of path)
+  const basename = filePath.split('/').pop().split('\\').pop();
+
+  // Extract extension (rightmost dot segment)
+  const lastDotIndex = basename.lastIndexOf('.');
+  if (lastDotIndex === -1) {
+    return { extension: null, suffix: null, combination: null, basename };
+  }
+
+  const extension = basename.substring(lastDotIndex); // e.g., ".tsx"
+  const withoutExt = basename.substring(0, lastDotIndex); // e.g., "Button.test"
+
+  // Extract suffix (second-to-last dot segment)
+  const secondLastDotIndex = withoutExt.lastIndexOf('.');
+  let suffix = null;
+  if (secondLastDotIndex !== -1) {
+    suffix = withoutExt.substring(secondLastDotIndex); // e.g., ".test"
+  }
+
+  // Build combination if suffix exists
+  const combination = suffix ? suffix + extension : null; // e.g., ".test.tsx"
+
+  return {
+    extension,
+    suffix,
+    combination,
+    basename,
+  };
+};
+
+/**
+ * Match file path against package tags and return packages to load.
+ *
+ * Builds file_patterns from tags, then matches.
+ *
+ * @param {string} filePath - File path to match
+ * @param {Object} mapping - Knowledge mapping object
+ * @returns {Array<string>} Array of package names to load
+ *
+ * @example
+ * matchFilePatterns("Button.test.tsx", mapping)
+ * // Returns: ["testing-core", "component-file-structure", "typescript-project-conventions", "react-project-conventions"]
+ * // (.test suffix + .tsx extension packages merged)
+ */
+export const matchFilePatterns = (filePath, mapping) => {
+  if (!filePath || !mapping) {
+    return [];
+  }
+
+  // Build file patterns from tags
+  const filePatterns = buildFilePatternsFromTags(mapping);
+
+  const parsed = parseFilePath(filePath);
+  const packages = new Set();
+
+  // Check suffix (e.g., .test, .spec, .hook)
+  if (parsed.suffix && filePatterns.suffixes?.[parsed.suffix]) {
+    filePatterns.suffixes[parsed.suffix].packages.forEach(pkg => packages.add(pkg));
+  }
+
+  // Check extension (e.g., .tsx, .ts, .jsx)
+  if (parsed.extension && filePatterns.extensions?.[parsed.extension]) {
+    filePatterns.extensions[parsed.extension].packages.forEach(pkg => packages.add(pkg));
+  }
+
+  return Array.from(packages);
 };
 

@@ -1,3 +1,17 @@
+---
+tags:
+  - architecture
+  - orchestration
+  - task-tool
+  - context-growth
+  - workflow
+description: >-
+  Orchestration patterns for multi-step CLI workflows: commands can't call commands,
+  Task tool orchestration pattern, subtask flag for isolation, context growth in
+  orchestration, and solutions (summarization, checkpointing, nested orchestrators)
+category: patterns/architecture
+required_knowledge: []
+---
 # Command Orchestration
 
 Orchestration patterns for multi-step CLI workflows. Covers Task tool usage, subtask isolation, and context growth management.

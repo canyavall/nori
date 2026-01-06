@@ -1,3 +1,17 @@
+---
+tags:
+  - architecture
+  - context-management
+  - agents
+  - caching
+  - cost-optimization
+description: >-
+  Context management patterns for Claude-based CLI tools: multi-agent pattern
+  (garbage collection, clean context), single-agent pattern (continuous context),
+  prompt caching strategy (system vs messages), and decision matrix for pattern selection
+category: patterns/architecture
+required_knowledge: []
+---
 # Claude Context Management
 
 Context management patterns for Claude-based CLI tools. Covers agent isolation vs context continuity tradeoffs, caching strategies, and cost optimization.

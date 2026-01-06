@@ -1,0 +1,23 @@
+{
+  "loaded_packages": [
+    "create-knowledge",
+    "hooks-system",
+    "hooks-troubleshooting-common",
+    "knowledge-dependencies-guide",
+    "knowledge-frontmatter-system",
+    "knowledge-loading-system",
+    "knowledge-metrics-basics",
+    "knowledge-prompt-session-management",
+    "knowledge-role-system",
+    "knowledge-search-basics",
+    "knowledge-tag-standards",
+    "knowledge-tracking",
+    "knowledge-validation-basics",
+    "personality-hooks-basics",
+    "serena-best-practices",
+    "testing-core"
+  ],
+  "categories_shown": true,
+  "cleared_at": "2026-01-01T12:03:28.872Z",
+  "updated_at": "2026-01-01T12:30:43.523Z"
+}

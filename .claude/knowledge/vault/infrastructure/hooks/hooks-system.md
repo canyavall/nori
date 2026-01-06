@@ -1,3 +1,18 @@
+---
+tags:
+  - ai-infrastructure
+  - hooks
+  - claude-code
+  - automation
+  - knowledge-loading
+  - session-management
+description: >-
+  Claude Code hooks for automating knowledge loading and session management: UserPromptSubmit
+  for knowledge injection, SessionStart for cleanup, agent-based decision making pattern,
+  and configuration examples
+category: infrastructure/hooks
+required_knowledge: []
+---
 # Hooks System
 
 Claude Code hooks that automate knowledge loading and session management.

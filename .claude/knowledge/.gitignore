@@ -1,0 +1,12 @@
+temp/
+epics/
+tokens.json
+
+# Build artifacts
+knowledge.json
+.cache/
+
+# Dependencies
+node_modules/
+package-lock.json
+settings.json

@@ -7,11 +7,11 @@
       "Bash(tree:*)",
       "Bash(xargs:*)",
       "Bash(nx show projects:*)",
-      "Read(//tmp/**)",
+      "Read(C:/tmp/**)",
       "Bash(nx show:*)",
       "Bash(npx nx show projects:*)",
       "Bash(npx nx show project:*)",
-      "Read(///**)",
+      "Read(**/*)",
       "Bash(nx lint:*)",
       "Bash(npm run nx lint suil -- --fix)",
       "Bash(npx nx lint:*)",
@@ -29,7 +29,7 @@
       "Bash(npm run test:*)",
       "Bash(npm run test:security:i18n:*)",
       "Bash(npm run:*)",
-      "Read(//Users/**)",
+      "Read(C:/Users/**)",
       "Bash(copilot:*)",
       "Bash(node:*)",
       "Bash(npx nx serve:*)",
@@ -37,11 +37,7 @@
       "Bash(cat:*)",
       "Bash(mv:*)",
       "Bash(jq:*)",
-      "Bash(/tmp/step1.json)",
-      "Bash(/tmp/step2.json)",
-      "Bash(.ai/knowledge/knowledge.json)",
-      "Bash(/tmp/step1-rename-keys.json)",
-      "Bash(/dev/null)",
+      "Bash(.claude/knowledge/knowledge.json)",
       "mcp__serena__search_for_pattern",
       "mcp__serena__find_file",
       "mcp__serena__list_dir",
@@ -59,8 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/knowledge/hooks/session-start-cleanup.mjs",
-            "statusMessage": "Cleaning up session logs..."
+            "command": "node .claude/knowledge/hooks/session-start-cleanup.mjs"
           }
         ]
       }
@@ -71,11 +66,26 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/knowledge/hooks/knowledge-prompt.mjs",
-            "statusMessage": "Preparing knowledge context..."
+            "command": "node .claude/knowledge/hooks/knowledge-prompt.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/knowledge/hooks/personality-loader.mjs"
           }
         ]
       }
-    ]
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/knowledge/hooks/tool-execution-pre.mjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": []
   }
 }

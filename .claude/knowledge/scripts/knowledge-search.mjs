@@ -2,14 +2,18 @@
 
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { existsSync, readFileSync } from 'fs';
 import {
   KNOWLEDGE_BASE_PATH,
   loadKnowledgeMapping,
   buildPackageIndex,
   findPackageByName,
   estimateTokens,
+  parseFilePath,
+  matchFilePatterns,
 } from './knowledge-lib.mjs';
-import { initializeFromSearch } from '../hooks/unified-tracking.mjs';
+import { logKnowledgeSearch } from './metrics-logger.mjs';
+import { logScriptUsage } from './lib/usage-tracker.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -136,6 +140,41 @@ const formatTimestamp = (date) => {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const seconds = String(date.getSeconds()).padStart(2, '0');
   return `${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+/**
+ * Detect repository type by checking for specific files and dependencies
+ * Returns: 'frontend', 'backend-java', 'backend-node', or 'unknown'
+ */
+const detectRepositoryType = () => {
+  // Check for Java backend indicators
+  if (existsSync('pom.xml') || existsSync('build.gradle') || existsSync('build.gradle.kts')) {
+    return 'backend-java';
+  }
+
+  // Check package.json for frontend/backend Node indicators
+  if (existsSync('package.json')) {
+    try {
+      const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+
+      // Backend Node indicators (NestJS, Express, Fastify)
+      const backendIndicators = ['@nestjs/core', '@nestjs/common', 'express', 'fastify', '@nestjs/platform-express'];
+      if (backendIndicators.some(indicator => deps[indicator])) {
+        return 'backend-node';
+      }
+
+      // Frontend indicators (React, Vue, Vite, Nx, etc.)
+      const frontendIndicators = ['react', 'vue', 'vite', '@nx/vite', '@nx/react', 'next', 'nuxt'];
+      if (frontendIndicators.some(indicator => deps[indicator])) {
+        return 'frontend';
+      }
+    } catch (e) {
+      // Invalid package.json, continue
+    }
+  }
+
+  return 'unknown';
 };
 
 /**
@@ -273,7 +312,7 @@ const matchesAgent = (usedByAgents, searchAgent) => {
   return usedByAgents.some(agent => agent.toLowerCase().includes(lowerSearchAgent));
 };
 
-const resolveDependencies = (mapping, packageIndex, packageName, visited = new Set(), maxDepth = 1, currentDepth = 0) => {
+const resolveDependencies = (mapping, packageIndex, packageName, visited = new Set(), maxDepth = 2, currentDepth = 0) => {
   if (visited.has(packageName)) {
     return [];
   }
@@ -293,7 +332,8 @@ const resolveDependencies = (mapping, packageIndex, packageName, visited = new S
   const requiredKnowledge = packageInfo.data.required_knowledge ?? [];
 
   for (const knowledgeName of requiredKnowledge) {
-    const depInfo = findPackageByName(packageIndex, knowledgeName);
+    // Prefer dependencies in the same category as parent package
+    const depInfo = findPackageByName(packageIndex, knowledgeName, packageInfo.category);
     if (depInfo) {
       dependencies.push({
         name: knowledgeName,
@@ -302,7 +342,6 @@ const resolveDependencies = (mapping, packageIndex, packageName, visited = new S
         tags: depInfo.data.tags ?? [],
         used_by_agents: depInfo.data.used_by_agents ?? [],
         required_knowledge: depInfo.data.required_knowledge ?? [],
-        optional_knowledge: depInfo.data.optional_knowledge ?? [],
         knowledge_path: depInfo.data.knowledge_path ?? `${KNOWLEDGE_BASE_PATH}/wisdom/${depInfo.category}/${knowledgeName}/${knowledgeName}.md`,
       });
 
@@ -347,7 +386,6 @@ const searchByProfile = (mapping, packageIndex, profile, additionalTags = []) =>
         tags: packageInfo.data.tags ?? [],
         used_by_agents: packageInfo.data.used_by_agents ?? [],
         required_knowledge: packageInfo.data.required_knowledge ?? [],
-        optional_knowledge: packageInfo.data.optional_knowledge ?? [],
         knowledge_path: packageInfo.data.knowledge_path ?? `${KNOWLEDGE_BASE_PATH}/wisdom/${packageInfo.category}/${knowledgeName}/${knowledgeName}.md`,
         source: 'always_load',
       };
@@ -387,8 +425,53 @@ const searchKnowledge = (mapping, filters) => {
   const results = [];
   const { tags, text, agent, category, filePath, prompt, maxResults } = filters;
 
-  // Detect language from file path
+  // Detect repository type and language
+  const repoType = detectRepositoryType();
   const language = detectLanguage(filePath);
+
+  // Auto-load packages based on file patterns (highest priority)
+  const patternPackages = new Set();
+  if (filePath) {
+    const matchedPackages = matchFilePatterns(filePath, mapping);
+    const parsed = parseFilePath(filePath);
+
+    // Add pattern-matched packages to results with high relevance
+    for (const packageName of matchedPackages) {
+      // Find the package in the knowledge base
+      let found = false;
+      for (const [cat, packages] of Object.entries(mapping.knowledge)) {
+        if (packages[packageName]) {
+          const packageData = packages[packageName];
+          patternPackages.add(packageName);
+
+          results.push({
+            name: packageName,
+            category: cat,
+            description: packageData.description ?? '',
+            tags: packageData.tags ?? [],
+            used_by_agents: packageData.used_by_agents ?? [],
+            required_knowledge: packageData.required_knowledge ?? [],
+            knowledge_path: packageData.knowledge_path ?? `${mapping.skills_location}/${cat}/${packageName}/${packageName}.md`,
+            relevance_score: 1.0, // Highest priority
+            detected_language: language,
+            source: 'file_pattern',
+            pattern_info: {
+              extension: parsed.extension,
+              suffix: parsed.suffix,
+              combination: parsed.combination,
+            }
+          });
+
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        console.warn(`Warning: Pattern-matched package "${packageName}" not found in knowledge base`);
+      }
+    }
+  }
 
   let categoriesToSearch;
 
@@ -407,6 +490,11 @@ const searchKnowledge = (mapping, filters) => {
     }
 
     for (const [name, packageData] of Object.entries(packages)) {
+      // Skip if already added from file patterns
+      if (patternPackages.has(name)) {
+        continue;
+      }
+
       const packageTags = packageData.tags ?? [];
       const packageDescription = packageData.description ?? '';
       const usedByAgents = packageData.used_by_agents ?? [];
@@ -423,6 +511,40 @@ const searchKnowledge = (mapping, filters) => {
         continue;
       }
 
+      // Filter by repository type to avoid cross-repo pollution
+      // Cross-cutting categories allowed in all repos
+      const crossCuttingPrefixes = ['shared/', 'business/', 'apps/', 'infrastructure/', 'meta/'];
+      const isCrossCutting = crossCuttingPrefixes.some(prefix => cat.startsWith(prefix));
+
+      if (!isCrossCutting) {
+        if (repoType === 'frontend') {
+          // In frontend repos, exclude backend-specific packages by category
+          if (cat.startsWith('backend/')) {
+            continue;
+          }
+          // Secondary tag-based filtering
+          if (packageTags.includes('server-side') || packageTags.includes('backend-only')) {
+            continue;
+          }
+        } else if (repoType === 'backend-java') {
+          // In backend Java repos, exclude frontend and Node-specific packages
+          if (cat.startsWith('frontend/') || cat.startsWith('backend/node/')) {
+            continue;
+          }
+          if (packageTags.includes('client-side') || packageTags.includes('frontend-only')) {
+            continue;
+          }
+        } else if (repoType === 'backend-node') {
+          // In backend Node repos, exclude frontend and Java-specific packages
+          if (cat.startsWith('frontend/') || cat.startsWith('backend/java-quarkus/')) {
+            continue;
+          }
+          if (packageTags.includes('client-side') || packageTags.includes('frontend-only')) {
+            continue;
+          }
+        }
+      }
+
       // Calculate relevance score with language filtering
       const relevanceScore = calculateRelevanceScore(packageData, tags, cat, language);
 
@@ -433,10 +555,10 @@ const searchKnowledge = (mapping, filters) => {
         tags: packageTags,
         used_by_agents: usedByAgents,
         required_knowledge: packageData.required_knowledge ?? [],
-        optional_knowledge: packageData.optional_knowledge ?? [],
         knowledge_path: packageData.knowledge_path ?? `${mapping.skills_location}/${cat}/${name}/${name}.md`,
         relevance_score: parseFloat(relevanceScore.toFixed(3)),
         detected_language: language,
+        source: 'tag_search',
       });
     }
   }
@@ -456,7 +578,7 @@ const formatOutput = (results, filters, mapping, packageIndex) => {
     const depsMap = new Map();
 
     for (const result of results) {
-      const deps = resolveDependencies(mapping, packageIndex, result.name, new Set(), filters.maxDepth || 1);
+      const deps = resolveDependencies(mapping, packageIndex, result.name, new Set(), filters.maxDepth || 2);
       for (const dep of deps) {
         if (!depsMap.has(dep.name) && !results.some(r => r.name === dep.name)) {
           depsMap.set(dep.name, dep);
@@ -494,7 +616,9 @@ OPTIONS:
   --text <text>             Search by description text (case-insensitive)
   --agent <agent>           Filter by agent name (partial match)
   --category <cat>          Filter by category (exact match: technical/frameworks, business/trading)
-  --file-path <path>        File path for language detection (e.g., /path/to/file.spec.tsx)
+  --file-path <path>        File path for pattern-based auto-loading (e.g., Button.test.tsx)
+                            Automatically loads packages based on file extension and suffix
+                            Examples: .test.tsx → testing packages, .hook.ts → hook packages
   --max-results <number>    Maximum results to return (default: 15)
   --agent-name <name>       Agent name for tracking (enables automatic tracking)
   --agent-id <id>           Agent ID for tracking (enables automatic tracking)
@@ -536,7 +660,21 @@ MANUAL SEARCH MODE:
   node knowledge-search.mjs --category technical
   node knowledge-search.mjs --tags routing --agent-name implementation-agent --agent-id task-123
 
-DOMAIN-AWARE SEARCH (NEW):
+FILE PATTERN AUTO-LOADING (NEW):
+  # Auto-loads packages based on file extension and suffix
+  node knowledge-search.mjs --file-path "Button.test.tsx"
+  # Loads: testing-components-basics, testing-core, component-architecture, typescript-types, react-patterns
+
+  node knowledge-search.mjs --file-path "useDebounce.hook.ts"
+  # Loads: react-hooks, sidehooks-structure, typescript-types
+
+  node knowledge-search.mjs --file-path "Button.stories.tsx"
+  # Loads: storybook-best-practices-templates, storybook-fundamentals, component-architecture, typescript-types, react-patterns
+
+  # Combine with tags for additional context
+  node knowledge-search.mjs --file-path "OrderHistory.test.tsx" --tags msw,api-mocking
+
+DOMAIN-AWARE SEARCH:
   # Automatically detects frontend domain and prioritizes frontend packages
   node knowledge-search.mjs --tags testing,flaky-tests \\
     --file-path /path/to/OrderHistory.spec.tsx \\
@@ -545,7 +683,7 @@ DOMAIN-AWARE SEARCH (NEW):
   # Limit to top 10 results
   node knowledge-search.mjs --tags testing --max-results 10
 
-  # Results include relevance_score and detected_language fields
+  # Results include relevance_score, detected_language, and source fields
 
 OUTPUT:
   Structured JSON with matching knowledge packages, dependencies, and token estimate
@@ -590,6 +728,8 @@ const listTags = (mapping) => {
 };
 
 const main = () => {
+  const startTime = Date.now();
+
   try {
     const args = parseArguments(process.argv);
 
@@ -670,28 +810,82 @@ const main = () => {
       console.error('');
     }
 
-    // Track knowledge loads with unified tracking
-    if (args.agentName && args.agentId) {
-      const categories = [...new Set(allResults.map(r => r.category))].sort();
-      const consideredPackages = allResults.map(r => r.name);
+    // Always include dependencies in output (allResults includes results + deps)
+    const output = formatOutput(allResults, args, mapping, packageIndex);
+    const parsedOutput = JSON.parse(output);
 
-      initializeFromSearch({
-        agentId: args.agentId,
-        agentName: args.agentName,
-        sessionId: args.sessionId || null,
-        prompt: args.prompt || null,
-        tags: args.tags || [],
-        categories,
-        consideredPackages,
-      });
-    }
+    // Log search metrics (existing detailed tracking)
+    const durationMs = Date.now() - startTime;
+    logKnowledgeSearch({
+      tags: args.tags,
+      categories: args.category,
+      prompt: args.prompt,
+      resultsCount: results.length,
+      topResult: results[0]?.name || null,
+      sessionId: args.sessionId,
+      agentId: args.agentId,
+      durationMs,
+      status: 'success'
+    });
 
-    const output = formatOutput(results, args, mapping, packageIndex);
+    // Log unified script usage
+    logScriptUsage({
+      script: 'knowledge-search',
+      callerId: args.agentId || args.agentName,
+      args: {
+        tags: args.tags,
+        category: args.category,
+        command_profile: args.commandProfile,
+        max_results: args.maxResults,
+        has_file_path: !!args.filePath
+      },
+      executionTimeMs: durationMs,
+      result: {
+        status: 'success',
+        count: parsedOutput.count,
+        total_with_deps: parsedOutput.total_with_deps,
+        token_estimate: parsedOutput.token_estimate
+      }
+    });
 
     console.log(output);
 
     process.exit(0);
   } catch (error) {
+    // Log error metrics
+    const durationMs = Date.now() - startTime;
+    try {
+      const args = parseArguments(process.argv);
+      logKnowledgeSearch({
+        tags: args.tags,
+        categories: args.category,
+        prompt: args.prompt,
+        resultsCount: 0,
+        topResult: null,
+        sessionId: args.sessionId,
+        agentId: args.agentId,
+        durationMs,
+        status: 'error',
+        error
+      });
+
+      // Log unified script usage for errors
+      logScriptUsage({
+        script: 'knowledge-search',
+        callerId: args.agentId || args.agentName,
+        args: {
+          tags: args.tags,
+          category: args.category,
+          command_profile: args.commandProfile
+        },
+        executionTimeMs: durationMs,
+        result: {
+          status: 'error',
+          error: error.message
+        }
+      });
+    } catch {}
+
     const errorOutput = {
       error: error.message,
       query: null,

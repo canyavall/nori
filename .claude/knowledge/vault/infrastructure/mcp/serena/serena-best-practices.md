@@ -1,3 +1,17 @@
+---
+tags:
+  - mcp
+  - serena
+  - token-optimization
+  - semantic-tools
+  - code-exploration
+description: >-
+  Token-efficient code exploration with Serena MCP: 70-95% token savings using semantic
+  indexing, tool usage hierarchy (get_symbols_overview, find_symbol), setup requirements,
+  memory file management, and when NOT to use Serena
+category: infrastructure/mcp/serena
+required_knowledge: []
+---
 # Serena MCP Best Practices
 
 Token-efficient code exploration patterns with Serena MCP server.

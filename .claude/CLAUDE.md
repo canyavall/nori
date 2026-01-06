@@ -2,6 +2,75 @@
 
 Essential guidance for working with this repository.
 
+## Project Context
+
+**Nori**: Research repository analyzing OpenCode and Claude Code architectures. Goal is replicating Claude Code features in the open-source OpenCode project.
+
+### Repository Structure
+
+```
+nori/
+├── .claude/                    # Claude Code configuration
+│   ├── CLAUDE.md              # This file - working instructions
+│   ├── knowledge/             # Knowledge system
+│   ├── commands/              # User commands
+│   └── settings.json          # Claude Code settings
+│
+├── opencode-fork/             # Modified OpenCode (Claude-only)
+│   ├── packages/
+│   │   ├── opencode/         # Main OpenCode package
+│   │   │   └── src/
+│   │   │       ├── agent/    # Agent system
+│   │   │       ├── session/  # Session management, compaction
+│   │   │       ├── tool/     # 19 tools (bash, read, write, etc.)
+│   │   │       ├── config/   # Configuration system
+│   │   │       ├── lsp/      # LSP integration
+│   │   │       └── mcp/      # MCP support
+│   │   ├── sdk/              # SDK packages
+│   │   ├── plugin/           # Plugin system
+│   │   └── console/          # Web console
+│   ├── ARCHITECTURE.md       # OpenCode architecture
+│   ├── FEATURES.md           # Feature inventory
+│   └── CHANGES.md            # Modifications made
+│
+├── Comparison Documents (270+ pages):
+│   ├── claude-code-architecture-guide.md
+│   ├── hooks-comparison.md
+│   ├── skills-comparison.md
+│   ├── agents-comparison.md
+│   ├── commands-comparison.md
+│   ├── tools-comparison.md
+│   └── context-management-comparison.md
+│
+├── Implementation Planning:
+│   ├── MASTER-ROADMAP.md     # 4-phase implementation plan
+│   ├── GAP-ANALYSIS.md       # Knowledge gaps assessment
+│   └── README.md             # Project overview
+│
+└── Supporting Files:
+    ├── START-HERE.md         # Quick start guide
+    └── anthropic-repos/      # Anthropic SDK and resources
+```
+
+### Quick Start
+
+```bash
+# Install dependencies
+bun install
+
+# OpenCode development
+cd opencode-fork && bun run dev
+
+# Type checking
+bun turbo typecheck
+```
+
+### Resources
+
+- **OpenCode Original**: https://github.com/sst/opencode
+- **Architecture Guide**: `claude-code-architecture-guide.md`
+- **Implementation Plan**: `MASTER-ROADMAP.md`
+
 ## Professional Objectivity
 
 **CRITICAL MANDATE**: Your PRIMARY responsibility is technical accuracy and truth, NOT making the user feel validated. Be brutally honest, challenge bad ideas, and push back on unnecessary complexity.

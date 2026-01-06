@@ -35,82 +35,65 @@ User can request Sonnet for specific complex tasks:
 - Count total TODO tasks
 - Show plan summary to user
 
-### 2. Load Knowledge (MANDATORY)
+### 2. Load Knowledge (MANDATORY - AUTOMATED)
 
 **MANDATORY**: Load knowledge before starting implementation work.
 
-**Step 1: Discover Available Tags**
+**This process is now fully automated** - the system will:
+1. Extract relevant tags from plan.md automatically
+2. Load matching knowledge packages
+3. Report what was loaded
 
-Run tag discovery to see all available tags:
+**Step 1: Extract Tags from Plan**
+
+Run automatic tag extraction on plan.md:
 
 ```bash
-node .claude/knowledge/scripts/knowledge-search.mjs --list-tags
+extracted_tags=$(node .claude/knowledge/scripts/extract-tags-from-plan.mjs --plan-path .claude/epics/{project-id}/plan.md)
 ```
 
-**Step 2: Determine Relevant Tags**
+This analyzes the plan content and extracts relevant technical keywords (frameworks, tools, patterns, domains).
 
-Based on plan.md task details, select 2-4 relevant tags:
+**Step 2: Load Knowledge with Extracted Tags**
 
-**Domain-based tags**:
-- **Trading**: `trading`, `trading-oms`, `portfolio`, `market-data`
-- **Tokenization**: `tokenization`, `compliance`, `primary-market`, `secondary-market`
-- **Crypto**: `crypto`, `wallet`, `custody`, `blockchain`
-- **Cash**: `cash`, `payment`, `sepa`, `settlement`
-- **Risk**: `risk`, `compliance`, `monitoring`
-
-**Task-type tags**:
-- **Routing**: `routing`, `react-router`, `permissions`, `monorepo-routing`
-- **Components**: `component-creation`, `react-component-patterns`, `styling`
-- **Forms**: `forms`, `validation`, `yoda-form`
-- **Testing**: `testing-basics`, `mocking`, `jest`
-- **API**: `api-integration`, `data-fetching`, `react-query`
-- **State**: `state-management`, `zustand`, `context`
-- **Data Tables**: `data-table`, `tanstack-table`, `pagination`
-
-**Step 3: Load Knowledge**
-
-Run knowledge search with selected tags:
+Use extracted tags to automatically load knowledge:
 
 ```bash
 agent_id="implementation-{project-id}-$(date +%s)"
+tags=$(echo "$extracted_tags" | jq -r 'join(",")')
 
 node .claude/knowledge/scripts/knowledge-search.mjs \
   --command-profile implementation \
-  --tags [selected-tags] \
+  --tags "$tags" \
   --agent-name implementation-command \
   --agent-id "$agent_id" \
-  --prompt "[brief-task-summary]"
+  --prompt "Implement tasks from {project-id}"
 ```
 
-**Step 4: Read Top Packages**
+**Step 3: Read Top Packages**
 
-From the JSON output, read the top 3-5 most relevant packages by their `knowledge_path`.
+From the JSON output, read the top 5-8 most relevant packages by their `knowledge_path`.
 
-**Example**:
+**Example workflow**:
 ```bash
-# Task: "Create portal routes in synergy-client"
-# Selected tags: routing,react-router,component-creation
-
-agent_id="implementation-feco-0000-$(date +%s)"
-
-node .claude/knowledge/scripts/knowledge-search.mjs \
-  --command-profile implementation \
-  --tags routing,react-router,component-creation \
-  --agent-name implementation-command \
-  --agent-id "$agent_id" \
-  --prompt "Create portal routes in synergy-client"
-
-# Read top packages returned
+# For epic-0002 (ProtoSection component)
+# Extracts: ["charts", "mui", "suil", "d3", "data-visualization", "components"]
+# Loads: sygnum-charts-basics, suil-basics, suil-components, etc.
+# Reads: Top 5-8 packages automatically
 ```
 
-**If search returns 0 results**:
-1. Use fewer tags (try 1-2 instead of 4)
-2. Broaden tags (use more general terms)
-3. Re-run `--list-tags` to verify available tags
+**If no tags extracted or search returns 0 results**:
+1. Verify plan.md contains technical details
+2. Manually specify tags using original workflow (as fallback):
+   ```bash
+   node .claude/knowledge/scripts/knowledge-search.mjs --list-tags
+   # Then manually select and run with --tags
+   ```
 
 **Proof of loading**:
 After loading knowledge, state in your response:
 - "Loaded: [package1], [package2], [package3]"
+- Include extracted tags: "Extracted tags: [tag1, tag2, ...]"
 - OR "No relevant knowledge found: [reason]"
 
 ### 3. Ask User for Plan Approval
@@ -222,7 +205,7 @@ Example: "Run `npx nx serve client`, navigate to /users, click 'Add User'"
 
 **Suppress verbose outputs**:
 - Lint/build outputs: Only show errors, summarize success
-- Example: `✅ synergy-client lint passed` instead of full nx output
+- Example: `✅ bank-client-sg lint passed` instead of full nx output
 - Keep TypeScript errors if they occur, but summarize success
 
 **Do NOT continue to next task until user responds.**
@@ -273,6 +256,36 @@ Example: "Run `npx nx serve client`, navigate to /users, click 'Add User'"
 ## Context
 
 The plan.md contains all necessary information extracted from requirements, research, tech-design, and scenarios during the planning phase. You should refer to plan.md and may autonomously read other files if needed for specific implementation details.
+
+## Automatic Knowledge Loading
+
+The `/implement` command now automatically loads relevant knowledge based on plan.md content.
+
+**How it works:**
+1. **Tag Extraction**: Script analyzes plan.md and extracts technical keywords (React, Jest, Chakra, forms, routing, etc.)
+2. **Tag Mapping**: Keywords are mapped to knowledge tags using KEYWORD_TAG_MAPPING
+3. **Knowledge Loading**: Extracted tags are used with command profile to load relevant packages
+4. **Always-Load Packages**: Core standards (code-conventions, typescript-types, testing-core) are always loaded
+
+**Script Location**: `.claude/knowledge/scripts/extract-tags-from-plan.mjs`
+
+**Supported Keywords**:
+- Frameworks: React, TypeScript, Jest, Chakra, MUI, React Router, MSW, Storybook, Nx
+- Libraries: sygnum-ui, sygnum-query, sygnum-table, yoda-form, etc.
+- Domains: routing, testing, forms, authentication, API, state management
+- Patterns: hooks, components, validation, mocking
+
+**Command Profile**: `implementation`
+- Always loads: code-conventions, typescript-types, testing-core
+- Searches with: implementation, testing, best-practices tags
+- Plus extracted tags from plan.md
+
+**Example**:
+```bash
+# For plan.md mentioning "React", "Jest", "Chakra", "charts"
+# Extracts: ["react", "jest", "chakra", "charts", "components"]
+# Loads: Core standards + chart packages + component packages
+```
 
 ## Error Handling
 

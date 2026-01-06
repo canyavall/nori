@@ -1,3 +1,17 @@
+---
+tags:
+  - architecture
+  - knowledge-loading
+  - system-prompt
+  - caching
+  - dynamic-injection
+description: >-
+  Tag-based dynamic knowledge loading architecture: selective knowledge injection
+  based on ticket tags, OpenCode modification (4 lines), knowledge registry pattern,
+  system prompt composition with caching, and cost comparison (44% savings)
+category: patterns/architecture
+required_knowledge: []
+---
 # Dynamic Knowledge Loading
 
 Tag-based dynamic knowledge loading architecture for AI CLI tools. Implements selective knowledge injection with system prompt caching.

@@ -226,6 +226,6 @@ fn test_oauth_uses_correct_client_id() {
 
 ## References
 
-- **OAuth Implementation**: `anthropic-oauth-tauri-implementation.md`
 - **Client ID**: Reverse-engineered from OpenCode
 - **Token Format**: `sk-ant-oat01-` = OAuth access token, `sk-ant-api03-` = API key
+- **Current Implementation**: `app/src/server/auth/oauth.ts` (Electron/Node.js)

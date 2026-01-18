@@ -18,11 +18,16 @@ export interface TokenResponse {
 /**
  * Start OAuth flow - generate authorization URL
  */
-export function startOAuthFlow(): { url: string; session: OAuthSession } {
+export function startOAuthFlow(mode: 'console' | 'max' = 'console'): { url: string; session: OAuthSession } {
   const pkce = generatePKCE();
   const state = generateState();
 
-  const url = `https://claude.ai/oauth/authorize?code=true&client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
+  // Console mode uses console.anthropic.com (web), max mode uses claude.ai (may open desktop app)
+  const baseUrl = mode === 'console'
+    ? 'https://console.anthropic.com/oauth/authorize'
+    : 'https://claude.ai/oauth/authorize';
+
+  const url = `${baseUrl}?code=true&client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
     REDIRECT_URI
   )}&scope=${SCOPE}&code_challenge=${pkce.challenge}&code_challenge_method=S256&state=${state}`;
 

@@ -137,7 +137,7 @@ Knowledge compounds:
 1. AI adoption exploding (teams need tools for non-engineers)
 2. Knowledge management unsolved (no visual AI knowledge curation)
 3. Claude is SOTA (72.7% SWE-bench)
-4. Tauri 2.0 ready (modern desktop framework)
+4. Electron stack mature (modern desktop framework with Node.js backend)
 5. We have domain expertise (41 knowledge packages built)
 
 ## Source

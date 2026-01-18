@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { invokeCommand, createWebSocket } from '../lib/api';
+import { useState, useEffect, useCallback } from 'react';
+import { invokeCommand } from '../lib/api';
 import type { ChatMessage, ChatContext } from '../types/chat';
 import type { SessionMessage } from '../types/session';
 import { useRole } from './useRole';
 import { useKnowledge } from './useKnowledge';
+import { useWebSocket } from '../contexts/WebSocketContext';
 
 export function useChat(sessionId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -13,7 +14,7 @@ export function useChat(sessionId?: string) {
   const { personalityText, activeRole } = useRole();
   const { getAllPackages } = useKnowledge();
   const [knowledgeContent, setKnowledgeContent] = useState<string>('');
-  const wsRef = useRef<WebSocket | null>(null);
+  const { ws, isConnected, error: wsError } = useWebSocket();
 
   // Load knowledge content on mount
   useEffect(() => {
@@ -59,12 +60,11 @@ export function useChat(sessionId?: string) {
     }
   }, [sessionId]);
 
-  // WebSocket connection for chat streaming
+  // Set up message handlers on context WebSocket
   useEffect(() => {
-    const ws = createWebSocket('/chat');
-    wsRef.current = ws;
+    if (!ws) return;
 
-    ws.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
       try {
         const chunk = JSON.parse(event.data) as {
           type: 'chunk' | 'done' | 'error';
@@ -103,20 +103,20 @@ export function useChat(sessionId?: string) {
       }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setError('WebSocket connection error');
-      setIsStreaming(false);
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
+    ws.addEventListener('message', handleMessage);
 
     return () => {
-      ws.close();
+      ws.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [ws]);
+
+  // Sync WebSocket error to local error state
+  useEffect(() => {
+    if (wsError) {
+      setError(wsError);
+      setIsStreaming(false);
+    }
+  }, [wsError]);
 
   // Auto-save session helper
   const saveCurrentSession = useCallback(async () => {
@@ -185,8 +185,8 @@ export function useChat(sessionId?: string) {
         }));
 
         // Send via WebSocket
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.send(
+        if (ws && isConnected) {
+          ws.send(
             JSON.stringify({
               messages: messageHistory,
               model: 'claude-sonnet-4-20250514',
@@ -212,7 +212,7 @@ export function useChat(sessionId?: string) {
         setIsStreaming(false);
       }
     },
-    [messages, currentSessionId]
+    [messages, currentSessionId, ws, isConnected]
   );
 
   const clearMessages = useCallback(() => {

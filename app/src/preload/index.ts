@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron';
+import { contextBridge, shell } from 'electron';
 
 // Declare location as it exists in preload context
 declare const location: { search: string };
@@ -12,7 +12,8 @@ contextBridge.exposeInMainWorld('nori', {
   serverPort: parseInt(serverPort, 10),
   env: {
     isDevelopment: process.env.NODE_ENV === 'development'
-  }
+  },
+  openExternal: (url: string) => shell.openExternal(url)
 });
 
 // Type definitions for renderer (will be used in renderer code)
@@ -21,6 +22,7 @@ export interface NoriAPI {
   env: {
     isDevelopment: boolean;
   };
+  openExternal: (url: string) => Promise<void>;
 }
 
 declare global {

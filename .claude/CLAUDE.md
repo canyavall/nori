@@ -1,75 +1,103 @@
 # CLAUDE.md
 
-Essential guidance for working with this repository.
+Essential guidance for working with the Nori project.
 
 ## Project Context
 
-**Nori**: Research repository analyzing OpenCode and Claude Code architectures. Goal is replicating Claude Code features in the open-source OpenCode project.
+**Nori**: Knowledge-first AI collaboration platform for cross-functional product teams. Desktop Electron app providing visual knowledge management and role-based AI personalities for Engineers, PMs, Product Owners, Architects, CISO, and SRE.
+
+### What Makes Nori Different
+
+**vs Claude Code / OpenCode:**
+- Desktop GUI (not terminal-based) accessible to non-engineers
+- Visual knowledge browser (browse, search, edit packages)
+- Role-based AI personalities (PO, Architect, Engineer, CISO, SRE)
+- Workspace-vault separation (knowledge reusable across repos)
+
+**Competitive Moat**: Curated knowledge packages compound over time. Competitors can copy code, but cannot copy thousands of domain-specific knowledge files.
+
+### Product Vision
+
+**For individuals**: Use Claude AI with role-appropriate personality and visible knowledge
+
+**For teams**: Build institutional AI knowledge that compounds over time, accessible to entire product organization
+
+**Target users**: Product teams (50-500 people) where 40% engineers, 60% other roles
+
+### Core Architecture
+
+**Electron Desktop App**:
+- **Main Process**: Electron window management (app/src/main/)
+- **Preload**: Context bridge for secure IPC (app/src/preload/)
+- **Renderer**: React frontend (app/src/renderer/)
+
+**Express Backend** (app/src/server/):
+- HTTP REST API (auth, sessions, projects, knowledge)
+- WebSocket chat server (AI streaming)
+- SQLite database (~/.nori/nori.db)
+
+**Key Concepts**:
+- **Workspace**: Local folder with code (~/work/project/)
+- **Vault**: Named knowledge collection outside workspace (~/vaults/nestle/)
+- **nori.json**: Workspace config (vault reference, hooks, tools)
+- **Workspace-Vault Separation**: 1 workspace → 1 vault, N workspaces → 1 vault
 
 ### Repository Structure
 
 ```
 nori/
+├── app/                        # Electron app (THE active codebase)
+│   ├── src/
+│   │   ├── main/              # Electron main process
+│   │   ├── preload/           # Context bridge
+│   │   ├── renderer/          # React frontend
+│   │   └── server/            # Express backend + WebSocket
+│   ├── package.json
+│   └── tsconfig.json
+│
 ├── .claude/                    # Claude Code configuration
-│   ├── CLAUDE.md              # This file - working instructions
-│   ├── knowledge/             # Knowledge system
-│   ├── commands/              # User commands
-│   └── settings.json          # Claude Code settings
+│   ├── CLAUDE.md              # This file
+│   ├── knowledge/             # Knowledge vault
+│   ├── commands/              # Custom commands
+│   └── settings.json          # Settings
 │
-├── opencode-fork/             # Modified OpenCode (Claude-only)
-│   ├── packages/
-│   │   ├── opencode/         # Main OpenCode package
-│   │   │   └── src/
-│   │   │       ├── agent/    # Agent system
-│   │   │       ├── session/  # Session management, compaction
-│   │   │       ├── tool/     # 19 tools (bash, read, write, etc.)
-│   │   │       ├── config/   # Configuration system
-│   │   │       ├── lsp/      # LSP integration
-│   │   │       └── mcp/      # MCP support
-│   │   ├── sdk/              # SDK packages
-│   │   ├── plugin/           # Plugin system
-│   │   └── console/          # Web console
-│   ├── ARCHITECTURE.md       # OpenCode architecture
-│   ├── FEATURES.md           # Feature inventory
-│   └── CHANGES.md            # Modifications made
-│
-├── Comparison Documents (270+ pages):
-│   ├── claude-code-architecture-guide.md
-│   ├── hooks-comparison.md
-│   ├── skills-comparison.md
-│   ├── agents-comparison.md
-│   ├── commands-comparison.md
-│   ├── tools-comparison.md
-│   └── context-management-comparison.md
-│
-├── Implementation Planning:
-│   ├── MASTER-ROADMAP.md     # 4-phase implementation plan
-│   ├── GAP-ANALYSIS.md       # Knowledge gaps assessment
-│   └── README.md             # Project overview
-│
-└── Supporting Files:
-    ├── START-HERE.md         # Quick start guide
-    └── anthropic-repos/      # Anthropic SDK and resources
+├── base_repositories/          # Research (OpenCode, Claude Code plugins)
+├── research/                   # Architecture analysis docs
+└── requests_tracker/           # Feature tracking
 ```
 
 ### Quick Start
 
 ```bash
-# Install dependencies
-bun install
+# Install dependencies (first time)
+cd app && npm install
 
-# OpenCode development
-cd opencode-fork && bun run dev
+# Rebuild native modules (first time, or after Electron update)
+cd app && npx electron-rebuild
 
-# Type checking
-bun turbo typecheck
+# Start development server
+/serve
+
+# App will open on http://localhost:3000 (backend)
+# Vite dev server on http://localhost:5173 (hot reload)
 ```
 
-### Resources
+### Development Workflow
 
-- **OpenCode Original**: https://github.com/sst/opencode
-- **Architecture Guide**: `claude-code-architecture-guide.md`
-- **Implementation Plan**: `MASTER-ROADMAP.md`
+**Running the app**: Use `/serve` command
+- Compiles TypeScript (main process)
+- Starts Express backend (auto port: 3000-3009)
+- Launches Electron window
+- Starts Vite dev server (hot reload)
+
+**Making changes**:
+- Frontend changes → hot reload automatically
+- Backend changes → restart `/serve`
+- Preload changes → restart `/serve` (requires rebuild)
+
+**Database**: SQLite at `~/.nori/nori.db` (auto-created on first run)
+
+**OAuth**: Claude authentication via `console.anthropic.com` (Settings → OAuth Flow)
 
 ## Professional Objectivity
 
@@ -146,7 +174,7 @@ Be critical of IDEAS and CODE, not PEOPLE. Say "this approach has problems" not 
 
 ## Concise Communication
 
-Answer first, elaborate if requested. For analysis questions: Quick answer (≤30 lines) → User says "extend" for inline details → User says "report" for comprehensive file in `.ai/temp/`.
+Answer first, elaborate if requested. For analysis questions: Quick answer (≤30 lines) → User says "extend" for inline details → User says "report" for comprehensive file in `.claude/temp/`.
 
 ## Codebase Discovery
 
@@ -165,7 +193,7 @@ Answer first, elaborate if requested. For analysis questions: Quick answer (≤3
 
 **Tool hierarchy**:
 
-1. **Code files** (.ts, .tsx, .js, .jsx, .py, etc.)`: **Serena MCP ONLY**
+1. **Code files** (.ts, .tsx, .js, .jsx, .py, etc.): **Serena MCP ONLY**
 
 - `mcp__serena__get_symbols_overview` - Overview first (300-500 tokens)
 - `mcp__serena__find_symbol` - Specific symbol (100-200 tokens)
@@ -181,7 +209,7 @@ Answer first, elaborate if requested. For analysis questions: Quick answer (≤3
 - **Edit tool** - Modify files (NOT bash sed/awk)
 - **Write tool** - Create files (NOT bash echo)
 
-3. **Bash tool**: ONLY for git, npm, nx, curl, docker - NOT file operations
+3. **Bash tool**: ONLY for git, npm, electron-rebuild, curl, docker - NOT file operations
 
 **Token savings**:
 
@@ -198,10 +226,8 @@ Answer first, elaborate if requested. For analysis questions: Quick answer (≤3
 - `.claude/epics/[project-id]/` - Feature epics (requirements.md, research.md, tech-design.md, plan.md)
 - `.claude/knowledge/` - Modular knowledge packages (not auto-loaded)
 - `.claude/knowledge/knowledge.json` - Knowledge catalog
-- `.claude/agents/` - Specialized agents
 - `.claude/commands/` - User commands
-
-**Temp files**: `.claude/epics/[epic-name]/temp/` for epic work, `.claude/temp/` for general
+- `.claude/temp/` - Temporary files
 
 ## Feature Development Workflow
 
@@ -225,6 +251,12 @@ Answer first, elaborate if requested. For analysis questions: Quick answer (≤3
 - Updates task statuses in plan.md
 - Uses Haiku for 92% cost savings
 
+3. **`/serve`** command:
+
+- Starts Electron development server
+- Compiles TypeScript, launches Express + Vite + Electron
+- Opens app window with dev tools
+
 ## Knowledge System
 
 Knowledge packages are modular coding standards and patterns. Commands load knowledge using command profiles and task-type tags for precise discovery.
@@ -233,7 +265,7 @@ Knowledge packages are modular coding standards and patterns. Commands load know
 
 **Two-step loading:**
 
-1. **Always-load**: Core knowledge (nx-commands, research methodology)
+1. **Always-load**: Core knowledge (standards, architecture)
 2. **Task-specific**: Domain knowledge by task type (routing, testing, forms)
 
 **See**: `.claude/knowledge/vault/ai/knowledge/knowledge-loading-system.md` for complete workflow.
@@ -354,6 +386,7 @@ Then propose creating knowledge package if information is reusable.
 - `/implement <id>` - Execute implementation tasks from plan [Haiku - 92% cost savings]
 - `/task "description"` - Standalone quick fix (implement + document after-action report) [Sonnet]
 - `/next` - Discover what you were working on (scans epics, tasks, git, files) [Haiku]
+- `/serve` - Start Electron development server [No model]
 
 **Model strategy:** Sonnet for planning/decisions, Haiku for execution. Override available: "Use Sonnet for TASK-003"
 
@@ -402,6 +435,53 @@ Then propose creating knowledge package if information is reusable.
 
 **Why natural language?** Claude has conversation context. No need for command parameters or state tracking.
 
+## Nori-Specific Development
+
+### Architecture Principles
+
+**Workspace-Vault Separation**: Core Nori concept
+- Workspace (code context) ≠ Vault (knowledge storage)
+- 1 workspace → 1 vault (configured in nori.json)
+- N workspaces → 1 vault (vault reuse encouraged)
+- Vaults are named (nestle, xeenaa, family) and stored outside workspace
+
+**Configuration**:
+- `nori.json` in workspace root (NOT `.claude/settings.json`)
+- Global vault registry: `~/.nori/config.json`
+
+**See**: `.claude/knowledge/vault/nori/architecture/workspace-vault-separation.md`
+
+### Tech Stack
+
+**Frontend**: React 18, TypeScript, Vite
+**Backend**: Express, WebSocket, better-sqlite3
+**Desktop**: Electron 28, context isolation enabled
+**AI**: Anthropic Claude SDK (claude-sonnet-4)
+**Dev**: Hot reload (Vite), TypeScript watch mode
+
+### Testing
+
+**OAuth Flow**:
+1. Settings → OAuth Flow
+2. Click "Start OAuth Flow" → opens system browser
+3. Authorize on console.anthropic.com
+4. Copy authorization code (format: `code#state`)
+5. Paste code → Complete OAuth
+6. API key saved to `~/.nori/auth.json`
+
+**Database**: SQLite at `~/.nori/nori.db`
+- Auto-created on first run
+- Schema migrations handled by server init
+- Use `sqlite3 ~/.nori/nori.db` to inspect
+
+### Common Issues
+
+**Electron window blank**: Check backend startup in terminal logs
+**OAuth link doesn't open**: Use `window.nori.openExternal()` (not `window.open()`)
+**Database locked**: Close all Nori instances, remove `~/.nori/nori.db-wal`
+**TypeScript errors**: Run `npm run typecheck` in app/
+**Native module errors**: Run `npx electron-rebuild` in app/
+
 ## CLI Tools
 
 **Pattern search**: `rg -n "pattern" --glob '!node_modules/*'`
@@ -418,4 +498,3 @@ Use `curl` via Bash:
 ```bash
 curl -s "https://api.example.com" | jq '.data'
 ```
-

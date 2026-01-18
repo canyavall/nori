@@ -22,8 +22,8 @@ export function OAuthFlow({ onSuccess, onError }: OAuthFlowProps) {
       });
       setAuthUrl(response.url);
       setSessionId(response.sessionId);
-      // Open URL in default browser
-      window.open(response.url, '_blank');
+      // Open URL in system default browser
+      window.nori.openExternal(response.url);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       onError?.(errorMsg);
@@ -95,7 +95,7 @@ export function OAuthFlow({ onSuccess, onError }: OAuthFlowProps) {
           <div className="step">
             <h4>Step 1: Authorize</h4>
             <p>A browser window should have opened. If not, click the link below:</p>
-            <a href={authUrl} target="_blank" rel="noopener noreferrer">
+            <a onClick={() => window.nori.openExternal(authUrl)} style={{ cursor: 'pointer' }}>
               Open Authorization URL
             </a>
           </div>

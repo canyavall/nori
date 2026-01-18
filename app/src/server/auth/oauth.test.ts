@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { startOAuthFlow } from './oauth.js';
 
 describe('OAuth Flow', () => {
-  it('should generate valid authorization URL', () => {
-    const { url, session } = startOAuthFlow();
+  it('should generate valid authorization URL for console mode', () => {
+    const { url, session } = startOAuthFlow('console');
 
-    expect(url).toContain('https://claude.ai/oauth/authorize');
+    expect(url).toContain('https://console.anthropic.com/oauth/authorize');
     expect(url).toContain('code=true');
     expect(url).toContain('client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e');
     expect(url).toContain('response_type=code');
@@ -18,6 +18,21 @@ describe('OAuth Flow', () => {
     expect(session.pkce.verifier).toBeDefined();
     expect(session.pkce.challenge).toBeDefined();
     expect(session.state).toBeDefined();
+  });
+
+  it('should generate valid authorization URL for max mode', () => {
+    const { url, session } = startOAuthFlow('max');
+
+    expect(url).toContain('https://claude.ai/oauth/authorize');
+    expect(url).toContain('code=true');
+    expect(session.pkce.verifier).toBeDefined();
+    expect(session.state).toBeDefined();
+  });
+
+  it('should default to console mode', () => {
+    const { url } = startOAuthFlow();
+
+    expect(url).toContain('https://console.anthropic.com/oauth/authorize');
   });
 
   it('should use correct scope encoding', () => {

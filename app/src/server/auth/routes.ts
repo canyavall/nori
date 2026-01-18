@@ -11,9 +11,10 @@ const sessions = new Map<string, OAuthSession>();
  * POST /auth/start
  * Start OAuth flow and return authorization URL
  */
-router.post('/start', (_req: Request, res: Response) => {
+router.post('/start', (req: Request, res: Response) => {
   try {
-    const { url, session } = startOAuthFlow();
+    const { mode } = req.body as { mode?: 'console' | 'max' };
+    const { url, session } = startOAuthFlow(mode);
 
     // Generate session ID and store session
     const sessionId = Math.random().toString(36).substring(2, 15);

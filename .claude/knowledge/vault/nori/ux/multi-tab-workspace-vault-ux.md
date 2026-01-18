@@ -121,9 +121,9 @@ Shows vault linked to active workspace with vault switching capability.
    [Cancel]  [Switch Vault]
    ```
 3. User confirms
-4. Backend updates workspace via `update_workspace_vault` Tauri command
+4. Backend updates workspace via API endpoint (`PATCH /workspaces/:id/vault`)
 5. All tabs using this workspace are found and updated:
-   - Fetch updated workspace data via `get_workspace_by_path`
+   - Fetch updated workspace data from backend
    - Update tab state via `updateTabWorkspace` (Zustand)
 6. Re-index knowledge with new vault path
 7. Toast: "Vault switched to xeenaa"
@@ -192,7 +192,7 @@ Shows vault linked to active workspace with vault switching capability.
 **Architecture**: Direct Zustand state updates (single-window, in-process sync)
 
 **Why this works**:
-- Nori uses single-window architecture with browser-style tabs (not separate Tauri windows)
+- Nori uses single-window architecture with browser-style tabs (not separate Electron windows)
 - All tabs share same React instance and Zustand store
 - State updates trigger React re-renders in all components subscribed to that state
 - No async event bus needed for in-process communication
@@ -435,7 +435,7 @@ interface TabStore {
 **Cross-tab communication**: Direct Zustand state updates (single-window, in-process)
 
 **Implementation Decisions (2026-01-03)**:
-- ✅ Single-window app with browser-style tabs (not multi-window Tauri)
+- ✅ Single-window app with browser-style tabs (not multi-window Electron)
 - ✅ Always confirm vault switching (shows warning modal)
 - ✅ Auto-number tabs with same workspace (bank-client-2, bank-client-3)
 - ✅ No tab persistence (manual reopen via recent workspaces)

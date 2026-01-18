@@ -227,19 +227,19 @@ wss.on('connection', (ws, req) => {
 
 ## Nori Application
 
-For Nori (cross-platform desktop app):
-- Use Electron or Tauri instead of web
-- Keep React frontend architecture
-- Replace WebSocket with IPC (inter-process communication)
-- Direct SDK integration (no Express server needed)
-- Local SQLite for settings/sessions
-- Native file watchers (Chokidar)
-
-**Tauri advantages**:
-- Smaller bundle size (~3MB vs ~100MB Electron)
-- Rust backend (better performance, security)
-- Native OS integration
+Nori implementation (Electron desktop app):
+- Electron desktop framework (Node.js backend)
+- React frontend with TypeScript
+- Express backend + WebSocket (AI streaming)
+- Local SQLite for settings/sessions (~/.nori/nori.db)
+- Native file watchers and OS integration
 - Cross-platform (Mac, Windows, Linux)
+
+**Architecture choice**:
+- Chose Electron over web-only for native OS integration
+- Express backend enables REST API + WebSocket streaming
+- Context isolation via preload script (security)
+- Hot reload via Vite (developer experience)
 
 ## Source
 

@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Update cache state after reconciliation",
+  "why": "Persist current state as baseline for next reconciliation cycle",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/06-save-cache.json",
+    "implementation": "features/vault/vault-reconciliation/actions/save-cache.ts"
+  },
+  "output": "Updated cache file with current file hashes and sync timestamp",
+  "success_handling": {
+    "criteria": "Cache file is written with current state and timestamp",
+    "event": {
+      "action": "vault_reconciliation_save_cache",
+      "status": "success",
+      "message": "Cache state updated after reconciliation",
+      "data_fields": [
+        "vault_id",
+        "cache_path",
+        "file_count",
+        "timestamp"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Cache write fails",
+      "criteria": "File write operation throws an error (permission denied, disk full)",
+      "action": "Log warning, reconciliation results are still valid",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_reconciliation_save_cache",
+        "status": "warning",
+        "message": "Failed to update cache state: {error}",
+        "data_fields": [
+          "vault_id",
+          "cache_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Cache saved",
+      "outcome": "Reconciliation complete"
+    },
+    {
+      "condition": "Cache write fails",
+      "outcome": "Reconciliation complete with cache warning, next reconciliation will use stale baseline"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/save-cache.ts"
+  ]
+}

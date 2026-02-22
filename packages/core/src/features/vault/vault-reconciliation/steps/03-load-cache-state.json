@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Read cached state from last sync",
+  "why": "The cache represents the common ancestor for 3-way merge detection",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/03-load-cache-state.json",
+    "implementation": "features/vault/vault-reconciliation/actions/load-cache-state.ts"
+  },
+  "output": "Map of file paths to content hashes from the last known sync point",
+  "success_handling": {
+    "criteria": "Cache file exists and is parsed into a valid hash map",
+    "event": {
+      "action": "vault_reconciliation_load_cache_state",
+      "status": "success",
+      "message": "Cache state loaded from last sync",
+      "data_fields": [
+        "vault_id",
+        "cache_path",
+        "file_count",
+        "last_sync_timestamp"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Cache file missing or corrupt",
+      "criteria": "Cache file does not exist or cannot be parsed as valid JSON",
+      "action": "Use empty cache as baseline (treat all files as new), warn user",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_reconciliation_load_cache_state",
+        "status": "warning",
+        "message": "Cache state unavailable, using empty baseline: {error}",
+        "data_fields": [
+          "vault_id",
+          "cache_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Cache loaded",
+      "outcome": "Proceed to compare-three-way step with full 3-way data"
+    },
+    {
+      "condition": "Cache missing",
+      "outcome": "Proceed to compare-three-way step with empty cache baseline"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/load-cache-state.ts"
+  ]
+}

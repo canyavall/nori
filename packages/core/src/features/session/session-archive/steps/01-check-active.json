@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Verify an active session exists to archive",
+  "why": "Cannot archive if there is no active session",
+  "where": {
+    "entry_point": "features/session/session-archive/steps/01-check-active.json",
+    "implementation": "features/session/session-archive/actions/check-active.ts"
+  },
+  "output": {
+    "console": "Active session check result with session ID and state summary",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "An active session state file is found and its metadata confirms it is a valid active session",
+    "event": {
+      "action": "session_archive_check_active",
+      "status": "success",
+      "message": "Active session found for archiving: {session_id}",
+      "data_fields": [
+        "session_id",
+        "created_at",
+        "prompt_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No active session",
+      "criteria": "No active session state file found in the session directory",
+      "action": "Abort archive flow, nothing to archive",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "session_archive_check_active",
+        "status": "info",
+        "message": "No active session to archive",
+        "data_fields": [
+          "state_directory"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Active session found",
+      "outcome": "Proceed to archive-session step"
+    },
+    {
+      "condition": "No active session",
+      "outcome": "Abort archive flow (no-op)"
+    }
+  ],
+  "calls": [
+    "features/session/session-archive/actions/check-active.ts"
+  ]
+}

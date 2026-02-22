@@ -1,0 +1,59 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-audit",
+  "what": "Run audit on the newly created knowledge entry",
+  "why": "Validate quality immediately after creation",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-create/steps/04-audit-knowledge.json",
+    "implementation": "features/knowledge/knowledge-audit/steps/"
+  },
+  "output": {
+    "console": "Audit result summary with pass/fail status and findings",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Knowledge audit flow completes and returns a structured audit result",
+    "event": {
+      "action": "knowledge_create_audit_knowledge",
+      "status": "success",
+      "message": "Audit completed for newly created entry",
+      "data_fields": [
+        "entry_id",
+        "audit_passed",
+        "findings_count",
+        "audit_score"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Audit flow fails",
+      "criteria": "The knowledge-audit flow returns an error or does not complete",
+      "action": "Log audit failure as warning, do not block creation since the file is already written",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_audit_knowledge",
+        "status": "warning",
+        "message": "Audit failed for entry {entry_id}, creation still succeeded",
+        "data_fields": [
+          "entry_id",
+          "audit_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Audit passes",
+      "outcome": "Proceed to regenerate-index step"
+    },
+    {
+      "condition": "Audit fails or returns warnings",
+      "outcome": "Log findings, proceed to regenerate-index step regardless"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/steps/"
+  ]
+}

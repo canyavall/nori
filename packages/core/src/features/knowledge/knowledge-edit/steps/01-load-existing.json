@@ -1,0 +1,79 @@
+{
+  "type": "action",
+  "what": "Read existing markdown file and parse frontmatter",
+  "why": "Load current content for editing",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-edit/steps/01-load-existing.json",
+    "implementation": "features/knowledge/knowledge-edit/actions/load-existing.ts"
+  },
+  "output": {
+    "console": "Loaded entry details including frontmatter fields and content length",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Markdown file is read successfully and frontmatter is parsed into a structured object with content body separated",
+    "event": {
+      "action": "knowledge_edit_load_existing",
+      "status": "success",
+      "message": "Knowledge entry loaded from {file_path}",
+      "data_fields": [
+        "file_path",
+        "entry_id",
+        "frontmatter_fields",
+        "content_length"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "File not found",
+      "criteria": "The target markdown file does not exist at the expected vault path",
+      "action": "Abort edit, return error indicating the entry does not exist",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_edit_load_existing",
+        "status": "error",
+        "message": "Knowledge entry not found: {file_path}",
+        "data_fields": [
+          "file_path",
+          "entry_id"
+        ]
+      }
+    },
+    {
+      "scenario": "Parse error",
+      "criteria": "File exists but frontmatter YAML is malformed or cannot be parsed",
+      "action": "Attempt to load raw content, warn user about frontmatter issues, allow editing to fix",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_edit_load_existing",
+        "status": "error",
+        "message": "Failed to parse frontmatter in {file_path}: {parse_error}",
+        "data_fields": [
+          "file_path",
+          "parse_error",
+          "raw_content_loaded"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "File loaded and parsed successfully",
+      "outcome": "Proceed to validate-changes step with loaded data"
+    },
+    {
+      "condition": "File not found",
+      "outcome": "Abort edit flow"
+    },
+    {
+      "condition": "Parse error in frontmatter",
+      "outcome": "Load raw content, allow user to fix during edit"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-edit/actions/load-existing.ts"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "type": "action",
+  "what": "Parse search query into structured filters (tags, category, text)",
+  "why": "Decompose user query into typed filters for precise matching against the index",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/02-parse-query.json",
+    "implementation": "features/knowledge/knowledge-search/actions/parse-query.ts"
+  },
+  "output": {
+    "console": "Parsed query with extracted filters (tags, category, text terms)",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Search query is parsed into structured filter object with tag filters, category filter, and free text components identified",
+    "event": {
+      "action": "knowledge_search_parse_query",
+      "status": "success",
+      "message": "Query parsed: {filter_count} filters extracted",
+      "data_fields": [
+        "raw_query",
+        "tag_filters",
+        "category_filter",
+        "text_terms",
+        "filter_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Empty query",
+      "criteria": "Search query is empty or contains only whitespace",
+      "action": "Return all entries (unfiltered) or prompt user for query",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_parse_query",
+        "status": "info",
+        "message": "Empty search query, returning all entries",
+        "data_fields": [
+          "raw_query"
+        ]
+      }
+    },
+    {
+      "scenario": "Malformed filter syntax",
+      "criteria": "Query contains filter syntax that cannot be parsed (e.g., unclosed brackets, invalid operators)",
+      "action": "Treat the entire query as free text, log warning about unparseable filters",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_parse_query",
+        "status": "warning",
+        "message": "Could not parse query filters, treating as free text: {parse_error}",
+        "data_fields": [
+          "raw_query",
+          "parse_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Query parsed with filters",
+      "outcome": "Proceed to match-entries step with structured filters"
+    },
+    {
+      "condition": "Empty query",
+      "outcome": "Proceed to match-entries with no filters (return all)"
+    },
+    {
+      "condition": "Malformed filter syntax",
+      "outcome": "Fall back to free text search, proceed to match-entries"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/parse-query.ts"
+  ]
+}

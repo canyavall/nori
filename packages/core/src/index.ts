@@ -1,0 +1,31 @@
+// Shared utilities
+export { createNoopEmitter, createFlowEmitter, prefixedEmitter } from './features/shared/utils/flow-emitter.js';
+export { createEventLogger } from './features/shared/utils/event-logger.js';
+export { getNoriDataDir, getNoriDbPath, getVaultsDir, getVaultDir } from './features/shared/utils/path-resolver.js';
+export { openDatabase, saveDatabase, runMigrations, queryOne, queryAll, type DatabaseOptions } from './features/shared/utils/database.js';
+
+// Flows
+export { runAppIntegrityCheck } from './features/app/app-integrity-check/app-integrity-check.js';
+export { runAppAuthenticationCheck } from './features/app/app-authentication-check/app-authentication-check.js';
+export { runAppAutoupdate } from './features/app/app-autoupdate/app-autoupdate.js';
+export { runVaultRegistration } from './features/vault/vault-registration/vault-registration.js';
+export { runVaultLocalRegistration } from './features/vault/vault-local-registration/vault-local-registration.js';
+export { runVaultReconciliation } from './features/vault/vault-reconciliation/vault-reconciliation.js';
+export { runVaultRegenerateDb } from './features/vault/vault-regenerate-db/vault-regenerate-db.js';
+export { runVaultVectorEmbedding } from './features/vault/vault-vector-embedding/vault-vector-embedding.js';
+export { runVaultAudit } from './features/vault/vault-audit/vault-audit.js';
+export { runKnowledgeAudit } from './features/knowledge/knowledge-audit/knowledge-audit.js';
+export { runVaultLinkProject } from './features/vault/vault-link-project/vault-link-project.js';
+export { runKnowledgeIndexBuild } from './features/knowledge/knowledge-index-build/knowledge-index-build.js';
+export { runKnowledgeSearch } from './features/knowledge/knowledge-search/knowledge-search.js';
+export { runKnowledgeCreate } from './features/knowledge/knowledge-create/knowledge-create.js';
+export { runKnowledgeEdit } from './features/knowledge/knowledge-edit/knowledge-edit.js';
+export { loadExisting } from './features/knowledge/knowledge-edit/actions/load-existing.js';
+export { runKnowledgeDelete } from './features/knowledge/knowledge-delete/knowledge-delete.js';
+export { runVaultPull } from './features/vault/vault-pull/vault-pull.js';
+export { runVaultPush } from './features/vault/vault-push/vault-push.js';
+export { runSessionCreate } from './features/session/session-create/session-create.js';
+export { runSessionResume } from './features/session/session-resume/session-resume.js';
+export { runSessionArchive } from './features/session/session-archive/session-archive.js';
+export { runProjectRegister } from './features/project/project-register/project-register.js';
+export { runProjectList } from './features/project/project-list/project-list.js';

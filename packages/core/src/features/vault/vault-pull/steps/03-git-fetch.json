@@ -1,0 +1,80 @@
+{
+  "type": "action",
+  "what": "Fetch latest changes from vault git remote",
+  "why": "Get latest knowledge content from team",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/03-git-fetch.json",
+    "implementation": "features/vault/vault-pull/actions/git-fetch.ts"
+  },
+  "output": "Fetch result with new commits count and remote HEAD reference",
+  "success_handling": {
+    "criteria": "git fetch completes successfully and remote refs are updated",
+    "event": {
+      "action": "vault_pull_git_fetch",
+      "status": "success",
+      "message": "Fetched latest changes from remote",
+      "data_fields": [
+        "vault_id",
+        "remote_url",
+        "new_commits",
+        "remote_head",
+        "fetch_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Network unavailable",
+      "criteria": "git fetch fails with connection refused, timeout, or DNS resolution error",
+      "action": "Abort pull, suggest user check network connectivity and retry",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_git_fetch",
+        "status": "error",
+        "message": "Network unavailable during fetch: {error}",
+        "data_fields": [
+          "vault_id",
+          "remote_url",
+          "error",
+          "elapsed_time_ms"
+        ]
+      }
+    },
+    {
+      "scenario": "Authentication expired",
+      "criteria": "git fetch fails with HTTP 401/403 or SSH authentication error",
+      "action": "Abort pull, prompt user to refresh credentials",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_git_fetch",
+        "status": "error",
+        "message": "Authentication expired for remote: {remote_url}",
+        "data_fields": [
+          "vault_id",
+          "remote_url",
+          "auth_method",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Fetch succeeds with new commits",
+      "outcome": "Proceed to detect-conflicts step"
+    },
+    {
+      "condition": "Fetch succeeds with no new commits",
+      "outcome": "Skip remaining steps, vault is up to date"
+    },
+    {
+      "condition": "Fetch fails",
+      "outcome": "Abort pull operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-pull/actions/git-fetch.ts"
+  ]
+}

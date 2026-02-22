@@ -1,0 +1,36 @@
+{
+  "type": "action",
+  "what": "Create the vault directory inside the Nori data folder",
+  "why": "Local vaults need a physical location on disk to store knowledge files; the directory is ~/.nori/vaults/{name}/",
+  "where": {
+    "entry_point": "features/vault/vault-local-registration/vault-local-registration.ts",
+    "implementation": "features/vault/vault-local-registration/actions/create-directory.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Directory exists and is writable at the expected path",
+    "event": {
+      "action": "vault_local_registration_create_directory",
+      "status": "success",
+      "message": "Vault directory created",
+      "data_fields": ["local_path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Disk full or permissions denied",
+      "criteria": "mkdirSync throws an OS error",
+      "action": "Return DIR_CREATE_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Uses mkdirSync with recursive:true so parent dirs are created automatically",
+      "rationale": "Handles first-time setup where ~/.nori/vaults/ doesn't exist yet"
+    }
+  ],
+  "calls": ["features/vault/vault-local-registration/actions/create-directory.ts"]
+}

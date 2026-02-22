@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Remove the markdown file from vault",
+  "why": "Complete the deletion",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-delete/steps/03-delete-file.json",
+    "implementation": "features/knowledge/knowledge-delete/actions/delete-file.ts"
+  },
+  "output": {
+    "console": "Confirmation of file deletion with path",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "The markdown file is removed from the vault directory and is no longer present on disk",
+    "event": {
+      "action": "knowledge_delete_delete_file",
+      "status": "success",
+      "message": "Knowledge entry deleted: {file_path}",
+      "data_fields": [
+        "file_path",
+        "entry_id"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Permission denied",
+      "criteria": "Filesystem returns EACCES or EPERM when attempting to delete the file",
+      "action": "Abort deletion, report permission error with the target path",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_delete_delete_file",
+        "status": "error",
+        "message": "Permission denied deleting {file_path}",
+        "data_fields": [
+          "file_path",
+          "error_code"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "File deleted successfully",
+      "outcome": "Proceed to regenerate-index step"
+    },
+    {
+      "condition": "Permission denied",
+      "outcome": "Abort delete flow, report fatal error"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-delete/actions/delete-file.ts"
+  ]
+}

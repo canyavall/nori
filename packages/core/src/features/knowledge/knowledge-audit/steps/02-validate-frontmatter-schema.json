@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Validate frontmatter against Zod schema",
+  "why": "Ensure all required fields present with correct types",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/steps/02-validate-frontmatter-schema.json",
+    "implementation": "features/knowledge/knowledge-audit/actions/validate-frontmatter-schema.ts"
+  },
+  "output": {
+    "console": "Schema validation result with field-level pass/fail details",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "All frontmatter fields pass Zod schema validation with correct types and required fields present",
+    "event": {
+      "action": "knowledge_audit_validate_frontmatter_schema",
+      "status": "success",
+      "message": "Frontmatter schema validation passed for entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "validated_fields",
+        "schema_version"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Schema validation fails",
+      "criteria": "One or more frontmatter fields fail Zod schema validation (missing, wrong type, invalid value)",
+      "action": "Record validation errors as audit findings, continue audit to collect all issues",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_audit_validate_frontmatter_schema",
+        "status": "error",
+        "message": "Frontmatter schema validation failed for entry {entry_id}: {validation_errors}",
+        "data_fields": [
+          "entry_id",
+          "validation_errors",
+          "invalid_fields",
+          "schema_version"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Schema validation passes",
+      "outcome": "Proceed to validate-content-quality step"
+    },
+    {
+      "condition": "Schema validation fails",
+      "outcome": "Record findings, proceed to validate-content-quality step to collect all audit issues"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/validate-frontmatter-schema.ts"
+  ]
+}

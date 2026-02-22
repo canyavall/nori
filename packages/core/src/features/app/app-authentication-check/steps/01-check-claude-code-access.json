@@ -1,0 +1,64 @@
+{
+  "type": "action",
+  "what": "Verify Claude Code CLI is installed and accessible",
+  "why": "Nori depends on Claude Code for AI operations — must validate before use",
+  "where": {
+    "entry_point": "features/app/app-authentication-check/steps/01-check-claude-code-access.json",
+    "implementation": "features/app/app-authentication-check/actions/check-claude-code-access.ts"
+  },
+  "output": "CLI availability status including version information",
+  "success_handling": {
+    "criteria": "Claude Code CLI found and responds to version check",
+    "event": {
+      "action": "app_authentication_check_check_claude_code_access_success",
+      "status": "success",
+      "message": "Claude Code CLI is installed and accessible",
+      "data_fields": ["cli_version", "cli_path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "CLI not found",
+      "criteria": "Claude Code CLI binary not found in PATH",
+      "action": "Prompt user to install Claude Code CLI",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "app_authentication_check_check_claude_code_access_not_found",
+        "status": "fatal",
+        "message": "Claude Code CLI not found — please install it to continue",
+        "data_fields": ["search_paths"]
+      }
+    },
+    {
+      "scenario": "CLI found but wrong version",
+      "criteria": "CLI binary exists but reports an unsupported version",
+      "action": "Warn user about version mismatch",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_authentication_check_check_claude_code_access_wrong_version",
+        "status": "warning",
+        "message": "Claude Code CLI version {found_version} does not match expected {expected_version}",
+        "data_fields": ["found_version", "expected_version"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "CLI found and correct version",
+      "outcome": "Proceed to next step"
+    },
+    {
+      "condition": "CLI not found",
+      "outcome": "Halt boot, prompt user to install Claude Code"
+    },
+    {
+      "condition": "CLI found but wrong version",
+      "outcome": "Warn user, proceed with caution"
+    }
+  ],
+  "calls": [
+    "features/app/app-authentication-check/actions/check-claude-code-access.ts"
+  ]
+}

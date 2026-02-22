@@ -1,0 +1,92 @@
+{
+  "type": "action",
+  "what": "Test git credentials and repository accessibility via ls-remote",
+  "why": "Fail fast before cloning — validate in ~2s vs 30s+ clone",
+  "where": {
+    "entry_point": "features/vault/vault-registration/steps/02-test-git-access.json",
+    "implementation": "features/vault/vault-registration/actions/test-git-access.ts"
+  },
+  "output": "Access verification result including remote refs and authentication method used",
+  "success_handling": {
+    "criteria": "git ls-remote completes successfully and returns at least one ref",
+    "event": {
+      "action": "vault_registration_test_git_access",
+      "status": "success",
+      "message": "Repository is accessible with current credentials",
+      "data_fields": [
+        "url",
+        "auth_method",
+        "ref_count",
+        "response_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "SSH key not configured",
+      "criteria": "ls-remote fails with 'Permission denied (publickey)' or 'Host key verification failed'",
+      "action": "Return error guiding user to configure SSH keys for the remote host",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_test_git_access",
+        "status": "error",
+        "message": "SSH key not configured for host: {host}",
+        "data_fields": [
+          "url",
+          "host",
+          "ssh_error",
+          "setup_instructions"
+        ]
+      }
+    },
+    {
+      "scenario": "Repository not found",
+      "criteria": "ls-remote fails with 'Repository not found' or HTTP 404",
+      "action": "Return error indicating repo does not exist or user lacks access",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_test_git_access",
+        "status": "error",
+        "message": "Repository not found: {url}",
+        "data_fields": [
+          "url",
+          "http_status",
+          "error_output"
+        ]
+      }
+    },
+    {
+      "scenario": "Authentication failure",
+      "criteria": "ls-remote fails with 'Authentication failed' or HTTP 401/403",
+      "action": "Return error indicating credentials are invalid or expired",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_test_git_access",
+        "status": "error",
+        "message": "Authentication failed for repository: {url}",
+        "data_fields": [
+          "url",
+          "auth_method",
+          "http_status",
+          "error_output"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "ls-remote succeeds",
+      "outcome": "Proceed to clone-repo step"
+    },
+    {
+      "condition": "Authentication or access failure",
+      "outcome": "Abort registration, return actionable error to user"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-registration/actions/test-git-access.ts"
+  ]
+}

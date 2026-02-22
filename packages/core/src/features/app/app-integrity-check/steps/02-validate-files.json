@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Validate required configuration files exist and are parseable",
+  "why": "Config files (package.json, tsconfig, etc.) must be valid for app to function",
+  "where": {
+    "entry_point": "features/app/app-integrity-check/steps/02-validate-files.json",
+    "implementation": "features/app/app-integrity-check/actions/validate-files.ts"
+  },
+  "output": "Validation result indicating which config files are valid, missing, or corrupt",
+  "success_handling": {
+    "criteria": "All config files exist and parse correctly",
+    "event": {
+      "action": "app_integrity_check_validate_files_success",
+      "status": "success",
+      "message": "All required configuration files are valid",
+      "data_fields": ["validated_files"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Missing file",
+      "criteria": "A required configuration file does not exist at the expected path",
+      "action": "Create missing file from template",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_integrity_check_validate_files_missing",
+        "status": "warning",
+        "message": "Required config file missing: {file_path}",
+        "data_fields": ["file_path", "template_used"]
+      }
+    },
+    {
+      "scenario": "Corrupt file",
+      "criteria": "A configuration file exists but cannot be parsed or contains invalid data",
+      "action": "Backup corrupt file and recreate from template",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_integrity_check_validate_files_corrupt",
+        "status": "warning",
+        "message": "Corrupt config file detected: {file_path}",
+        "data_fields": ["file_path", "parse_error", "backup_path"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All files valid",
+      "outcome": "Proceed to next step"
+    },
+    {
+      "condition": "Some files missing or corrupt",
+      "outcome": "Flag for self-heal in step 03"
+    }
+  ],
+  "calls": [
+    "features/app/app-integrity-check/actions/validate-files.ts"
+  ]
+}

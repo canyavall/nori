@@ -1,0 +1,29 @@
+{
+  "type": "ui_action",
+  "what": "Display ranked search results with relevance scores",
+  "why": "Present the matching knowledge entries in order of relevance so the user can find and navigate to the entry they need",
+  "where": {
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx",
+    "step_component": "features/knowledge/knowledge-search/SearchResults.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "results",
+      "relevance_scores"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "navigate:/knowledge/{entry_id}",
+    "on_search_again": "01-show-search-form"
+  },
+  "error_handling": [
+    {
+      "type": "no_results",
+      "display": "empty_state",
+      "description": "Show message indicating no knowledge entries matched the search query"
+    }
+  ],
+  "decisions": []
+}

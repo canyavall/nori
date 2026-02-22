@@ -1,0 +1,24 @@
+{
+  "type": "ui_action",
+  "what": "Display vault card in the vaults list",
+  "why": "Let the user see vault details and select a vault to activate the contextual sidebar",
+  "where": {
+    "component": "pages/VaultsPage.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": ["name", "git_url", "branch", "last_synced_at"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "02-set-active-vault"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Card p-4 div is the click target; Sync/Link buttons call stopPropagation",
+      "rationale": "Clicking vault info selects context; action buttons remain independent and do not trigger vault selection"
+    }
+  ]
+}

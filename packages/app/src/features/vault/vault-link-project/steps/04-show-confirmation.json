@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display confirmation that vault-project link was created successfully",
+  "why": "Confirm to the user that the vault has been linked to the project and knowledge is now available",
+  "where": {
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/LinkConfirmation.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "vault_name",
+      "project_path"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_dismiss": "close_dialog"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Link result data is unavailable. Show an error state indicating the link status could not be confirmed."
+    }
+  ],
+  "decisions": []
+}

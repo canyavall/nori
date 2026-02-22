@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Compare vault files against database entries for drift",
+  "why": "Detect files missing from database or database entries with no matching file",
+  "where": {
+    "entry_point": "features/vault/vault-audit/steps/04-check-db-consistency.json",
+    "implementation": "features/vault/vault-audit/actions/check-db-consistency.ts"
+  },
+  "output": "Consistency report with orphaned DB entries, unindexed files, and stale entries",
+  "success_handling": {
+    "criteria": "Comparison completes between all vault files and all database entries",
+    "event": {
+      "action": "vault_audit_vault_check_db_consistency",
+      "status": "success",
+      "message": "Database consistency check complete",
+      "data_fields": [
+        "vault_id",
+        "vault_file_count",
+        "db_entry_count",
+        "orphaned_db_entries",
+        "unindexed_files",
+        "stale_entries",
+        "consistent"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database read fails",
+      "criteria": "SQLite query throws an error during consistency check",
+      "action": "Record database error, continue to report generation with partial data",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_audit_vault_check_db_consistency",
+        "status": "warning",
+        "message": "Database read failed during consistency check: {error}",
+        "data_fields": [
+          "vault_id",
+          "db_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Database is consistent with vault files",
+      "outcome": "Proceed to generate-audit-report step"
+    },
+    {
+      "condition": "Drift detected",
+      "outcome": "Record drift details, proceed to generate-audit-report step"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-audit/actions/check-db-consistency.ts"
+  ]
+}

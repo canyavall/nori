@@ -1,0 +1,72 @@
+{
+  "type": "action",
+  "what": "Load knowledge index into memory",
+  "why": "Index must be in memory before search operations can be performed",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/01-load-index.json",
+    "implementation": "features/knowledge/knowledge-search/actions/load-index.ts"
+  },
+  "output": {
+    "console": "Index load result with entry count and load time",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "knowledge.json index file is read from disk, parsed, and loaded into memory as a queryable data structure",
+    "event": {
+      "action": "knowledge_search_load_index",
+      "status": "success",
+      "message": "Knowledge index loaded: {entry_count} entries",
+      "data_fields": [
+        "entry_count",
+        "index_path",
+        "load_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index file not found",
+      "criteria": "knowledge.json does not exist at the expected path",
+      "action": "Trigger index build, then retry load",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_load_index",
+        "status": "error",
+        "message": "Knowledge index not found at {index_path}, triggering rebuild",
+        "data_fields": [
+          "index_path"
+        ]
+      }
+    },
+    {
+      "scenario": "Corrupt index file",
+      "criteria": "Index file exists but cannot be parsed as valid JSON",
+      "action": "Trigger index rebuild, then retry load",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_load_index",
+        "status": "error",
+        "message": "Knowledge index is corrupt, triggering rebuild: {parse_error}",
+        "data_fields": [
+          "index_path",
+          "parse_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index loaded successfully",
+      "outcome": "Proceed to parse-query step"
+    },
+    {
+      "condition": "Index not found or corrupt",
+      "outcome": "Trigger index-build flow, then retry load"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/load-index.ts"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Create git commit with descriptive message",
+  "why": "Record changes with meaningful commit message for team history",
+  "where": {
+    "entry_point": "features/vault/vault-push/steps/04-commit.json",
+    "implementation": "features/vault/vault-push/actions/commit.ts"
+  },
+  "output": "Commit result with commit hash and message",
+  "success_handling": {
+    "criteria": "git commit succeeds and returns a valid commit hash",
+    "event": {
+      "action": "vault_push_commit",
+      "status": "success",
+      "message": "Commit created successfully",
+      "data_fields": [
+        "vault_id",
+        "commit_hash",
+        "commit_message",
+        "files_committed"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Commit fails",
+      "criteria": "git commit returns non-zero exit code",
+      "action": "Abort push, report commit error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_push_commit",
+        "status": "fatal",
+        "message": "Failed to create commit: {error}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Commit created",
+      "outcome": "Proceed to push step"
+    },
+    {
+      "condition": "Commit fails",
+      "outcome": "Abort push operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-push/actions/commit.ts"
+  ]
+}

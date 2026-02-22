@@ -1,0 +1,58 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-index-build",
+  "what": "Rebuild knowledge index to include new entry",
+  "why": "New entry must be searchable immediately",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-create/steps/05-regenerate-index.json",
+    "implementation": "features/knowledge/knowledge-index-build/steps/"
+  },
+  "output": {
+    "console": "Index rebuild result with entry count and duration",
+    "file": "Updated knowledge.json index file"
+  },
+  "success_handling": {
+    "criteria": "Index build flow completes and the new entry appears in the rebuilt index",
+    "event": {
+      "action": "knowledge_create_regenerate_index",
+      "status": "success",
+      "message": "Knowledge index rebuilt with new entry included",
+      "data_fields": [
+        "total_entries",
+        "new_entry_id",
+        "build_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build fails",
+      "criteria": "The knowledge-index-build flow returns an error or does not complete",
+      "action": "Log index build failure as warning, the file exists but may not be searchable until next rebuild",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_regenerate_index",
+        "status": "warning",
+        "message": "Index rebuild failed after creating entry {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "build_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index rebuilt successfully",
+      "outcome": "Knowledge creation flow complete"
+    },
+    {
+      "condition": "Index rebuild fails",
+      "outcome": "Log warning, creation still considered successful — index will rebuild on next trigger"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/steps/"
+  ]
+}

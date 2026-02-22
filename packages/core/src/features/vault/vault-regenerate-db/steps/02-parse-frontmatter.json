@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Extract YAML frontmatter from each markdown file",
+  "why": "Frontmatter contains metadata (title, tags, category) needed for indexing and search",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/02-parse-frontmatter.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/parse-frontmatter.ts"
+  },
+  "output": "Array of parsed entries with frontmatter fields and file paths",
+  "success_handling": {
+    "criteria": "All markdown files are parsed and frontmatter is extracted from each",
+    "event": {
+      "action": "vault_regenerate_db_parse_frontmatter",
+      "status": "success",
+      "message": "Frontmatter parsed from all vault files",
+      "data_fields": [
+        "vault_id",
+        "parsed_count",
+        "skipped_count",
+        "parse_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid YAML frontmatter",
+      "criteria": "YAML parsing fails for one or more files",
+      "action": "Skip invalid files, log warning with file paths, continue with valid entries",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_regenerate_db_parse_frontmatter",
+        "status": "warning",
+        "message": "Some files have invalid frontmatter",
+        "data_fields": [
+          "vault_id",
+          "invalid_files",
+          "invalid_count",
+          "valid_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All files parsed",
+      "outcome": "Proceed to validate-entries step"
+    },
+    {
+      "condition": "Some files have invalid frontmatter",
+      "outcome": "Proceed with valid entries, report invalid files"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/parse-frontmatter.ts"
+  ]
+}

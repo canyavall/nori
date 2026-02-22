@@ -1,0 +1,43 @@
+{
+  "type": "action",
+  "what": "Persist local vault metadata to the SQLite database",
+  "why": "The vault must be recorded in the DB so the rest of the app can find and manage it",
+  "where": {
+    "entry_point": "features/vault/vault-local-registration/vault-local-registration.ts",
+    "implementation": "features/vault/vault-local-registration/actions/write-config.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Row inserted into vaults table with vault_type='local', git_url=NULL, branch=NULL",
+    "event": {
+      "action": "vault_local_registration_write_config",
+      "status": "success",
+      "message": "Vault configuration saved",
+      "data_fields": ["vault_id", "vault_name", "local_path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Duplicate vault name (race condition)",
+      "criteria": "UNIQUE constraint violation on vaults.name",
+      "action": "Return DUPLICATE_VAULT_NAME error",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Database write failure",
+      "criteria": "Any other SQL error",
+      "action": "Return DB_WRITE_FAILED error and delete the directory created in step 02",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "vault_type='local', git_url=NULL, branch=NULL stored in DB",
+      "rationale": "Distinguishes local vaults from git vaults; null git fields signal no sync capability"
+    }
+  ],
+  "calls": ["features/vault/vault-local-registration/actions/write-config.ts"]
+}

@@ -1,0 +1,71 @@
+{
+  "type": "api_call",
+  "what": "Submit vault registration request to the backend",
+  "why": "POST /api/vault with vault_type dispatches to the correct backend flow. For git: tests access, clones repo, indexes. For local: creates directory in ~/.nori/vaults/, writes config, indexes.",
+  "where": {
+    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/vault",
+    "request_type_git": "@nori/shared:VaultRegistrationInput",
+    "request_type_local": "@nori/shared:VaultLocalRegistrationInput",
+    "response_type": "@nori/shared:VaultRegistrationResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events_git": [
+      "vault:registration:started",
+      "vault:registration:validating-url",
+      "vault:registration:testing-access",
+      "vault:registration:cloning",
+      "vault:registration:writing-config",
+      "vault:registration:building-index",
+      "vault:registration:completed",
+      "vault:registration:error"
+    ],
+    "sse_events_local": [
+      "vault:local-registration:started",
+      "vault:local-registration:creating-directory",
+      "vault:local-registration:writing-config",
+      "vault:local-registration:building-index",
+      "vault:local-registration:completed",
+      "vault:local-registration:error"
+    ]
+  },
+  "backend_flow_git": "core/features/vault/vault-registration",
+  "backend_flow_local": "core/features/vault/vault-local-registration",
+  "transitions": {
+    "on_success": "04-show-result",
+    "on_error": "01-show-form"
+  },
+  "error_handling": [
+    {
+      "type": "git_access_denied",
+      "when": "vault_type=git",
+      "display": "toast_error",
+      "description": "Show error that git credentials are invalid or repository is inaccessible"
+    },
+    {
+      "type": "clone_failed",
+      "when": "vault_type=git",
+      "display": "toast_error",
+      "description": "Show error that repository cloning failed"
+    },
+    {
+      "type": "directory_exists",
+      "when": "vault_type=local",
+      "display": "field_error",
+      "description": "Show error that a vault with this name already exists in ~/.nori/vaults/"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Single endpoint dispatches based on vault_type field",
+      "rationale": "Both vault types share the same POST /api/vault endpoint. The server reads vault_type from the body to route to the correct flow. This avoids two separate API endpoints and keeps the FE contract simple."
+    }
+  ]
+}

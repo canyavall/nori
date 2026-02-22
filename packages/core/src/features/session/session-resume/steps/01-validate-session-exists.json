@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Verify the target session state file exists",
+  "why": "Cannot resume a session if its state file is missing",
+  "where": {
+    "entry_point": "features/session/session-resume/steps/01-validate-session-exists.json",
+    "implementation": "features/session/session-resume/actions/validate-session-exists.ts"
+  },
+  "output": {
+    "console": "Session existence check result with file path and session ID",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Session state file exists at the expected path and is readable",
+    "event": {
+      "action": "session_resume_validate_session_exists",
+      "status": "success",
+      "message": "Session state file found: {session_id}",
+      "data_fields": [
+        "session_id",
+        "state_file_path",
+        "file_size"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Session not found",
+      "criteria": "No session state file exists at the expected path for the given session ID",
+      "action": "Abort resume, return error indicating the session does not exist or was archived",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "session_resume_validate_session_exists",
+        "status": "error",
+        "message": "Session state not found: {session_id}",
+        "data_fields": [
+          "session_id",
+          "expected_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Session state file exists",
+      "outcome": "Proceed to load-session-state step"
+    },
+    {
+      "condition": "Session not found",
+      "outcome": "Abort resume flow"
+    }
+  ],
+  "calls": [
+    "features/session/session-resume/actions/validate-session-exists.ts"
+  ]
+}

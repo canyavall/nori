@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Build searchable index from parsed entries",
+  "why": "Create optimized data structures for fast knowledge lookup and search",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/04-build-index.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/build-index.ts"
+  },
+  "output": "In-memory index object ready for database serialization",
+  "success_handling": {
+    "criteria": "Index is built from all valid entries and passes integrity check",
+    "event": {
+      "action": "vault_regenerate_db_build_index",
+      "status": "success",
+      "message": "Searchable index built",
+      "data_fields": [
+        "vault_id",
+        "entry_count",
+        "index_size_bytes",
+        "build_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build fails",
+      "criteria": "Unexpected error during index construction (memory, data corruption)",
+      "action": "Abort regeneration, report error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_regenerate_db_build_index",
+        "status": "fatal",
+        "message": "Failed to build index: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "entries_processed"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index built",
+      "outcome": "Proceed to write-database step"
+    },
+    {
+      "condition": "Index build fails",
+      "outcome": "Abort regeneration"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/build-index.ts"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "type": "action",
+  "what": "Validate modified frontmatter and content",
+  "why": "Ensure edits maintain knowledge quality standards",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-edit/steps/02-validate-changes.json",
+    "implementation": "features/knowledge/knowledge-edit/actions/validate-changes.ts"
+  },
+  "output": {
+    "console": "Validation result for modified frontmatter and content fields",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Modified frontmatter conforms to schema and content meets quality standards (non-empty, structured)",
+    "event": {
+      "action": "knowledge_edit_validate_changes",
+      "status": "success",
+      "message": "Edit validation passed for entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "changed_fields",
+        "content_length"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid frontmatter after edit",
+      "criteria": "Modified frontmatter fields do not conform to schema (missing required fields, wrong types)",
+      "action": "Return validation errors listing the invalid fields, prompt user to correct",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_edit_validate_changes",
+        "status": "error",
+        "message": "Modified frontmatter is invalid: {validation_errors}",
+        "data_fields": [
+          "entry_id",
+          "validation_errors",
+          "invalid_fields"
+        ]
+      }
+    },
+    {
+      "scenario": "Content quality degraded",
+      "criteria": "Edits reduced content below minimum quality thresholds (too short, lost structure)",
+      "action": "Warn user that edits degraded content quality, allow proceeding if confirmed",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_edit_validate_changes",
+        "status": "warning",
+        "message": "Content quality decreased after edit for entry {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "previous_quality_score",
+          "new_quality_score"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All changes valid",
+      "outcome": "Proceed to write-changes step"
+    },
+    {
+      "condition": "Invalid frontmatter",
+      "outcome": "Abort edit, return validation errors to user"
+    },
+    {
+      "condition": "Content quality degraded",
+      "outcome": "Warn user, allow proceeding if confirmed"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-edit/actions/validate-changes.ts"
+  ]
+}

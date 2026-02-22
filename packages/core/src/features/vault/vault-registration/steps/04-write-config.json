@@ -1,0 +1,79 @@
+{
+  "type": "action",
+  "what": "Persist vault configuration to database",
+  "why": "Store vault metadata for future operations",
+  "where": {
+    "entry_point": "features/vault/vault-registration/steps/04-write-config.json",
+    "implementation": "features/vault/vault-registration/actions/write-config.ts"
+  },
+  "output": "Persisted vault configuration record with generated vault ID",
+  "success_handling": {
+    "criteria": "Database write completes and vault record is retrievable by ID",
+    "event": {
+      "action": "vault_registration_write_config",
+      "status": "success",
+      "message": "Vault configuration persisted to database",
+      "data_fields": [
+        "vault_id",
+        "vault_name",
+        "url",
+        "local_path",
+        "created_at"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database write fails",
+      "criteria": "SQLite write operation throws an error (SQLITE_BUSY, SQLITE_CORRUPT, etc.)",
+      "action": "Abort registration, clean up cloned repository",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_registration_write_config",
+        "status": "fatal",
+        "message": "Failed to write vault configuration to database: {error}",
+        "data_fields": [
+          "vault_name",
+          "url",
+          "error",
+          "db_path"
+        ]
+      }
+    },
+    {
+      "scenario": "Duplicate vault name",
+      "criteria": "Database unique constraint violation on vault name",
+      "action": "Return error suggesting user choose a different name or update existing vault",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_write_config",
+        "status": "error",
+        "message": "Vault name already exists: {vault_name}",
+        "data_fields": [
+          "vault_name",
+          "existing_vault_id",
+          "url"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Config persisted successfully",
+      "outcome": "Proceed to build-index step"
+    },
+    {
+      "condition": "Duplicate vault name",
+      "outcome": "Abort registration, prompt user to rename or update"
+    },
+    {
+      "condition": "Database write fails",
+      "outcome": "Abort registration, clean up cloned repo"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-registration/actions/write-config.ts"
+  ]
+}

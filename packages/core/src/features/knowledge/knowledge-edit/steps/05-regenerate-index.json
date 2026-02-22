@@ -1,0 +1,58 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-index-build",
+  "what": "Rebuild index with updated entry",
+  "why": "Index must reflect the latest content after edits",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-edit/steps/05-regenerate-index.json",
+    "implementation": "features/knowledge/knowledge-index-build/steps/"
+  },
+  "output": {
+    "console": "Index rebuild result with entry count and duration",
+    "file": "Updated knowledge.json index file"
+  },
+  "success_handling": {
+    "criteria": "Index build flow completes and the updated entry metadata is reflected in the rebuilt index",
+    "event": {
+      "action": "knowledge_edit_regenerate_index",
+      "status": "success",
+      "message": "Knowledge index rebuilt with updated entry",
+      "data_fields": [
+        "total_entries",
+        "updated_entry_id",
+        "build_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build fails",
+      "criteria": "The knowledge-index-build flow returns an error or does not complete",
+      "action": "Log index build failure as warning, the edit is persisted but search may return stale metadata until next rebuild",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_edit_regenerate_index",
+        "status": "warning",
+        "message": "Index rebuild failed after editing entry {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "build_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index rebuilt successfully",
+      "outcome": "Knowledge edit flow complete"
+    },
+    {
+      "condition": "Index rebuild fails",
+      "outcome": "Log warning, edit still considered successful — index will rebuild on next trigger"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/steps/"
+  ]
+}

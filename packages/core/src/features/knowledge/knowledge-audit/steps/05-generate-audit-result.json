@@ -1,0 +1,61 @@
+{
+  "type": "action",
+  "what": "Compile audit findings into structured result",
+  "why": "Aggregate all audit step findings into a single actionable report",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/steps/05-generate-audit-result.json",
+    "implementation": "features/knowledge/knowledge-audit/actions/generate-audit-result.ts"
+  },
+  "output": {
+    "console": "Final audit report with overall pass/fail, score, and itemized findings",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Audit result is compiled with all findings from previous steps, overall pass/fail status determined, and score calculated",
+    "event": {
+      "action": "knowledge_audit_generate_audit_result",
+      "status": "success",
+      "message": "Audit result generated for entry {entry_id}: {overall_status}",
+      "data_fields": [
+        "entry_id",
+        "overall_status",
+        "audit_score",
+        "findings_count",
+        "errors_count",
+        "warnings_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Result compilation fails",
+      "criteria": "Unable to compile findings from previous steps into a structured result",
+      "action": "Return partial result with available findings, log compilation error",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_audit_generate_audit_result",
+        "status": "error",
+        "message": "Failed to compile audit result for entry {entry_id}: {error}",
+        "data_fields": [
+          "entry_id",
+          "error",
+          "partial_findings"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Result compiled successfully",
+      "outcome": "Knowledge audit flow complete, return structured result to caller"
+    },
+    {
+      "condition": "Compilation fails",
+      "outcome": "Return partial result with available data"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/generate-audit-result.ts"
+  ]
+}

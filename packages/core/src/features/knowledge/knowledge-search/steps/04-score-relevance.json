@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Score and rank matched entries by relevance",
+  "why": "Present the most relevant results first by computing relevance scores based on match quality",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/04-score-relevance.json",
+    "implementation": "features/knowledge/knowledge-search/actions/score-relevance.ts"
+  },
+  "output": {
+    "console": "Ranked entry list with relevance scores",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Matched entries are scored based on filter match quality, tag overlap, and text relevance, then sorted by score descending",
+    "event": {
+      "action": "knowledge_search_score_relevance",
+      "status": "success",
+      "message": "Scored and ranked {scored_count} entries",
+      "data_fields": [
+        "scored_count",
+        "top_score",
+        "score_range",
+        "scoring_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Scoring fails",
+      "criteria": "Relevance scoring algorithm encounters an error (e.g., invalid entry data)",
+      "action": "Fall back to unsorted results, log warning",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_score_relevance",
+        "status": "warning",
+        "message": "Relevance scoring failed, returning unsorted results: {error}",
+        "data_fields": [
+          "error",
+          "matched_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entries scored and ranked",
+      "outcome": "Proceed to semantic-search step"
+    },
+    {
+      "condition": "Scoring fails",
+      "outcome": "Use unsorted match results, proceed to semantic-search step"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/score-relevance.ts"
+  ]
+}

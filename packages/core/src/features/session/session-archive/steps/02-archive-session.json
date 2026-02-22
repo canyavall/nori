@@ -1,0 +1,43 @@
+{
+  "type": "action",
+  "what": "Update session status to archived in the database",
+  "why": "Mark the session as archived so it is no longer considered active",
+  "where": {
+    "entry_point": "features/session/session-archive/steps/02-archive-session.json",
+    "implementation": "features/session/session-archive/actions/archive-session.ts"
+  },
+  "output": "Session archive confirmation with id and status",
+  "success_handling": {
+    "criteria": "Session status updated to 'archived' in the database",
+    "event": {
+      "action": "session_archive_archive_session",
+      "status": "success",
+      "message": "Session {session_id} archived successfully",
+      "data_fields": ["session_id", "status"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database update fails",
+      "criteria": "SQL UPDATE statement fails or affects zero rows",
+      "action": "Return error, session remains active",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "session_archive_archive_session",
+        "status": "error",
+        "message": "Failed to archive session: {error}",
+        "data_fields": ["session_id", "error"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Archive succeeds",
+      "outcome": "Flow completes successfully"
+    }
+  ],
+  "calls": [
+    "features/session/session-archive/actions/archive-session.ts"
+  ]
+}

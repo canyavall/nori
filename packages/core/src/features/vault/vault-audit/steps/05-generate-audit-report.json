@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Build comprehensive audit report with issues and recommendations",
+  "why": "Provide actionable summary of vault health for user review",
+  "where": {
+    "entry_point": "features/vault/vault-audit/steps/05-generate-audit-report.json",
+    "implementation": "features/vault/vault-audit/actions/generate-audit-report.ts"
+  },
+  "output": "Audit report object with categorized issues, severity levels, and fix recommendations",
+  "success_handling": {
+    "criteria": "Audit report is generated with all findings from previous steps consolidated",
+    "event": {
+      "action": "vault_audit_vault_generate_audit_report",
+      "status": "success",
+      "message": "Vault audit report generated",
+      "data_fields": [
+        "vault_id",
+        "report_path",
+        "total_issues",
+        "critical_issues",
+        "warning_issues",
+        "info_issues",
+        "recommendations"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Report generation fails",
+      "criteria": "Unexpected error during report formatting or file write",
+      "action": "Return raw audit findings as fallback",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_audit_vault_generate_audit_report",
+        "status": "warning",
+        "message": "Report generation failed, returning raw findings: {error}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Report generated",
+      "outcome": "Audit complete"
+    },
+    {
+      "condition": "Report generation fails",
+      "outcome": "Audit complete with raw data"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-audit/actions/generate-audit-report.ts"
+  ]
+}

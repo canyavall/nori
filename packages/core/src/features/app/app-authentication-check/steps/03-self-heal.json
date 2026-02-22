@@ -1,0 +1,47 @@
+{
+  "type": "action",
+  "what": "Attempt to fix authentication issues automatically",
+  "why": "Some auth issues (expired tokens, missing configs) can be auto-repaired",
+  "where": {
+    "entry_point": "features/app/app-authentication-check/steps/03-self-heal.json",
+    "implementation": "features/app/app-authentication-check/actions/self-heal.ts"
+  },
+  "output": "Repair report indicating which auth issues were fixed and which remain",
+  "success_handling": {
+    "criteria": "Auth issues resolved",
+    "event": {
+      "action": "app_authentication_check_self_heal_success",
+      "status": "success",
+      "message": "All authentication issues have been resolved automatically",
+      "data_fields": ["issues_fixed", "repair_actions"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Cannot auto-fix",
+      "criteria": "Self-heal attempted but one or more auth issues could not be resolved automatically",
+      "action": "Report to user with manual resolution instructions",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "app_authentication_check_self_heal_failed",
+        "status": "error",
+        "message": "Some authentication issues could not be fixed automatically — manual intervention required",
+        "data_fields": ["issues_remaining", "resolution_instructions"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All auth issues resolved",
+      "outcome": "Authentication check complete, proceed to next boot phase"
+    },
+    {
+      "condition": "Some issues remain",
+      "outcome": "Report to user with manual resolution instructions"
+    }
+  ],
+  "calls": [
+    "features/app/app-authentication-check/actions/self-heal.ts"
+  ]
+}

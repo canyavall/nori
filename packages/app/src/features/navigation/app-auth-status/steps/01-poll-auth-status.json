@@ -1,0 +1,40 @@
+{
+  "type": "api_call",
+  "what": "Call the authentication-check SSE endpoint and update authStatus store",
+  "why": "Determines whether the user has valid Anthropic access (Claude CLI subscription or API key), so Avatar and SettingsPage can show accurate status",
+  "where": {
+    "component": "components/ui/Avatar.tsx (onMount) + pages/SettingsPage.tsx (onMount)"
+  },
+  "contract": {
+    "endpoint": "POST /api/app/authentication-check",
+    "request_type": "{}",
+    "response_type": "@nori/shared:AuthenticationCheckResponse",
+    "sse_events": [
+      "app:authentication-check:started",
+      "app:authentication-check:checking-claude-code-access",
+      "app:authentication-check:checking-git-credentials",
+      "app:authentication-check:self-healing",
+      "app:authentication-check:checking-anthropic-access",
+      "app:authentication-check:completed"
+    ]
+  },
+  "transitions": {
+    "on_result": "02-show-auth-indicator"
+  },
+  "error_handling": [
+    {
+      "scenario": "Server unreachable or SSE error",
+      "criteria": "onError callback fires in connectSSE",
+      "action": "setAuthStatus('unauthenticated')",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "authStatus driven by has_anthropic_access, not cli_installed",
+      "rationale": "The meaningful gate is Anthropic access (subscription or API key). CLI installed alone is not sufficient — the user must be able to run AI operations."
+    }
+  ]
+}

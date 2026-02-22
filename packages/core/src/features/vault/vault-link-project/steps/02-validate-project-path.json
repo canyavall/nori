@@ -1,0 +1,67 @@
+{
+  "type": "action",
+  "what": "Verify the target project directory exists",
+  "why": "Cannot link to a non-existent project",
+  "where": {
+    "entry_point": "features/vault/vault-link-project/steps/02-validate-project-path.json",
+    "implementation": "features/vault/vault-link-project/actions/validate-project-path.ts"
+  },
+  "output": "Validated project path with directory existence confirmation",
+  "success_handling": {
+    "criteria": "Project directory exists and is a valid directory (not a file)",
+    "event": {
+      "action": "vault_link_project_validate_project_path",
+      "status": "success",
+      "message": "Project directory exists and is valid",
+      "data_fields": [
+        "project_path",
+        "is_git_repo"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Project path does not exist",
+      "criteria": "stat() fails with ENOENT for the provided path",
+      "action": "Abort link, return error with the invalid path",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_link_project_validate_project_path",
+        "status": "error",
+        "message": "Project directory does not exist: {project_path}",
+        "data_fields": [
+          "project_path"
+        ]
+      }
+    },
+    {
+      "scenario": "Path is a file, not a directory",
+      "criteria": "stat() succeeds but isDirectory() returns false",
+      "action": "Abort link, return error clarifying a directory path is required",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_link_project_validate_project_path",
+        "status": "error",
+        "message": "Path is not a directory: {project_path}",
+        "data_fields": [
+          "project_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Project directory exists",
+      "outcome": "Proceed to write-link step"
+    },
+    {
+      "condition": "Project path invalid",
+      "outcome": "Abort link operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-link-project/actions/validate-project-path.ts"
+  ]
+}

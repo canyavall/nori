@@ -1,0 +1,27 @@
+{
+  "type": "ui_action",
+  "what": "Display vault picker for selecting a registered vault to link",
+  "why": "Allow the user to choose which registered vault they want to link to a project",
+  "where": {
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/VaultPicker.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields": [
+      "vault_id"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_valid": "02-show-project-picker"
+  },
+  "error_handling": [
+    {
+      "type": "no_vaults_available",
+      "display": "empty_state",
+      "description": "Show message indicating no vaults are registered yet with a link to register one"
+    }
+  ],
+  "decisions": []
+}

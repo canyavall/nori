@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Stage modified knowledge files for commit",
+  "why": "Prepare changed files for git commit",
+  "where": {
+    "entry_point": "features/vault/vault-push/steps/03-stage-changes.json",
+    "implementation": "features/vault/vault-push/actions/stage-changes.ts"
+  },
+  "output": "Staging result with list of files added to the git index",
+  "success_handling": {
+    "criteria": "All modified knowledge files are staged in git index",
+    "event": {
+      "action": "vault_push_stage_changes",
+      "status": "success",
+      "message": "Files staged for commit",
+      "data_fields": [
+        "vault_id",
+        "staged_files",
+        "staged_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Staging fails",
+      "criteria": "git add returns non-zero exit code",
+      "action": "Abort push, report staging error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_push_stage_changes",
+        "status": "fatal",
+        "message": "Failed to stage files: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "failed_files"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Files staged successfully",
+      "outcome": "Proceed to commit step"
+    },
+    {
+      "condition": "Staging fails",
+      "outcome": "Abort push operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-push/actions/stage-changes.ts"
+  ]
+}

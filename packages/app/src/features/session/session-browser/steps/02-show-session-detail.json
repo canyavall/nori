@@ -1,0 +1,30 @@
+{
+  "type": "ui_action",
+  "what": "Display session detail including messages, loaded knowledge, and timeline",
+  "why": "Allow the user to review a session's full history and decide whether to resume it",
+  "where": {
+    "component": "features/session/session-browser/SessionBrowserPage.tsx",
+    "step_component": "features/session/session-browser/SessionDetail.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "messages",
+      "loaded_knowledge",
+      "timeline"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_resume": "04-call-resume-session",
+    "on_back": "01-show-session-list"
+  },
+  "error_handling": [
+    {
+      "type": "session_not_found",
+      "display": "toast_error",
+      "description": "Show error that the selected session no longer exists"
+    }
+  ],
+  "decisions": []
+}

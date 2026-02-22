@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Write embedding vectors to vector store",
+  "why": "Persist vectors for semantic search queries at runtime",
+  "where": {
+    "entry_point": "features/vault/vault-vector-embedding/steps/03-store-vectors.json",
+    "implementation": "features/vault/vault-vector-embedding/actions/store-vectors.ts"
+  },
+  "output": "Vector store write confirmation with stored count and store path",
+  "success_handling": {
+    "criteria": "All embedding vectors are written to the vector store",
+    "event": {
+      "action": "vault_vector_embedding_store_vectors",
+      "status": "success",
+      "message": "Embedding vectors stored successfully",
+      "data_fields": [
+        "vault_id",
+        "vectors_stored",
+        "store_path",
+        "store_size_bytes",
+        "write_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vector store write fails",
+      "criteria": "Write operation throws error (disk full, permission denied, store corruption)",
+      "action": "Abort, report store error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_vector_embedding_store_vectors",
+        "status": "fatal",
+        "message": "Failed to write vectors to store: {error}",
+        "data_fields": [
+          "vault_id",
+          "store_path",
+          "error",
+          "vectors_written"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Vectors stored",
+      "outcome": "Proceed to validate-store step"
+    },
+    {
+      "condition": "Store write fails",
+      "outcome": "Abort embedding flow"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-vector-embedding/actions/store-vectors.ts"
+  ]
+}

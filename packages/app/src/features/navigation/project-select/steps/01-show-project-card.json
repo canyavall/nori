@@ -1,0 +1,30 @@
+{
+  "type": "ui_action",
+  "what": "Display project card in the projects list",
+  "why": "Let the user see project details and select a project to activate the contextual sidebar",
+  "where": {
+    "component": "pages/ProjectsPage.tsx#ProjectCard"
+  },
+  "ui": {
+    "renders": "display",
+    "layout": "grid",
+    "fields": ["name", "path", "is_git", "connected_vaults", "created_at"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "02-set-active-project"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "No auto-navigation on select",
+      "rationale": "User stays on /projects page; sidebar appears with context, giving them control of when to navigate to Vaults/Sessions"
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "Grid card layout",
+      "rationale": "Projects are displayed in a responsive 1→2 column grid so multiple projects are visible at a glance without long scrolling"
+    }
+  ]
+}

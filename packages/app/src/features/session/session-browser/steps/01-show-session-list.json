@@ -1,0 +1,36 @@
+{
+  "type": "ui_action",
+  "what": "Display list of all sessions with dates, message counts, and status",
+  "why": "Give the user an overview of their sessions so they can select one to view details, resume, or create a new session",
+  "where": {
+    "component": "features/session/session-browser/SessionBrowserPage.tsx",
+    "step_component": "features/session/session-browser/SessionList.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "sessions",
+      "session_date",
+      "message_count",
+      "status"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "02-show-session-detail",
+    "on_create_new": "03-call-create-session"
+  },
+  "error_handling": [
+    {
+      "type": "load_failed",
+      "display": "error_page",
+      "description": "Show error that the session list could not be loaded"
+    },
+    {
+      "type": "no_sessions",
+      "display": "empty_state",
+      "description": "Show message indicating no sessions exist yet with a prompt to create one"
+    }
+  ],
+  "decisions": []
+}

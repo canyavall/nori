@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display pull results showing files changed and any conflicts",
+  "why": "Let the user review what changed during the pull and identify any conflicts that need manual resolution",
+  "where": {
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx",
+    "step_component": "features/vault/vault-sync-panel/PullResults.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "files_changed",
+      "conflicts"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_conflicts": "04-show-conflict-resolver"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Pull results are unavailable. Show an error banner with a retry option to re-fetch the pull results."
+    }
+  ],
+  "decisions": []
+}

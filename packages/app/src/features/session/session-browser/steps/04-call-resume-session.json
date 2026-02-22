@@ -1,0 +1,38 @@
+{
+  "type": "api_call",
+  "what": "Resume an existing chat session via the backend",
+  "why": "Reactivate a previous session so the user can continue their conversation with the same knowledge context",
+  "where": {
+    "component": "features/session/session-browser/SessionBrowserPage.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/session/:id/resume",
+    "request_type": "@nori/shared:SessionResumeRequest",
+    "response_type": "@nori/shared:SessionResumeResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": []
+  },
+  "backend_flow": "core/features/session/session-resume",
+  "transitions": {
+    "on_success": "navigate:/chat/{session_id}",
+    "on_error": "02-show-session-detail"
+  },
+  "error_handling": [
+    {
+      "type": "session_not_found",
+      "display": "toast_error",
+      "description": "Show error that the session no longer exists"
+    },
+    {
+      "type": "session_locked",
+      "display": "toast_error",
+      "description": "Show error that the session is currently active in another window"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

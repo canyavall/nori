@@ -1,0 +1,34 @@
+{
+  "type": "ui_action",
+  "what": "Show Anthropic access status in Avatar (TopNav) and SettingsPage",
+  "why": "Gives the user immediate visual feedback on whether their Anthropic account or API key is valid and active",
+  "where": {
+    "component": "components/ui/Avatar.tsx + pages/SettingsPage.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": ["authStatus", "has_anthropic_access", "anthropic_access_type", "subscription_type", "anthropic_email", "cli_installed"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_click": "navigate:/settings"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Green dot = has_anthropic_access true, red = false, pulsing-gray = check in progress",
+      "rationale": "Anthropic access (not just CLI install) is the meaningful signal — user can have CLI installed but not logged in"
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "SettingsPage shows subscription_type badge and anthropic_email",
+      "rationale": "Gives the user confidence that the correct account is active (e.g., 'max' tier vs 'free')"
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "SettingsPage shows two fix paths when unauthenticated: Claude CLI login or ANTHROPIC_API_KEY",
+      "rationale": "Either path gives valid Anthropic access; CLI is preferred (richer metadata), API key is the fallback"
+    }
+  ]
+}

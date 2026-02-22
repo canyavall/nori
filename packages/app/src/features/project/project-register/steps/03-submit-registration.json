@@ -1,0 +1,41 @@
+{
+  "type": "api_call",
+  "what": "POST selected folder path to /api/project to create the project record",
+  "why": "Persists the project registration in the database; server creates .nori/ config folder inside the project directory",
+  "where": {
+    "component": "features/project/project-register/ProjectRegisterDialog.tsx#handleSubmit"
+  },
+  "contract": {
+    "endpoint": "POST /api/project",
+    "request_type": "@nori/shared:ProjectRegisterInput",
+    "response_type": "{ data: Project }",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "close_dialog",
+    "on_error": "01-show-register-form"
+  },
+  "error_handling": [
+    {
+      "scenario": "Path does not exist or is not a directory",
+      "criteria": "API returns 4xx with error message",
+      "action": "Display error message below form fields; keep dialog open",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Project already registered",
+      "criteria": "API returns conflict error",
+      "action": "Display error message; user can cancel or pick a different folder",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Register button disabled until path is non-empty",
+      "rationale": "Path comes from the OS picker so it is always valid when present; no further client-side validation needed beyond the non-empty check"
+    }
+  ]
+}

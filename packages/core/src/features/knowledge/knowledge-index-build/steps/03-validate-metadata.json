@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Validate parsed metadata against schema",
+  "why": "Ensure only entries with valid metadata are included in the index",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/03-validate-metadata.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/validate-metadata.ts"
+  },
+  "output": {
+    "console": "Validation results with valid/invalid entry counts and specific issues",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "All parsed metadata entries pass schema validation with correct types and required fields",
+    "event": {
+      "action": "knowledge_index_build_validate_metadata",
+      "status": "success",
+      "message": "Metadata validation passed for {valid_count}/{total_count} entries",
+      "data_fields": [
+        "valid_count",
+        "total_count",
+        "validation_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid metadata entries",
+      "criteria": "One or more entries have metadata that fails schema validation",
+      "action": "Exclude invalid entries from index, log warning with details for each invalid entry",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_validate_metadata",
+        "status": "warning",
+        "message": "Metadata validation failed for {invalid_count} entries",
+        "data_fields": [
+          "invalid_count",
+          "invalid_entries",
+          "validation_errors"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All entries valid",
+      "outcome": "Proceed to build-index step with all entries"
+    },
+    {
+      "condition": "Some entries invalid",
+      "outcome": "Exclude invalid entries, proceed to build-index step with valid entries only"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/validate-metadata.ts"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Log rebuild metrics (file count, duration, errors)",
+  "why": "Provide visibility into regeneration performance and quality for monitoring",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/06-report-metrics.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/report-metrics.ts"
+  },
+  "output": "Metrics report with file count, entry count, duration, and error summary",
+  "success_handling": {
+    "criteria": "Metrics are logged and report is generated",
+    "event": {
+      "action": "vault_regenerate_db_report_metrics",
+      "status": "success",
+      "message": "Regeneration metrics reported",
+      "data_fields": [
+        "vault_id",
+        "files_scanned",
+        "entries_indexed",
+        "entries_skipped",
+        "total_duration_ms",
+        "parse_errors",
+        "validation_errors"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Metrics logging fails",
+      "criteria": "Log write operation throws an error",
+      "action": "Log to stderr as fallback, do not fail the regeneration",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_regenerate_db_report_metrics",
+        "status": "warning",
+        "message": "Failed to log metrics: {error}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Metrics reported",
+      "outcome": "Regeneration complete"
+    },
+    {
+      "condition": "Metrics logging fails",
+      "outcome": "Regeneration complete with logging warning"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/report-metrics.ts"
+  ]
+}

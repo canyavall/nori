@@ -1,0 +1,26 @@
+{
+  "name": "nori-app",
+  "private": true,
+  "packageManager": "bun@1.2.4",
+  "workspaces": [
+    "packages/shared",
+    "packages/core",
+    "packages/server",
+    "packages/app"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "build:sidecar": "bun run --filter @nori/server build:sidecar",
+    "setup:sidecar": "bun install && chmod +x packages/server/scripts/build-sidecar.sh && bun run build:sidecar",
+    "dev": "turbo dev",
+    "dev:server": "bun run --filter @nori/server dev",
+    "dev:app": "bun run --filter @nori/app dev",
+    "package:app": "bun run --filter @nori/app build:tauri",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  }
+}

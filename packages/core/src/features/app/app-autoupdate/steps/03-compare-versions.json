@@ -1,0 +1,51 @@
+{
+  "type": "action",
+  "what": "Compare current version against latest and determine if update is needed",
+  "why": "Only trigger update flow if a newer version is available",
+  "where": {
+    "entry_point": "features/app/app-autoupdate/steps/03-compare-versions.json",
+    "implementation": "features/app/app-autoupdate/actions/compare-versions.ts"
+  },
+  "output": "Comparison result indicating whether update is needed",
+  "success_handling": {
+    "criteria": "Comparison complete — update needed or up-to-date",
+    "event": {
+      "action": "app_autoupdate_compare_versions_success",
+      "status": "success",
+      "message": "Version comparison complete",
+      "data_fields": ["current_version", "latest_version", "update_needed"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid version format",
+      "criteria": "Current or latest version string does not follow semver format",
+      "action": "Skip update",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_compare_versions_invalid_format",
+        "status": "warning",
+        "message": "Invalid version format detected — skipping update",
+        "data_fields": ["current_version", "latest_version", "parse_error"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Update needed",
+      "outcome": "Proceed to apply update"
+    },
+    {
+      "condition": "Already up-to-date",
+      "outcome": "Skip update, continue boot"
+    },
+    {
+      "condition": "Invalid version format",
+      "outcome": "Skip update, continue boot"
+    }
+  ],
+  "calls": [
+    "features/app/app-autoupdate/actions/compare-versions.ts"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "validation",
+  "what": "Set the active vault in the navigation store",
+  "why": "Updates global navigation context so ContextualSidebar renders with vault-specific links (Knowledge only)",
+  "where": {
+    "implementation": "stores/navigation.store#selectVault"
+  },
+  "transitions": {},
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "selectVault clears activeProject; no navigation occurs",
+      "rationale": "Vault context shows Knowledge only (no Sessions). Sidebar appears reactively — no further step or dialog needed."
+    }
+  ]
+}

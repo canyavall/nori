@@ -1,0 +1,76 @@
+{
+  "type": "action",
+  "what": "Verify vector store integrity and query a test vector",
+  "why": "Ensure stored vectors are queryable and the store is not corrupted",
+  "where": {
+    "entry_point": "features/vault/vault-vector-embedding/steps/04-validate-store.json",
+    "implementation": "features/vault/vault-vector-embedding/actions/validate-store.ts"
+  },
+  "output": "Validation result with store integrity status and test query result",
+  "success_handling": {
+    "criteria": "Store integrity check passes and test query returns expected nearest neighbors",
+    "event": {
+      "action": "vault_vector_embedding_validate_store",
+      "status": "success",
+      "message": "Vector store validated successfully",
+      "data_fields": [
+        "vault_id",
+        "store_path",
+        "vector_count",
+        "test_query_time_ms",
+        "test_query_results"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Store integrity check fails",
+      "criteria": "Store file is corrupt, unreadable, or vector count does not match expected",
+      "action": "Warn user, suggest re-running embedding generation",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_vector_embedding_validate_store",
+        "status": "warning",
+        "message": "Vector store integrity check failed: {error}",
+        "data_fields": [
+          "vault_id",
+          "store_path",
+          "expected_count",
+          "actual_count",
+          "error"
+        ]
+      }
+    },
+    {
+      "scenario": "Test query fails",
+      "criteria": "Nearest-neighbor query throws error or returns empty results",
+      "action": "Warn user, store may need rebuilding",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_vector_embedding_validate_store",
+        "status": "warning",
+        "message": "Test query against vector store failed: {error}",
+        "data_fields": [
+          "vault_id",
+          "store_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Validation passes",
+      "outcome": "Embedding flow complete, store is ready for queries"
+    },
+    {
+      "condition": "Validation fails",
+      "outcome": "Embedding flow complete with warning, user may need to re-run"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-vector-embedding/actions/validate-store.ts"
+  ]
+}

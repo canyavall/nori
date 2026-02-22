@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display project directory picker for selecting a project to link",
+  "why": "Allow the user to choose which local project directory should be linked to the selected vault",
+  "where": {
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/ProjectPicker.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields": [
+      "project_path"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_valid": "03-call-backend",
+    "on_back": "01-show-vault-picker"
+  },
+  "error_handling": [
+    {
+      "type": "invalid_directory",
+      "display": "field_error",
+      "description": "Show error if the selected path is not a valid project directory"
+    }
+  ],
+  "decisions": []
+}

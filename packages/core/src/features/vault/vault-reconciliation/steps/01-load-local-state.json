@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Read local vault file hashes",
+  "why": "Capture current local state for 3-way comparison",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/01-load-local-state.json",
+    "implementation": "features/vault/vault-reconciliation/actions/load-local-state.ts"
+  },
+  "output": "Map of file paths to content hashes for all local vault files",
+  "success_handling": {
+    "criteria": "All local vault files are hashed and the hash map is populated",
+    "event": {
+      "action": "vault_reconciliation_load_local_state",
+      "status": "success",
+      "message": "Local vault state loaded",
+      "data_fields": [
+        "vault_id",
+        "file_count",
+        "total_size_bytes"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault directory not found",
+      "criteria": "Local vault path does not exist or is inaccessible",
+      "action": "Abort reconciliation, suggest re-registering vault",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_reconciliation_load_local_state",
+        "status": "fatal",
+        "message": "Local vault directory not found: {local_path}",
+        "data_fields": [
+          "vault_id",
+          "local_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Local state loaded",
+      "outcome": "Proceed to load-remote-state step"
+    },
+    {
+      "condition": "Vault directory missing",
+      "outcome": "Abort reconciliation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/load-local-state.ts"
+  ]
+}

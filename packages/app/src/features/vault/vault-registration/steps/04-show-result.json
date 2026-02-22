@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display vault registration success with summary",
+  "why": "Confirm to the user that the vault was registered successfully and show key details like vault name and knowledge count",
+  "where": {
+    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx",
+    "step_component": "features/vault/vault-registration/VaultRegistrationResult.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "vault_name",
+      "knowledge_count"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_continue": "navigate:/vaults/{vault_id}"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Registration result data is unavailable. Show an error state with a retry option to re-fetch the result."
+    }
+  ],
+  "decisions": []
+}

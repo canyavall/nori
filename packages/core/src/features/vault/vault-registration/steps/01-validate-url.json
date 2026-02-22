@@ -1,0 +1,73 @@
+{
+  "type": "action",
+  "what": "Validate git URL format and accessibility",
+  "why": "Reject malformed URLs before attempting network operations",
+  "where": {
+    "entry_point": "features/vault/vault-registration/steps/01-validate-url.json",
+    "implementation": "features/vault/vault-registration/actions/validate-url.ts"
+  },
+  "output": "Validated URL object with parsed protocol, host, and repository path",
+  "success_handling": {
+    "criteria": "URL matches supported git URL patterns (HTTPS or SSH) and parses without error",
+    "event": {
+      "action": "vault_registration_validate_url",
+      "status": "success",
+      "message": "Git URL is valid and uses supported protocol",
+      "data_fields": [
+        "url",
+        "protocol",
+        "host",
+        "repo_path"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid URL format",
+      "criteria": "URL does not match any known git URL pattern (no protocol, malformed host, missing repo path)",
+      "action": "Return validation error with format hint, prompt user to correct URL",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_validate_url",
+        "status": "error",
+        "message": "Invalid git URL format: {url}",
+        "data_fields": [
+          "url",
+          "parse_error",
+          "expected_formats"
+        ]
+      }
+    },
+    {
+      "scenario": "Unsupported protocol",
+      "criteria": "URL uses a protocol other than HTTPS or SSH (e.g., git://, ftp://)",
+      "action": "Return error indicating only HTTPS and SSH are supported",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_validate_url",
+        "status": "error",
+        "message": "Unsupported git protocol: {protocol}",
+        "data_fields": [
+          "url",
+          "protocol",
+          "supported_protocols"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "URL is valid and uses supported protocol",
+      "outcome": "Proceed to test-git-access step"
+    },
+    {
+      "condition": "URL is invalid or uses unsupported protocol",
+      "outcome": "Abort registration, return error to user"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-registration/actions/validate-url.ts"
+  ]
+}

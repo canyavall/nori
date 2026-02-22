@@ -1,0 +1,64 @@
+{
+  "type": "action",
+  "what": "Download and apply the update using Tauri updater",
+  "why": "Keep app current with latest features and security fixes",
+  "where": {
+    "entry_point": "features/app/app-autoupdate/steps/04-apply-update.json",
+    "implementation": "features/app/app-autoupdate/actions/apply-update.ts"
+  },
+  "output": "Update application result including restart scheduling status",
+  "success_handling": {
+    "criteria": "Update applied, restart scheduled",
+    "event": {
+      "action": "app_autoupdate_apply_update_success",
+      "status": "success",
+      "message": "Update applied successfully — restart scheduled",
+      "data_fields": ["new_version", "restart_time"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Download fails",
+      "criteria": "Update package download fails due to network or server issues",
+      "action": "Notify user, skip update",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_apply_update_download_failed",
+        "status": "error",
+        "message": "Failed to download update package — continuing with current version",
+        "data_fields": ["download_url", "error_reason"]
+      }
+    },
+    {
+      "scenario": "Install fails",
+      "criteria": "Update package downloaded but installation process fails",
+      "action": "Rollback to previous version, notify user",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_apply_update_install_failed",
+        "status": "error",
+        "message": "Update installation failed — rolling back to previous version",
+        "data_fields": ["target_version", "install_error", "rollback_status"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Update applied successfully",
+      "outcome": "Schedule restart, notify user"
+    },
+    {
+      "condition": "Download fails",
+      "outcome": "Skip update, continue with current version"
+    },
+    {
+      "condition": "Install fails",
+      "outcome": "Rollback to previous version, continue boot"
+    }
+  ],
+  "calls": [
+    "features/app/app-autoupdate/actions/apply-update.ts"
+  ]
+}

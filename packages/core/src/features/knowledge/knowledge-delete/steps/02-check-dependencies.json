@@ -1,0 +1,62 @@
+{
+  "type": "action",
+  "what": "Check if other knowledge entries depend on this one via required_knowledge",
+  "why": "Warn user before deleting a dependency",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-delete/steps/02-check-dependencies.json",
+    "implementation": "features/knowledge/knowledge-delete/actions/check-dependencies.ts"
+  },
+  "output": {
+    "console": "Dependency check result listing any entries that reference this one",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Dependency scan completes and no other entries reference this entry via required_knowledge",
+    "event": {
+      "action": "knowledge_delete_check_dependencies",
+      "status": "success",
+      "message": "No dependents found for entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "dependents_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Has dependents",
+      "criteria": "One or more knowledge entries reference this entry in their required_knowledge field",
+      "action": "Warn user with the list of dependent entries, require explicit confirmation before proceeding",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_delete_check_dependencies",
+        "status": "warning",
+        "message": "Entry {entry_id} has {dependents_count} dependents: {dependent_ids}",
+        "data_fields": [
+          "entry_id",
+          "dependents_count",
+          "dependent_ids",
+          "user_confirmed"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "No dependents found",
+      "outcome": "Proceed to delete-file step"
+    },
+    {
+      "condition": "Has dependents and user confirms deletion",
+      "outcome": "Proceed to delete-file step"
+    },
+    {
+      "condition": "Has dependents and user declines",
+      "outcome": "Abort delete flow"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-delete/actions/check-dependencies.ts"
+  ]
+}

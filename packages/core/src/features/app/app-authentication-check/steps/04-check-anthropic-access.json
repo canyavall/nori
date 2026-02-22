@@ -1,0 +1,62 @@
+{
+  "type": "action",
+  "what": "Verify the user has valid Anthropic access (CLI subscription or API key)",
+  "why": "Nori uses Claude CLI or Anthropic SDK for all AI operations — access must be validated before the app is usable",
+  "where": {
+    "entry_point": "features/app/app-authentication-check/app-authentication-check.ts",
+    "implementation": "features/app/app-authentication-check/actions/check-anthropic-access.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "claude auth status returns loggedIn:true, OR ANTHROPIC_API_KEY validates against GET /v1/models",
+    "event": {
+      "action": "app_authentication_check_check_anthropic_access_success",
+      "status": "success",
+      "message": "Anthropic access confirmed",
+      "data_fields": ["has_anthropic_access", "anthropic_access_type", "subscription_type", "anthropic_email"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Not logged in and no API key",
+      "criteria": "claude auth status returns loggedIn:false AND ANTHROPIC_API_KEY not set",
+      "action": "Set has_anthropic_access=false, access_type=none. SettingsPage shows instructions.",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "API key set but invalid",
+      "criteria": "ANTHROPIC_API_KEY present but GET /v1/models returns 401",
+      "action": "Fall through to none. SettingsPage shows invalid key warning.",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "Network unreachable during API key validation",
+      "criteria": "fetch() throws on /v1/models",
+      "action": "validateApiKey returns false. Flow continues; has_anthropic_access=false.",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "CLI auth checked first, API key second",
+      "rationale": "CLI auth provides richer metadata (email, subscription_type). API key is the fallback for programmatic users without a Claude account."
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "GET /v1/models used for API key validation, not a messages call",
+      "rationale": "Models endpoint is free — no tokens consumed, no side effects. Returns 200 for valid keys, 401 for invalid."
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "Both --output-format json and plain text fallback for claude auth status",
+      "rationale": "The --output-format flag may not exist in older CLI versions. JSON parse attempted first; text heuristics used as fallback."
+    }
+  ],
+  "calls": [
+    "features/app/app-authentication-check/actions/check-anthropic-access.ts"
+  ]
+}

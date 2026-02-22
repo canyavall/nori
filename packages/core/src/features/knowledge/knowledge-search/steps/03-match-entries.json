@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Filter entries matching query criteria",
+  "why": "Narrow the index to entries that match the parsed filters before scoring",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/03-match-entries.json",
+    "implementation": "features/knowledge/knowledge-search/actions/match-entries.ts"
+  },
+  "output": {
+    "console": "Matched entries count and filter breakdown",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Index entries are filtered against parsed query criteria and a candidate set of matching entries is produced",
+    "event": {
+      "action": "knowledge_search_match_entries",
+      "status": "success",
+      "message": "Matched {matched_count}/{total_count} entries",
+      "data_fields": [
+        "matched_count",
+        "total_count",
+        "filters_applied",
+        "match_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No matches found",
+      "criteria": "No entries in the index match the query filters",
+      "action": "Return empty result set, continue to semantic search which may find matches",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_match_entries",
+        "status": "info",
+        "message": "No keyword matches found for query",
+        "data_fields": [
+          "filters_applied",
+          "total_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entries matched",
+      "outcome": "Proceed to score-relevance step with matched entries"
+    },
+    {
+      "condition": "No matches",
+      "outcome": "Proceed to semantic-search step (may find matches via vector similarity)"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/match-entries.ts"
+  ]
+}

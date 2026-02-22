@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Check content quality (non-empty, has headings, reasonable length)",
+  "why": "Detect low-quality or empty entries that reduce knowledge effectiveness",
+  "where": {
+    "entry_point": "features/vault/vault-audit/steps/03-validate-content.json",
+    "implementation": "features/vault/vault-audit/actions/validate-content.ts"
+  },
+  "output": "Content quality results with per-entry quality scores and issue flags",
+  "success_handling": {
+    "criteria": "Content quality check completes for all entries",
+    "event": {
+      "action": "vault_audit_vault_validate_content",
+      "status": "success",
+      "message": "Content quality validation complete",
+      "data_fields": [
+        "vault_id",
+        "total_entries",
+        "empty_entries",
+        "no_headings_count",
+        "too_short_count",
+        "too_long_count",
+        "quality_pass_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Content quality issues found",
+      "criteria": "One or more entries are empty, lack headings, or have unreasonable length",
+      "action": "Record all issues, continue audit with remaining checks",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_audit_vault_validate_content",
+        "status": "warning",
+        "message": "Content quality issues found in {issue_count} entries",
+        "data_fields": [
+          "vault_id",
+          "issue_entries",
+          "issue_count",
+          "issue_types"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All content passes quality checks",
+      "outcome": "Proceed to check-db-consistency step"
+    },
+    {
+      "condition": "Some content has quality issues",
+      "outcome": "Record issues, proceed to check-db-consistency step"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-audit/actions/validate-content.ts"
+  ]
+}

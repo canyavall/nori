@@ -1,0 +1,81 @@
+{
+  "type": "action",
+  "what": "Clone vault repository to local storage",
+  "why": "Get vault content for knowledge indexing",
+  "where": {
+    "entry_point": "features/vault/vault-registration/steps/03-clone-repo.json",
+    "implementation": "features/vault/vault-registration/actions/clone-repo.ts"
+  },
+  "output": "Clone result with local path, commit hash, and file count",
+  "success_handling": {
+    "criteria": "git clone completes successfully and local directory contains repository files",
+    "event": {
+      "action": "vault_registration_clone_repo",
+      "status": "success",
+      "message": "Repository cloned successfully to local storage",
+      "data_fields": [
+        "url",
+        "local_path",
+        "commit_hash",
+        "file_count",
+        "clone_time_ms",
+        "shallow"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Disk full",
+      "criteria": "git clone fails with 'No space left on device' or ENOSPC error",
+      "action": "Abort registration, report disk space issue to user",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_registration_clone_repo",
+        "status": "fatal",
+        "message": "Insufficient disk space to clone repository: {error}",
+        "data_fields": [
+          "url",
+          "local_path",
+          "error",
+          "available_space_bytes"
+        ]
+      }
+    },
+    {
+      "scenario": "Network timeout",
+      "criteria": "git clone times out or connection is reset during transfer",
+      "action": "Abort registration, suggest user check network and retry",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_registration_clone_repo",
+        "status": "fatal",
+        "message": "Network timeout during clone: {error}",
+        "data_fields": [
+          "url",
+          "error",
+          "elapsed_time_ms",
+          "bytes_transferred"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Clone strategy",
+      "outcome": "Use shallow clone (--depth 1) to save bandwidth and reduce clone time"
+    },
+    {
+      "condition": "Clone succeeds",
+      "outcome": "Proceed to write-config step"
+    },
+    {
+      "condition": "Clone fails with fatal error",
+      "outcome": "Clean up partial clone directory, abort registration"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-registration/actions/clone-repo.ts"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "type": "action",
+  "what": "Push commit to remote",
+  "why": "Share local knowledge changes with team via git remote",
+  "where": {
+    "entry_point": "features/vault/vault-push/steps/05-push.json",
+    "implementation": "features/vault/vault-push/actions/push.ts"
+  },
+  "output": "Push result with remote URL and pushed commit hash",
+  "success_handling": {
+    "criteria": "git push completes successfully and remote accepts the commit",
+    "event": {
+      "action": "vault_push_push",
+      "status": "success",
+      "message": "Changes pushed to remote successfully",
+      "data_fields": [
+        "vault_id",
+        "remote_url",
+        "commit_hash",
+        "branch",
+        "push_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Remote reject",
+      "criteria": "git push is rejected by remote (non-fast-forward, branch protection, etc.)",
+      "action": "Abort push, suggest user pull first to resolve divergence",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_push_push",
+        "status": "error",
+        "message": "Remote rejected push: {error}",
+        "data_fields": [
+          "vault_id",
+          "remote_url",
+          "error",
+          "reject_reason"
+        ]
+      }
+    },
+    {
+      "scenario": "Authentication expired",
+      "criteria": "git push fails with HTTP 401/403 or SSH authentication error",
+      "action": "Abort push, prompt user to refresh credentials",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_push_push",
+        "status": "error",
+        "message": "Authentication expired for remote: {remote_url}",
+        "data_fields": [
+          "vault_id",
+          "remote_url",
+          "auth_method",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Push accepted by remote",
+      "outcome": "Push operation complete"
+    },
+    {
+      "condition": "Push rejected",
+      "outcome": "Abort, suggest user pull and resolve conflicts first"
+    },
+    {
+      "condition": "Auth failure",
+      "outcome": "Abort, prompt user to refresh credentials"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-push/actions/push.ts"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Validate frontmatter fields against schema",
+  "why": "Ensure all entries meet required field constraints before building index",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/03-validate-entries.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/validate-entries.ts"
+  },
+  "output": "Validation result with valid entries and array of validation errors per invalid entry",
+  "success_handling": {
+    "criteria": "Schema validation completes for all entries",
+    "event": {
+      "action": "vault_regenerate_db_validate_entries",
+      "status": "success",
+      "message": "Entry validation complete",
+      "data_fields": [
+        "vault_id",
+        "valid_count",
+        "invalid_count",
+        "validation_errors"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Schema validation fails for some entries",
+      "criteria": "One or more entries have missing required fields or invalid field types",
+      "action": "Exclude invalid entries from index, include them in report",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_regenerate_db_validate_entries",
+        "status": "warning",
+        "message": "Some entries failed schema validation",
+        "data_fields": [
+          "vault_id",
+          "invalid_entries",
+          "invalid_count",
+          "valid_count",
+          "error_details"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All entries valid",
+      "outcome": "Proceed to build-index step with full set"
+    },
+    {
+      "condition": "Some entries invalid",
+      "outcome": "Proceed to build-index step with valid subset, report invalid entries"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/validate-entries.ts"
+  ]
+}

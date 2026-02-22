@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display audit results for the edited knowledge entry",
+  "why": "Show the user the quality audit results after editing so they can verify the entry still meets quality standards",
+  "where": {
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx",
+    "step_component": "features/knowledge/knowledge-edit/EditAuditResults.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "audit_status",
+      "audit_findings"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_continue": "navigate:/knowledge/{entry_id}"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Audit results are unavailable. Show a warning that the quality audit could not be displayed, but the entry was saved successfully."
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,47 @@
+{
+  "type": "action",
+  "what": "Read current app version from package metadata",
+  "why": "Need current version to compare against latest available",
+  "where": {
+    "entry_point": "features/app/app-autoupdate/steps/01-check-current-version.json",
+    "implementation": "features/app/app-autoupdate/actions/check-current-version.ts"
+  },
+  "output": "Current application version string",
+  "success_handling": {
+    "criteria": "Current version read successfully",
+    "event": {
+      "action": "app_autoupdate_check_current_version_success",
+      "status": "success",
+      "message": "Current application version detected successfully",
+      "data_fields": ["current_version", "version_source"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Version file missing",
+      "criteria": "Package metadata file (package.json) not found or missing version field",
+      "action": "Use fallback version detection",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_check_current_version_missing",
+        "status": "warning",
+        "message": "Version file missing — using fallback version detection",
+        "data_fields": ["expected_path", "fallback_method"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Version read successfully",
+      "outcome": "Proceed to fetch latest version"
+    },
+    {
+      "condition": "Version file missing",
+      "outcome": "Use fallback detection, proceed with caution"
+    }
+  ],
+  "calls": [
+    "features/app/app-autoupdate/actions/check-current-version.ts"
+  ]
+}

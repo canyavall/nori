@@ -1,0 +1,78 @@
+{
+  "type": "action",
+  "what": "Compare vault directory mtime against index mtime",
+  "why": "Skip full rebuild if vault unchanged (~10ms vs ~120ms)",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/00-fast-path-check.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/fast-path-check.ts"
+  },
+  "output": {
+    "console": "Fast path check result indicating whether rebuild is needed",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Vault directory mtime and index file mtime are successfully compared to determine if rebuild is needed",
+    "event": {
+      "action": "knowledge_index_build_fast_path_check",
+      "status": "success",
+      "message": "Fast path check complete: rebuild_needed={rebuild_needed}",
+      "data_fields": [
+        "rebuild_needed",
+        "vault_mtime",
+        "index_mtime",
+        "check_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index file does not exist",
+      "criteria": "No existing knowledge.json index file found to compare mtime against",
+      "action": "Proceed with full rebuild since there is no index to compare",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_fast_path_check",
+        "status": "info",
+        "message": "No existing index found, full rebuild required",
+        "data_fields": [
+          "expected_index_path"
+        ]
+      }
+    },
+    {
+      "scenario": "Unable to read mtime",
+      "criteria": "Filesystem stat call fails for vault directory or index file",
+      "action": "Proceed with full rebuild as a safe fallback",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_fast_path_check",
+        "status": "warning",
+        "message": "Could not compare mtimes, falling back to full rebuild: {error}",
+        "data_fields": [
+          "error",
+          "vault_path",
+          "index_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Vault mtime is newer than index mtime",
+      "outcome": "Proceed with full rebuild (scan-vault step)"
+    },
+    {
+      "condition": "Index is up to date (vault mtime <= index mtime)",
+      "outcome": "Skip rebuild, return cached index"
+    },
+    {
+      "decision": "mtime comparison is sufficient for change detection",
+      "rationale": "From KV — mtime comparison provides reliable change detection with minimal overhead, avoiding expensive content hashing"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/fast-path-check.ts"
+  ]
+}

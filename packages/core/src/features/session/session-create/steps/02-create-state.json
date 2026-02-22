@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Create session state file with initial metadata",
+  "why": "Initialize session tracking (timestamps, prompt count, loaded packages)",
+  "where": {
+    "entry_point": "features/session/session-create/steps/02-create-state.json",
+    "implementation": "features/session/session-create/actions/create-state.ts"
+  },
+  "output": {
+    "console": "Session state creation confirmation with file path",
+    "file": "Session state JSON file with initial metadata (session_id, created_at, prompt_count, loaded_packages)"
+  },
+  "success_handling": {
+    "criteria": "Session state file is created with initial metadata including session ID, creation timestamp, zero prompt count, and empty loaded packages list",
+    "event": {
+      "action": "session_create_create_state",
+      "status": "success",
+      "message": "Session state created: {session_id}",
+      "data_fields": [
+        "session_id",
+        "state_file_path",
+        "created_at"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Permission denied",
+      "criteria": "Filesystem returns EACCES or EPERM when attempting to write the session state file",
+      "action": "Abort session creation, report permission error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "session_create_create_state",
+        "status": "error",
+        "message": "Permission denied creating session state: {state_file_path}",
+        "data_fields": [
+          "state_file_path",
+          "error_code"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "State file created successfully",
+      "outcome": "Flow completes successfully"
+    },
+    {
+      "condition": "Permission denied",
+      "outcome": "Abort session creation flow"
+    }
+  ],
+  "calls": [
+    "features/session/session-create/actions/create-state.ts"
+  ]
+}

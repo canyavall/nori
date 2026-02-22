@@ -1,0 +1,79 @@
+{
+  "type": "action",
+  "what": "Write markdown file with frontmatter to vault directory",
+  "why": "Persist the knowledge entry as a versioned markdown file",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-create/steps/03-write-markdown-file.json",
+    "implementation": "features/knowledge/knowledge-create/actions/write-markdown-file.ts"
+  },
+  "output": {
+    "console": "Confirmation of file write with path and size",
+    "file": "Markdown file written to vault directory with YAML frontmatter header"
+  },
+  "success_handling": {
+    "criteria": "Markdown file is written to the vault directory with correct frontmatter and content, and the file is readable after write",
+    "event": {
+      "action": "knowledge_create_write_markdown_file",
+      "status": "success",
+      "message": "Knowledge entry written to {file_path}",
+      "data_fields": [
+        "file_path",
+        "file_size",
+        "entry_id"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Permission denied",
+      "criteria": "Filesystem returns EACCES or EPERM when attempting to write the file",
+      "action": "Abort creation, report permission error with the target path",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_create_write_markdown_file",
+        "status": "error",
+        "message": "Permission denied writing to {file_path}",
+        "data_fields": [
+          "file_path",
+          "error_code",
+          "vault_directory"
+        ]
+      }
+    },
+    {
+      "scenario": "File already exists",
+      "criteria": "A markdown file with the same name already exists in the vault directory",
+      "action": "Prompt user to confirm overwrite or choose a different name",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_write_markdown_file",
+        "status": "warning",
+        "message": "File already exists: {file_path}",
+        "data_fields": [
+          "file_path",
+          "existing_file_size",
+          "user_choice"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "File written successfully",
+      "outcome": "Proceed to audit-knowledge step"
+    },
+    {
+      "condition": "Permission denied",
+      "outcome": "Abort creation, report fatal error"
+    },
+    {
+      "condition": "File already exists",
+      "outcome": "Prompt user for overwrite confirmation or alternative name"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-create/actions/write-markdown-file.ts"
+  ]
+}

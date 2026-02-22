@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display markdown editor for composing knowledge content",
+  "why": "Provide a rich editing experience for writing the knowledge entry body in markdown format",
+  "where": {
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/ContentEditor.tsx"
+  },
+  "ui": {
+    "renders": "editor",
+    "fields": [
+      "content"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "03-preview-knowledge",
+    "on_back": "01-show-frontmatter-form"
+  },
+  "error_handling": [
+    {
+      "type": "editor_init_failed",
+      "display": "inline_banner",
+      "description": "The markdown editor component failed to initialize. Show a fallback plain textarea so the user can still enter content."
+    }
+  ],
+  "decisions": []
+}

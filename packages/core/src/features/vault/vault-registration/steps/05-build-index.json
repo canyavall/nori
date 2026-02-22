@@ -1,0 +1,57 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-index-build",
+  "what": "Build knowledge index for the newly registered vault",
+  "why": "Make vault content searchable immediately after registration",
+  "where": {
+    "entry_point": "features/vault/vault-registration/steps/05-build-index.json",
+    "implementation": "features/vault/vault-registration/actions/build-index.ts"
+  },
+  "output": "Knowledge index file with searchable entries from the vault",
+  "success_handling": {
+    "criteria": "knowledge-index-build flow completes successfully and index file is created",
+    "event": {
+      "action": "vault_registration_build_index",
+      "status": "success",
+      "message": "Knowledge index built successfully for vault",
+      "data_fields": [
+        "vault_id",
+        "index_path",
+        "entry_count",
+        "build_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build fails",
+      "criteria": "knowledge-index-build flow exits with non-zero code",
+      "action": "Log warning, complete registration without index (can rebuild later)",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_registration_build_index",
+        "status": "warning",
+        "message": "Index build failed, vault registered without index: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "rebuild_command"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index build succeeds",
+      "outcome": "Registration complete with full search capability"
+    },
+    {
+      "condition": "Index build fails",
+      "outcome": "Registration completes with warning, user can rebuild index later"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build"
+  ]
+}

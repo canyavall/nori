@@ -1,0 +1,33 @@
+{
+  "type": "api_call",
+  "what": "Create a new chat session via the backend",
+  "why": "Initialize a new session so the user can start a fresh conversation with knowledge context",
+  "where": {
+    "component": "features/session/session-browser/SessionBrowserPage.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/session",
+    "request_type": "@nori/shared:SessionCreateRequest",
+    "response_type": "@nori/shared:SessionCreateResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": []
+  },
+  "backend_flow": "core/features/session/session-create",
+  "transitions": {
+    "on_success": "navigate:/chat/{session_id}",
+    "on_error": "01-show-session-list"
+  },
+  "error_handling": [
+    {
+      "type": "creation_failed",
+      "display": "toast_error",
+      "description": "Show error that the session could not be created"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

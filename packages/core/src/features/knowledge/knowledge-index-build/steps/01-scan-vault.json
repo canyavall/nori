@@ -1,0 +1,72 @@
+{
+  "type": "action",
+  "what": "Find all .md files in vault directories",
+  "why": "Discover all knowledge entries that need to be indexed",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/01-scan-vault.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/scan-vault.ts"
+  },
+  "output": {
+    "console": "List of discovered markdown file paths with count",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Vault directories are scanned and all .md files are discovered with their paths collected",
+    "event": {
+      "action": "knowledge_index_build_scan_vault",
+      "status": "success",
+      "message": "Vault scan complete: {file_count} markdown files found",
+      "data_fields": [
+        "file_count",
+        "vault_directories",
+        "scan_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault directory not found",
+      "criteria": "One or more configured vault directories do not exist on disk",
+      "action": "Log warning for missing directories, continue scanning remaining directories",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_scan_vault",
+        "status": "warning",
+        "message": "Vault directory not found: {missing_directory}",
+        "data_fields": [
+          "missing_directory",
+          "available_directories"
+        ]
+      }
+    },
+    {
+      "scenario": "No markdown files found",
+      "criteria": "Scan completes but no .md files are discovered in any vault directory",
+      "action": "Proceed with empty index, log informational message",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_scan_vault",
+        "status": "info",
+        "message": "No markdown files found in vault directories",
+        "data_fields": [
+          "vault_directories"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Markdown files found",
+      "outcome": "Proceed to parse-frontmatter step with file list"
+    },
+    {
+      "condition": "No files found",
+      "outcome": "Proceed to build-index step with empty entries list"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/scan-vault.ts"
+  ]
+}

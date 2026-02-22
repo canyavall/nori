@@ -1,0 +1,33 @@
+{
+  "type": "api_call",
+  "what": "Load existing knowledge entry for editing",
+  "why": "Fetch the current content and metadata of the knowledge entry so the edit form can be pre-populated",
+  "where": {
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx"
+  },
+  "contract": {
+    "endpoint": "GET /api/knowledge/:id",
+    "request_type": "@nori/shared:KnowledgeGetRequest",
+    "response_type": "@nori/shared:KnowledgeGetResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": []
+  },
+  "backend_flow": "core/features/knowledge/knowledge-get",
+  "transitions": {
+    "on_success": "02-show-edit-form",
+    "on_error": "navigate_back"
+  },
+  "error_handling": [
+    {
+      "type": "not_found",
+      "display": "error_page",
+      "description": "Show error page indicating the knowledge entry was not found"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Load all knowledge entries from vault",
+  "why": "Retrieve all vault files for comprehensive audit inspection",
+  "where": {
+    "entry_point": "features/vault/vault-audit/steps/01-load-all-entries.json",
+    "implementation": "features/vault/vault-audit/actions/load-all-entries.ts"
+  },
+  "output": "Array of all vault entries with file paths, frontmatter, and content",
+  "success_handling": {
+    "criteria": "All vault files are read and loaded into memory",
+    "event": {
+      "action": "vault_audit_vault_load_all_entries",
+      "status": "success",
+      "message": "All vault entries loaded for audit",
+      "data_fields": [
+        "vault_id",
+        "entry_count",
+        "total_size_bytes"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault directory inaccessible",
+      "criteria": "readdir or file read fails with permission or path error",
+      "action": "Abort audit, report inaccessible path",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_audit_vault_load_all_entries",
+        "status": "fatal",
+        "message": "Failed to load vault entries: {error}",
+        "data_fields": [
+          "vault_id",
+          "vault_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entries loaded",
+      "outcome": "Proceed to validate-frontmatter step"
+    },
+    {
+      "condition": "Load fails",
+      "outcome": "Abort audit"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-audit/actions/load-all-entries.ts"
+  ]
+}

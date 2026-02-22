@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Fetch remote vault file hashes",
+  "why": "Capture current remote state for 3-way comparison",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/02-load-remote-state.json",
+    "implementation": "features/vault/vault-reconciliation/actions/load-remote-state.ts"
+  },
+  "output": "Map of file paths to content hashes for all remote vault files",
+  "success_handling": {
+    "criteria": "Remote tree is fetched and all file hashes are extracted",
+    "event": {
+      "action": "vault_reconciliation_load_remote_state",
+      "status": "success",
+      "message": "Remote vault state loaded",
+      "data_fields": [
+        "vault_id",
+        "remote_url",
+        "file_count",
+        "remote_head"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Remote unreachable",
+      "criteria": "git ls-tree or fetch fails due to network or auth error",
+      "action": "Abort reconciliation, suggest user check connectivity",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_reconciliation_load_remote_state",
+        "status": "error",
+        "message": "Failed to fetch remote state: {error}",
+        "data_fields": [
+          "vault_id",
+          "remote_url",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Remote state loaded",
+      "outcome": "Proceed to load-cache-state step"
+    },
+    {
+      "condition": "Remote unreachable",
+      "outcome": "Abort reconciliation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/load-remote-state.ts"
+  ]
+}

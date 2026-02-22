@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Detect local changes to push",
+  "why": "Avoid empty commits and inform user what will be pushed",
+  "where": {
+    "entry_point": "features/vault/vault-push/steps/02-check-changes.json",
+    "implementation": "features/vault/vault-push/actions/check-changes.ts"
+  },
+  "output": "Change detection result with list of modified, added, and deleted files",
+  "success_handling": {
+    "criteria": "Change detection completes and at least one file has local changes",
+    "event": {
+      "action": "vault_push_check_changes",
+      "status": "success",
+      "message": "Local changes detected for push",
+      "data_fields": [
+        "vault_id",
+        "modified_files",
+        "added_files",
+        "deleted_files",
+        "change_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No changes to push",
+      "criteria": "git status reports clean working tree and no unpushed commits",
+      "action": "Abort push, inform user there is nothing to push",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_push_check_changes",
+        "status": "warning",
+        "message": "No local changes to push",
+        "data_fields": [
+          "vault_id",
+          "vault_name"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Changes detected",
+      "outcome": "Proceed to stage-changes step"
+    },
+    {
+      "condition": "No changes detected",
+      "outcome": "Abort push, nothing to do"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-push/actions/check-changes.ts"
+  ]
+}

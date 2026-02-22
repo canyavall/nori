@@ -1,0 +1,59 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-audit",
+  "what": "Audit the edited entry",
+  "why": "Validate quality after modification",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-edit/steps/04-audit-knowledge.json",
+    "implementation": "features/knowledge/knowledge-audit/steps/"
+  },
+  "output": {
+    "console": "Audit result summary with pass/fail status and findings for the edited entry",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Knowledge audit flow completes and returns a structured audit result for the edited entry",
+    "event": {
+      "action": "knowledge_edit_audit_knowledge",
+      "status": "success",
+      "message": "Audit completed for edited entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "audit_passed",
+        "findings_count",
+        "audit_score"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Audit flow fails",
+      "criteria": "The knowledge-audit flow returns an error or does not complete",
+      "action": "Log audit failure as warning, do not block edit since the file is already written",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_edit_audit_knowledge",
+        "status": "warning",
+        "message": "Audit failed for edited entry {entry_id}, edit still succeeded",
+        "data_fields": [
+          "entry_id",
+          "audit_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Audit passes",
+      "outcome": "Proceed to regenerate-index step"
+    },
+    {
+      "condition": "Audit fails or returns warnings",
+      "outcome": "Log findings, proceed to regenerate-index step regardless"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/steps/"
+  ]
+}

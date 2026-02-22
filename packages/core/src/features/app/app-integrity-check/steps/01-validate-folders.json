@@ -1,0 +1,47 @@
+{
+  "type": "action",
+  "what": "Validate all required package directories exist",
+  "why": "Ensure monorepo structure is intact before app starts",
+  "where": {
+    "entry_point": "features/app/app-integrity-check/steps/01-validate-folders.json",
+    "implementation": "features/app/app-integrity-check/actions/validate-folders.ts"
+  },
+  "output": "Validation result indicating which directories exist and which are missing",
+  "success_handling": {
+    "criteria": "All required directories exist",
+    "event": {
+      "action": "app_integrity_check_validate_folders_success",
+      "status": "success",
+      "message": "All required package directories are present",
+      "data_fields": ["validated_directories"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Missing directories",
+      "criteria": "One or more required package directories do not exist on disk",
+      "action": "Attempt self-heal by creating missing directories",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_integrity_check_validate_folders_missing_dirs",
+        "status": "warning",
+        "message": "Missing directories detected: {missing_dirs}",
+        "data_fields": ["missing_dirs", "total_checked"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All directories exist",
+      "outcome": "Proceed to next step"
+    },
+    {
+      "condition": "Some directories missing",
+      "outcome": "Flag for self-heal in step 03"
+    }
+  ],
+  "calls": [
+    "features/app/app-integrity-check/actions/validate-folders.ts"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "type": "action",
+  "what": "Write index to knowledge.json",
+  "why": "Persist the built index to disk for use by search and other consumers",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/05-write-index.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/write-index.ts"
+  },
+  "output": {
+    "console": "Confirmation of index file write with path and size",
+    "file": "knowledge.json index file written to configured output path"
+  },
+  "success_handling": {
+    "criteria": "Index is serialized to JSON and written to knowledge.json successfully, file is readable after write",
+    "event": {
+      "action": "knowledge_index_build_write_index",
+      "status": "success",
+      "message": "Knowledge index written to {index_path}",
+      "data_fields": [
+        "index_path",
+        "file_size",
+        "entry_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Write permission denied",
+      "criteria": "Filesystem returns EACCES or EPERM when attempting to write the index file",
+      "action": "Abort index write, report permission error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_index_build_write_index",
+        "status": "error",
+        "message": "Permission denied writing index to {index_path}",
+        "data_fields": [
+          "index_path",
+          "error_code"
+        ]
+      }
+    },
+    {
+      "scenario": "Serialization error",
+      "criteria": "Index object cannot be serialized to JSON (circular references, invalid values)",
+      "action": "Abort index write, report serialization error with details",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_index_build_write_index",
+        "status": "error",
+        "message": "Failed to serialize index to JSON: {error}",
+        "data_fields": [
+          "error",
+          "index_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index written successfully",
+      "outcome": "Proceed to report-metrics step"
+    },
+    {
+      "condition": "Write fails",
+      "outcome": "Abort index build flow, report error"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/write-index.ts"
+  ]
+}

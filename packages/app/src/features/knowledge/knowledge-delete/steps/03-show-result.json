@@ -1,0 +1,27 @@
+{
+  "type": "ui_action",
+  "what": "Display deletion confirmed message",
+  "why": "Confirm to the user that the knowledge entry has been successfully deleted and guide them back to the knowledge list",
+  "where": {
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx",
+    "step_component": "features/knowledge/knowledge-delete/DeleteResult.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "deleted_entry_name"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_continue": "navigate:/knowledge"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Deletion result data is unavailable. Show a generic success or error state based on the last known operation status."
+    }
+  ],
+  "decisions": []
+}

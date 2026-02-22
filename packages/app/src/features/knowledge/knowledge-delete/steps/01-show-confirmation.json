@@ -1,0 +1,29 @@
+{
+  "type": "ui_action",
+  "what": "Display delete confirmation dialog with entry name and dependency warnings",
+  "why": "Ensure the user explicitly confirms deletion and is aware of any dependent entries or sessions that reference this knowledge",
+  "where": {
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx",
+    "step_component": "features/knowledge/knowledge-delete/DeleteConfirmation.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": [
+      "entry_name",
+      "dependency_warnings"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_confirm": "02-call-backend",
+    "on_cancel": "close_dialog"
+  },
+  "error_handling": [
+    {
+      "type": "entry_not_found",
+      "display": "toast_error",
+      "description": "The knowledge entry to delete no longer exists. Show an error message and close the dialog."
+    }
+  ],
+  "decisions": []
+}

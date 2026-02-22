@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Log vault pull event with summary",
+  "why": "Track sync history for audit and debugging",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/07-log-event.json",
+    "implementation": "features/vault/vault-pull/actions/log-event.ts"
+  },
+  "output": "Persisted pull event log entry with sync summary",
+  "success_handling": {
+    "criteria": "Pull event is written to event log with complete summary data",
+    "event": {
+      "action": "vault_pull_log_event",
+      "status": "success",
+      "message": "Pull event logged successfully",
+      "data_fields": [
+        "vault_id",
+        "event_id",
+        "pull_summary",
+        "files_updated",
+        "files_added",
+        "files_deleted",
+        "conflicts",
+        "timestamp"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Log write fails",
+      "criteria": "Event log write operation throws an error",
+      "action": "Log to stderr as fallback, do not fail the pull operation",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_log_event",
+        "status": "warning",
+        "message": "Failed to write pull event log: {error}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Event logged successfully",
+      "outcome": "Pull operation complete"
+    },
+    {
+      "condition": "Event log fails",
+      "outcome": "Pull operation complete with logging warning"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-pull/actions/log-event.ts"
+  ]
+}

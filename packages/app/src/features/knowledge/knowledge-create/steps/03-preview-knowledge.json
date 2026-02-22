@@ -1,0 +1,29 @@
+{
+  "type": "ui_action",
+  "what": "Display rendered markdown preview with frontmatter summary",
+  "why": "Allow the user to review the final appearance of the knowledge entry before committing to creation",
+  "where": {
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/KnowledgePreview.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "rendered_content",
+      "frontmatter_summary"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_confirm": "04-call-backend",
+    "on_edit": "02-show-content-editor"
+  },
+  "error_handling": [
+    {
+      "type": "render_failed",
+      "display": "inline_banner",
+      "description": "Markdown preview rendering failed. Show the raw markdown content as a fallback so the user can still review their entry."
+    }
+  ],
+  "decisions": []
+}

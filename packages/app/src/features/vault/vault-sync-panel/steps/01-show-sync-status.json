@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display current vault sync status including last pull time and pending changes",
+  "why": "Give the user visibility into the synchronization state of their vault so they can decide whether to pull updates",
+  "where": {
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx",
+    "step_component": "features/vault/vault-sync-panel/SyncStatus.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "last_pull_time",
+      "pending_changes"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_pull": "02-trigger-pull"
+  },
+  "error_handling": [
+    {
+      "type": "status_fetch_failed",
+      "display": "inline_error",
+      "description": "Show error that sync status could not be retrieved"
+    }
+  ],
+  "decisions": []
+}

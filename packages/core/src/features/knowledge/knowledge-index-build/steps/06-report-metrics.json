@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Log index build metrics (entries, categories, duration)",
+  "why": "Provide observability into index build performance and coverage",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/06-report-metrics.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/report-metrics.ts"
+  },
+  "output": {
+    "console": "Build metrics summary: total entries, categories, tags, build duration, skipped entries",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Build metrics are collected and logged including entry count, category count, build duration, and any skipped entries",
+    "event": {
+      "action": "knowledge_index_build_report_metrics",
+      "status": "success",
+      "message": "Index build metrics: {entry_count} entries, {category_count} categories, {build_duration_ms}ms",
+      "data_fields": [
+        "entry_count",
+        "category_count",
+        "tag_count",
+        "build_duration_ms",
+        "skipped_count",
+        "fast_path_used"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Metrics collection fails",
+      "criteria": "Unable to collect or format build metrics",
+      "action": "Log partial metrics, do not fail the build over metrics reporting",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_report_metrics",
+        "status": "info",
+        "message": "Metrics reporting incomplete: {error}",
+        "data_fields": [
+          "error",
+          "partial_metrics"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Metrics reported successfully",
+      "outcome": "Knowledge index build flow complete"
+    },
+    {
+      "condition": "Metrics reporting fails",
+      "outcome": "Log warning, build still considered successful"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/report-metrics.ts"
+  ]
+}

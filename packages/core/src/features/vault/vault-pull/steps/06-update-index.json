@@ -1,0 +1,59 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-index-build",
+  "what": "Rebuild knowledge index after pull",
+  "why": "Index must reflect newly pulled content",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/06-update-index.json",
+    "implementation": "features/vault/vault-pull/actions/update-index.ts"
+  },
+  "output": "Updated knowledge index reflecting pulled changes",
+  "success_handling": {
+    "criteria": "knowledge-index-build flow completes and index is updated with new content",
+    "event": {
+      "action": "vault_pull_update_index",
+      "status": "success",
+      "message": "Knowledge index rebuilt after pull",
+      "data_fields": [
+        "vault_id",
+        "index_path",
+        "entry_count",
+        "new_entries",
+        "removed_entries",
+        "build_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index rebuild fails",
+      "criteria": "knowledge-index-build flow exits with non-zero code",
+      "action": "Log warning, continue pull (index can be rebuilt later)",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_update_index",
+        "status": "warning",
+        "message": "Index rebuild failed after pull: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "rebuild_command"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index rebuild succeeds",
+      "outcome": "Proceed to log-event step"
+    },
+    {
+      "condition": "Index rebuild fails",
+      "outcome": "Proceed to log-event step with warning, user can rebuild later"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build"
+  ]
+}

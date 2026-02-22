@@ -1,0 +1,80 @@
+{
+  "type": "action",
+  "what": "Persist vault-to-project link in database",
+  "why": "Enable vault knowledge injection for this project",
+  "where": {
+    "entry_point": "features/vault/vault-link-project/steps/03-write-link.json",
+    "implementation": "features/vault/vault-link-project/actions/write-link.ts"
+  },
+  "output": "Persisted link record with vault ID, project path, and link timestamp",
+  "success_handling": {
+    "criteria": "Database write completes and link record is retrievable",
+    "event": {
+      "action": "vault_link_project_write_link",
+      "status": "success",
+      "message": "Vault linked to project successfully",
+      "data_fields": [
+        "vault_id",
+        "vault_name",
+        "project_path",
+        "link_id",
+        "created_at"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Duplicate link",
+      "criteria": "Database unique constraint violation on vault_id + project_path combination",
+      "action": "Return error indicating this vault is already linked to this project",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_link_project_write_link",
+        "status": "error",
+        "message": "Vault is already linked to this project: {vault_name} -> {project_path}",
+        "data_fields": [
+          "vault_id",
+          "vault_name",
+          "project_path",
+          "existing_link_id"
+        ]
+      }
+    },
+    {
+      "scenario": "Database write fails",
+      "criteria": "SQLite write operation throws an error (SQLITE_BUSY, SQLITE_CORRUPT, etc.)",
+      "action": "Abort link operation, report database error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_link_project_write_link",
+        "status": "fatal",
+        "message": "Failed to write link to database: {error}",
+        "data_fields": [
+          "vault_id",
+          "project_path",
+          "error",
+          "db_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Link persisted successfully",
+      "outcome": "Link operation complete"
+    },
+    {
+      "condition": "Duplicate link detected",
+      "outcome": "Abort, inform user link already exists"
+    },
+    {
+      "condition": "Database write fails",
+      "outcome": "Abort link operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-link-project/actions/write-link.ts"
+  ]
+}

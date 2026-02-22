@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Reload session context (loaded packages, prompt count)",
+  "why": "Resume exactly where the user left off",
+  "where": {
+    "entry_point": "features/session/session-resume/steps/02-restore-context.json",
+    "implementation": "features/session/session-resume/actions/restore-context.ts"
+  },
+  "output": {
+    "console": "Restored context summary with loaded packages and prompt count",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Session context is restored with loaded packages re-initialized and prompt count resumed from saved state",
+    "event": {
+      "action": "session_resume_restore_context",
+      "status": "success",
+      "message": "Session context restored: {session_id}",
+      "data_fields": [
+        "session_id",
+        "loaded_packages",
+        "prompt_count",
+        "restored_at"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Package reload fails",
+      "criteria": "One or more previously loaded packages cannot be reloaded (removed, corrupted, version mismatch)",
+      "action": "Skip failed packages, restore available context, log warning with failed package list",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "session_resume_restore_context",
+        "status": "warning",
+        "message": "Some packages could not be reloaded: {failed_packages}",
+        "data_fields": [
+          "session_id",
+          "failed_packages",
+          "restored_packages",
+          "prompt_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Context fully restored",
+      "outcome": "Flow completes successfully"
+    },
+    {
+      "condition": "Partial context restored",
+      "outcome": "Warn user about missing packages, flow completes successfully"
+    }
+  ],
+  "calls": [
+    "features/session/session-resume/actions/restore-context.ts"
+  ]
+}

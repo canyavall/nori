@@ -1,0 +1,71 @@
+{
+  "type": "action",
+  "what": "Load all knowledge entries from database",
+  "why": "Retrieve entries that need vector embeddings generated",
+  "where": {
+    "entry_point": "features/vault/vault-vector-embedding/steps/01-load-knowledge-entries.json",
+    "implementation": "features/vault/vault-vector-embedding/actions/load-knowledge-entries.ts"
+  },
+  "output": "Array of knowledge entries with content and metadata from database",
+  "success_handling": {
+    "criteria": "Database query completes and returns at least one entry",
+    "event": {
+      "action": "vault_vector_embedding_load_knowledge_entries",
+      "status": "success",
+      "message": "Knowledge entries loaded from database",
+      "data_fields": [
+        "vault_id",
+        "entry_count",
+        "total_content_size_bytes"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database read fails",
+      "criteria": "SQLite query throws an error",
+      "action": "Abort embedding generation, report database error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_vector_embedding_load_knowledge_entries",
+        "status": "fatal",
+        "message": "Failed to load knowledge entries: {error}",
+        "data_fields": [
+          "vault_id",
+          "db_path",
+          "error"
+        ]
+      }
+    },
+    {
+      "scenario": "No entries found",
+      "criteria": "Database query returns zero results",
+      "action": "Abort embedding generation, suggest running vault-regenerate-db first",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_vector_embedding_load_knowledge_entries",
+        "status": "warning",
+        "message": "No knowledge entries found in database",
+        "data_fields": [
+          "vault_id",
+          "db_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entries loaded",
+      "outcome": "Proceed to generate-embeddings step"
+    },
+    {
+      "condition": "No entries or database error",
+      "outcome": "Abort embedding generation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-vector-embedding/actions/load-knowledge-entries.ts"
+  ]
+}

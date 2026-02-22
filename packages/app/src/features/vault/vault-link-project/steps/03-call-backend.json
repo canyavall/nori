@@ -1,0 +1,38 @@
+{
+  "type": "api_call",
+  "what": "Submit vault-project link request to the backend",
+  "why": "Create the association between the selected vault and the project directory so knowledge is available in that project context",
+  "where": {
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/vault/:id/link",
+    "request_type": "@nori/shared:VaultLinkProjectRequest",
+    "response_type": "@nori/shared:VaultLinkProjectResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": []
+  },
+  "backend_flow": "core/features/vault/vault-link-project",
+  "transitions": {
+    "on_success": "04-show-confirmation",
+    "on_error": "01-show-vault-picker"
+  },
+  "error_handling": [
+    {
+      "type": "vault_not_found",
+      "display": "toast_error",
+      "description": "Show error that the selected vault no longer exists"
+    },
+    {
+      "type": "link_already_exists",
+      "display": "toast_error",
+      "description": "Show error that this vault is already linked to the selected project"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Apply remote changes to local vault",
+  "why": "Update local knowledge with team changes",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/05-merge-changes.json",
+    "implementation": "features/vault/vault-pull/actions/merge-changes.ts"
+  },
+  "output": "Merge result with list of updated, added, deleted, and skipped files",
+  "success_handling": {
+    "criteria": "All non-conflicting remote changes are applied to local vault",
+    "event": {
+      "action": "vault_pull_merge_changes",
+      "status": "success",
+      "message": "Remote changes merged successfully",
+      "data_fields": [
+        "vault_id",
+        "updated_files",
+        "added_files",
+        "deleted_files",
+        "skipped_files",
+        "merge_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Merge conflict",
+      "criteria": "One or more files have conflicting local and remote changes that cannot be auto-resolved",
+      "action": "Skip conflicting files, apply non-conflicting changes, report conflicts for user resolution",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_merge_changes",
+        "status": "warning",
+        "message": "Merge completed with conflicts requiring user resolution",
+        "data_fields": [
+          "vault_id",
+          "conflict_files",
+          "conflict_count",
+          "applied_count",
+          "skipped_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All changes merged cleanly",
+      "outcome": "Proceed to update-index step"
+    },
+    {
+      "condition": "Some conflicts remain",
+      "outcome": "Proceed to update-index step with partial merge, user resolves conflicts later"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-pull/actions/merge-changes.ts"
+  ]
+}

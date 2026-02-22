@@ -1,0 +1,32 @@
+{
+  "type": "ui_action",
+  "what": "Display pre-filled frontmatter form and content editor for editing",
+  "why": "Allow the user to modify both the metadata and content of an existing knowledge entry in a combined view",
+  "where": {
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx",
+    "step_component": "features/knowledge/knowledge-edit/EditForm.tsx"
+  },
+  "ui": {
+    "renders": "form+editor",
+    "fields": [
+      "tags",
+      "description",
+      "category",
+      "auto_load",
+      "content"
+    ],
+    "validation_schema": "@nori/shared:knowledgeFrontmatterSchema"
+  },
+  "transitions": {
+    "on_save": "03-call-backend",
+    "on_cancel": "navigate_back"
+  },
+  "error_handling": [
+    {
+      "type": "validation_error",
+      "display": "inline_field_errors",
+      "description": "Show validation errors next to the corresponding form fields"
+    }
+  ],
+  "decisions": []
+}

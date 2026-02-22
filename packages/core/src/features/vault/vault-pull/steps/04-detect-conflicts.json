@@ -1,0 +1,62 @@
+{
+  "type": "action",
+  "what": "Compare local and remote using 3-way merge detection",
+  "why": "Identify conflicts before merging to give user control",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/04-detect-conflicts.json",
+    "implementation": "features/vault/vault-pull/actions/detect-conflicts.ts"
+  },
+  "output": "Conflict detection report with per-file status (no-change, local-only, remote-only, conflict)",
+  "success_handling": {
+    "criteria": "3-way comparison completes and all files are classified",
+    "event": {
+      "action": "vault_pull_detect_conflicts",
+      "status": "success",
+      "message": "Conflict detection complete",
+      "data_fields": [
+        "vault_id",
+        "total_files",
+        "no_change_count",
+        "local_only_count",
+        "remote_only_count",
+        "conflict_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Cache state unavailable",
+      "criteria": "Cached hashes from last sync are missing or corrupt",
+      "action": "Fall back to 2-way comparison (local vs remote), warn about reduced accuracy",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_pull_detect_conflicts",
+        "status": "warning",
+        "message": "Cache state unavailable, falling back to 2-way comparison",
+        "data_fields": [
+          "vault_id",
+          "cache_path",
+          "fallback_method"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Merge detection strategy",
+      "outcome": "Use 3-way comparison (local/remote/cache hashes) from KV pattern for accurate conflict detection"
+    },
+    {
+      "condition": "No conflicts detected",
+      "outcome": "Proceed to merge-changes step"
+    },
+    {
+      "condition": "Conflicts detected",
+      "outcome": "Report conflicts to user, proceed to merge-changes with conflict list"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-pull/actions/detect-conflicts.ts"
+  ]
+}

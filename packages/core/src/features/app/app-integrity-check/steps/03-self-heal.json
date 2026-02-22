@@ -1,0 +1,47 @@
+{
+  "type": "action",
+  "what": "Repair missing or corrupt structure components",
+  "why": "Automatically fix issues found in validation steps to avoid manual intervention",
+  "where": {
+    "entry_point": "features/app/app-integrity-check/steps/03-self-heal.json",
+    "implementation": "features/app/app-integrity-check/actions/self-heal.ts"
+  },
+  "output": "Repair report indicating which issues were fixed and which remain",
+  "success_handling": {
+    "criteria": "All issues repaired",
+    "event": {
+      "action": "app_integrity_check_self_heal_success",
+      "status": "success",
+      "message": "All integrity issues have been repaired successfully",
+      "data_fields": ["issues_fixed", "repair_actions"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Self-heal fails",
+      "criteria": "Repair process attempted but one or more issues could not be resolved",
+      "action": "Log error, continue with degraded functionality",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "app_integrity_check_self_heal_failed",
+        "status": "error",
+        "message": "Self-heal failed — some integrity issues remain unresolved",
+        "data_fields": ["issues_remaining", "errors_encountered"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All issues repaired",
+      "outcome": "Integrity check complete, proceed to next boot phase"
+    },
+    {
+      "condition": "Some issues remain",
+      "outcome": "Continue with degraded functionality, notify user"
+    }
+  ],
+  "calls": [
+    "features/app/app-integrity-check/actions/self-heal.ts"
+  ]
+}

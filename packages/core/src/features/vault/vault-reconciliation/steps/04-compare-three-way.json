@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Run 3-way comparison across all vault files",
+  "why": "Detect no-change/local-change/remote-change/conflict per file",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/04-compare-three-way.json",
+    "implementation": "features/vault/vault-reconciliation/actions/compare-three-way.ts"
+  },
+  "output": "Per-file classification map with status (no_change, local_only, remote_only, both_changed, conflict)",
+  "success_handling": {
+    "criteria": "All files from local, remote, and cache are compared and classified",
+    "event": {
+      "action": "vault_reconciliation_compare_three_way",
+      "status": "success",
+      "message": "3-way comparison complete",
+      "data_fields": [
+        "vault_id",
+        "total_files",
+        "no_change_count",
+        "local_only_count",
+        "remote_only_count",
+        "both_changed_count",
+        "conflict_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Comparison error",
+      "criteria": "Hash comparison fails due to unexpected data format or missing entries",
+      "action": "Abort reconciliation, report corrupted state data",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_reconciliation_compare_three_way",
+        "status": "fatal",
+        "message": "3-way comparison failed: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "failed_at_file"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Comparison strategy",
+      "outcome": "Uses KV's 3-way merge detection pattern: compare local/remote/cache hashes per file"
+    },
+    {
+      "condition": "Comparison complete",
+      "outcome": "Proceed to generate-report step"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/compare-three-way.ts"
+  ]
+}

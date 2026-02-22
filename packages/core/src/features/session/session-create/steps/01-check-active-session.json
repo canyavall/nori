@@ -1,0 +1,61 @@
+{
+  "type": "action",
+  "what": "Check if an active session already exists",
+  "why": "Must archive previous session before creating new one",
+  "where": {
+    "entry_point": "features/session/session-create/steps/01-check-active-session.json",
+    "implementation": "features/session/session-create/actions/check-active-session.ts"
+  },
+  "output": {
+    "console": "Active session check result with session ID if one exists",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Active session check completes and returns whether an active session exists, along with its ID if present",
+    "event": {
+      "action": "session_create_check_active_session",
+      "status": "success",
+      "message": "Active session check complete: has_active={has_active}",
+      "data_fields": [
+        "has_active",
+        "active_session_id",
+        "active_since"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "State directory unreadable",
+      "criteria": "Cannot read session state directory to check for active sessions",
+      "action": "Assume no active session, proceed with creation, log warning",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "session_create_check_active_session",
+        "status": "warning",
+        "message": "Could not read session state directory: {error}",
+        "data_fields": [
+          "error",
+          "state_directory"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "No active session exists",
+      "outcome": "Skip archive, proceed to create-state step"
+    },
+    {
+      "condition": "Active session exists",
+      "outcome": "Archive previous session internally, then proceed to create-state step"
+    },
+    {
+      "condition": "State directory unreadable",
+      "outcome": "Assume no active session, proceed to create-state step"
+    }
+  ],
+  "calls": [
+    "features/session/session-create/actions/check-active-session.ts"
+  ]
+}

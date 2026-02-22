@@ -1,0 +1,61 @@
+{
+  "type": "action",
+  "what": "Check content for quality indicators (structure, length, headings, code blocks)",
+  "why": "Ensure knowledge is useful and well-structured for AI consumption",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/steps/03-validate-content-quality.json",
+    "implementation": "features/knowledge/knowledge-audit/actions/validate-content-quality.ts"
+  },
+  "output": {
+    "console": "Content quality assessment with scores for structure, length, and formatting",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Content meets quality thresholds: adequate length, has recognizable structure (headings, sections), and includes useful formatting (code blocks, lists)",
+    "event": {
+      "action": "knowledge_audit_validate_content_quality",
+      "status": "success",
+      "message": "Content quality check passed for entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "content_length",
+        "heading_count",
+        "code_block_count",
+        "quality_score"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Content below quality threshold",
+      "criteria": "Content fails one or more quality checks (too short, no structure, no formatting)",
+      "action": "Record quality findings as audit issues, continue audit to collect all issues",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_audit_validate_content_quality",
+        "status": "warning",
+        "message": "Content quality below threshold for entry {entry_id}: {quality_issues}",
+        "data_fields": [
+          "entry_id",
+          "quality_issues",
+          "quality_score",
+          "threshold"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Content meets quality thresholds",
+      "outcome": "Proceed to check-ai-originality step"
+    },
+    {
+      "condition": "Content below thresholds",
+      "outcome": "Record findings, proceed to check-ai-originality step"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/validate-content-quality.ts"
+  ]
+}

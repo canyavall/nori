@@ -1,0 +1,43 @@
+{
+  "type": "action",
+  "what": "Validate local vault name format and uniqueness",
+  "why": "Fail fast before touching the filesystem — catch invalid characters and duplicate names before creating any directory",
+  "where": {
+    "entry_point": "features/vault/vault-local-registration/vault-local-registration.ts",
+    "implementation": "features/vault/vault-local-registration/actions/validate-name.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Name passes regex and is not already in the vaults table",
+    "event": {
+      "action": "vault_local_registration_validate_name",
+      "status": "success",
+      "message": "Vault name is valid",
+      "data_fields": ["vault_name"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid characters in name",
+      "criteria": "Name fails /^[a-zA-Z0-9_-]+$/ regex",
+      "action": "Return INVALID_NAME error",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Duplicate vault name",
+      "criteria": "A vault with the same name already exists in the DB",
+      "action": "Return DUPLICATE_VAULT_NAME error",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Validate name before creating the directory",
+      "rationale": "Avoids orphaned directories if the DB insert fails later"
+    }
+  ],
+  "calls": ["features/vault/vault-local-registration/actions/validate-name.ts"]
+}

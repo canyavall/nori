@@ -1,0 +1,26 @@
+{
+  "type": "validation",
+  "what": "Validate input locally before calling the backend — rules depend on vault type",
+  "why": "Catch obvious errors client-side (bad URL format, invalid name) before making a network call",
+  "where": {
+    "implementation": "features/vault/vault-registration/validate-input.ts"
+  },
+  "transitions": {
+    "on_valid": "03-call-backend",
+    "on_invalid": "01-show-form"
+  },
+  "error_handling": [
+    {
+      "type": "invalid_git_url",
+      "when": "vault_type=git",
+      "display": "field_error",
+      "description": "Show error that the git URL format is invalid"
+    },
+    {
+      "type": "invalid_name",
+      "display": "field_error",
+      "description": "Show error that the vault name is invalid (spaces, special chars, too long)"
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Format and return search results",
+  "why": "Present search results in a consistent format for consumption by the caller",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/07-output-results.json",
+    "implementation": "features/knowledge/knowledge-search/actions/output-results.ts"
+  },
+  "output": {
+    "console": "Formatted search results with entry summaries and relevance scores",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Search results are formatted into the standard output structure with entry metadata, relevance scores, and content snippets",
+    "event": {
+      "action": "knowledge_search_output_results",
+      "status": "success",
+      "message": "Search complete: {result_count} results returned",
+      "data_fields": [
+        "result_count",
+        "total_search_duration_ms",
+        "has_semantic_results"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Formatting fails",
+      "criteria": "Unable to format results into standard output structure",
+      "action": "Return raw results without formatting, log warning",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_output_results",
+        "status": "warning",
+        "message": "Result formatting failed, returning raw results: {error}",
+        "data_fields": [
+          "error",
+          "result_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Results formatted successfully",
+      "outcome": "Knowledge search flow complete, return results to caller"
+    },
+    {
+      "condition": "Formatting fails",
+      "outcome": "Return raw results, search still considered successful"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/output-results.ts"
+  ]
+}

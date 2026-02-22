@@ -1,0 +1,21 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for the Nori desktop app",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-spawn",
+    "shell:allow-stdin-write",
+    "shell:allow-kill",
+    "dialog:allow-open",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "nori-server",
+          "sidecar": true
+        }
+      ]
+    }
+  ]
+}

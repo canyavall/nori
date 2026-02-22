@@ -1,2 +1,27 @@
+node_modules/
+dist/
+.turbo/
+.tmp/
 
-nul
+# Tauri
+packages/app/src-tauri/target/
+packages/app/src-tauri/binaries/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Bun
+bun.lockb

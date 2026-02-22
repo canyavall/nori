@@ -1,0 +1,45 @@
+{
+  "type": "api_call",
+  "what": "Submit knowledge entry creation request to the backend",
+  "why": "Persist the new knowledge entry by validating, writing to the vault, auditing content quality, and indexing for search",
+  "where": {
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/knowledge",
+    "request_type": "@nori/shared:KnowledgeCreateRequest",
+    "response_type": "@nori/shared:KnowledgeCreateResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": [
+      "knowledge:create:validating",
+      "knowledge:create:writing",
+      "knowledge:create:auditing",
+      "knowledge:create:indexing",
+      "knowledge:create:completed",
+      "knowledge:create:error"
+    ]
+  },
+  "backend_flow": "core/features/knowledge/knowledge-create",
+  "transitions": {
+    "on_success": "05-show-audit-results",
+    "on_error": "01-show-frontmatter-form"
+  },
+  "error_handling": [
+    {
+      "type": "validation_failed",
+      "display": "toast_error",
+      "description": "Show error that the knowledge entry failed server-side validation"
+    },
+    {
+      "type": "write_failed",
+      "display": "toast_error",
+      "description": "Show error that writing the entry to the vault failed"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

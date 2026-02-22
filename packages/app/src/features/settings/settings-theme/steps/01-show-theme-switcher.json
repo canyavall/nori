@@ -1,0 +1,25 @@
+{
+  "type": "ui_action",
+  "what": "Render Dark/Light segmented button control in the Appearance section of SettingsPage",
+  "why": "Let the user pick their preferred UI theme; preference is stored globally and persists across restarts",
+  "where": {
+    "component": "features/settings/settings-theme/ThemeSwitcher.tsx",
+    "host_page": "pages/SettingsPage.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "02-apply-theme"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "localStorage over DB for theme storage",
+      "rationale": "localStorage is synchronous — theme is applied before first render, preventing a flash of wrong theme. The DB requires an async fetch."
+    }
+  ]
+}

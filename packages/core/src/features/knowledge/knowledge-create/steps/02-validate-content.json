@@ -1,0 +1,78 @@
+{
+  "type": "action",
+  "what": "Validate markdown content is non-empty and well-structured",
+  "why": "Reject empty or trivial content that wouldn't be useful as knowledge",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-create/steps/02-validate-content.json",
+    "implementation": "features/knowledge/knowledge-create/actions/validate-content.ts"
+  },
+  "output": {
+    "console": "Content validation result with structure quality indicators",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Markdown content is non-empty, exceeds minimum length threshold, and contains recognizable structure (headings, paragraphs, or code blocks)",
+    "event": {
+      "action": "knowledge_create_validate_content",
+      "status": "success",
+      "message": "Content validation passed",
+      "data_fields": [
+        "content_length",
+        "has_headings",
+        "has_code_blocks",
+        "structure_score"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Empty content",
+      "criteria": "Markdown body is empty or contains only whitespace",
+      "action": "Return validation error requiring non-empty content",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_validate_content",
+        "status": "error",
+        "message": "Knowledge content is empty",
+        "data_fields": [
+          "content_length"
+        ]
+      }
+    },
+    {
+      "scenario": "Content too short",
+      "criteria": "Content is below the minimum useful length threshold but not empty",
+      "action": "Return warning suggesting the content may be too brief to be useful, allow user to proceed",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_validate_content",
+        "status": "warning",
+        "message": "Content may be too short to be useful: {content_length} characters",
+        "data_fields": [
+          "content_length",
+          "minimum_length",
+          "user_confirmed"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Content is non-empty and meets length threshold",
+      "outcome": "Proceed to write-markdown-file step"
+    },
+    {
+      "condition": "Content is empty",
+      "outcome": "Abort creation, return error to user"
+    },
+    {
+      "condition": "Content is too short but non-empty",
+      "outcome": "Warn user, allow proceeding if confirmed"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-create/actions/validate-content.ts"
+  ]
+}

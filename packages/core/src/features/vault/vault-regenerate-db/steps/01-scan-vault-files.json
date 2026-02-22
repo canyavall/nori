@@ -1,0 +1,76 @@
+{
+  "type": "action",
+  "what": "Find all markdown files in vault directories",
+  "why": "Discover all knowledge entries that need to be indexed",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/01-scan-vault-files.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/scan-vault-files.ts"
+  },
+  "output": "Array of file paths for all markdown files found in vault directories",
+  "success_handling": {
+    "criteria": "File scan completes and returns at least one markdown file",
+    "event": {
+      "action": "vault_regenerate_db_scan_vault_files",
+      "status": "success",
+      "message": "Vault file scan complete",
+      "data_fields": [
+        "vault_id",
+        "file_count",
+        "vault_paths",
+        "total_size_bytes"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No markdown files found",
+      "criteria": "File scan returns zero results",
+      "action": "Warn user that vault appears empty, proceed with empty database",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_regenerate_db_scan_vault_files",
+        "status": "warning",
+        "message": "No markdown files found in vault directories",
+        "data_fields": [
+          "vault_id",
+          "vault_paths"
+        ]
+      }
+    },
+    {
+      "scenario": "Vault directory inaccessible",
+      "criteria": "readdir fails with permission or path error",
+      "action": "Abort regeneration, report inaccessible path",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_regenerate_db_scan_vault_files",
+        "status": "fatal",
+        "message": "Vault directory inaccessible: {error}",
+        "data_fields": [
+          "vault_id",
+          "vault_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Files found",
+      "outcome": "Proceed to parse-frontmatter step"
+    },
+    {
+      "condition": "No files found",
+      "outcome": "Proceed with empty set, write empty database"
+    },
+    {
+      "condition": "Directory inaccessible",
+      "outcome": "Abort regeneration"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/scan-vault-files.ts"
+  ]
+}

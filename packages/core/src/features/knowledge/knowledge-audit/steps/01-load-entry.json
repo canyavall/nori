@@ -1,0 +1,75 @@
+{
+  "type": "action",
+  "what": "Load the target knowledge entry",
+  "why": "Read the knowledge file from vault so it can be audited",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/steps/01-load-entry.json",
+    "implementation": "features/knowledge/knowledge-audit/actions/load-entry.ts"
+  },
+  "output": {
+    "console": "Loaded entry summary with file path and content length",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Knowledge entry markdown file is read and parsed into frontmatter object and content body",
+    "event": {
+      "action": "knowledge_audit_load_entry",
+      "status": "success",
+      "message": "Knowledge entry loaded for audit: {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "file_path",
+        "content_length",
+        "frontmatter_fields"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "File not found",
+      "criteria": "The target markdown file does not exist at the expected vault path",
+      "action": "Abort audit, return error indicating the entry does not exist",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_audit_load_entry",
+        "status": "error",
+        "message": "Knowledge entry not found for audit: {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "expected_path"
+        ]
+      }
+    },
+    {
+      "scenario": "Read error",
+      "criteria": "File exists but cannot be read (permission issue, encoding error)",
+      "action": "Abort audit, return error with details",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_audit_load_entry",
+        "status": "error",
+        "message": "Failed to read knowledge entry: {error}",
+        "data_fields": [
+          "entry_id",
+          "file_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entry loaded successfully",
+      "outcome": "Proceed to validate-frontmatter-schema step"
+    },
+    {
+      "condition": "Entry not found or unreadable",
+      "outcome": "Abort audit flow"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/load-entry.ts"
+  ]
+}

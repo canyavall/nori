@@ -1,0 +1,82 @@
+{
+  "type": "action",
+  "what": "Generate vector embeddings for each entry using LLM",
+  "why": "Transform knowledge text into vector representations for semantic search",
+  "where": {
+    "entry_point": "features/vault/vault-vector-embedding/steps/02-generate-embeddings.json",
+    "implementation": "features/vault/vault-vector-embedding/actions/generate-embeddings.ts"
+  },
+  "output": "Array of embedding vectors paired with their source entry IDs",
+  "success_handling": {
+    "criteria": "Embeddings are generated for all entries without exceeding error threshold",
+    "event": {
+      "action": "vault_vector_embedding_generate_embeddings",
+      "status": "success",
+      "message": "Vector embeddings generated for all entries",
+      "data_fields": [
+        "vault_id",
+        "embeddings_count",
+        "dimension",
+        "model_used",
+        "generation_time_ms",
+        "tokens_used"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "LLM API error",
+      "criteria": "Embedding API returns 5xx error or connection failure",
+      "action": "Retry up to 3 times with exponential backoff, abort if all retries fail",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_vector_embedding_generate_embeddings",
+        "status": "error",
+        "message": "LLM API error during embedding generation: {error}",
+        "data_fields": [
+          "vault_id",
+          "error",
+          "retry_count",
+          "failed_entries",
+          "successful_count"
+        ]
+      }
+    },
+    {
+      "scenario": "Rate limit exceeded",
+      "criteria": "Embedding API returns HTTP 429",
+      "action": "Apply exponential backoff starting at 1s, retry up to 5 times",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_vector_embedding_generate_embeddings",
+        "status": "warning",
+        "message": "Rate limit hit during embedding generation, backing off",
+        "data_fields": [
+          "vault_id",
+          "retry_after_ms",
+          "retry_count",
+          "entries_remaining"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All embeddings generated",
+      "outcome": "Proceed to store-vectors step"
+    },
+    {
+      "condition": "Partial embeddings due to rate limit",
+      "outcome": "Proceed with partial set, store what we have"
+    },
+    {
+      "condition": "API completely unavailable",
+      "outcome": "Abort embedding generation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-vector-embedding/actions/generate-embeddings.ts"
+  ]
+}

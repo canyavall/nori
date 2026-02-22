@@ -1,0 +1,58 @@
+{
+  "type": "flow_call",
+  "flow_id": "knowledge-index-build",
+  "what": "Rebuild index without deleted entry",
+  "why": "Index must no longer reference the deleted entry",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-delete/steps/04-regenerate-index.json",
+    "implementation": "features/knowledge/knowledge-index-build/steps/"
+  },
+  "output": {
+    "console": "Index rebuild result with updated entry count and duration",
+    "file": "Updated knowledge.json index file without the deleted entry"
+  },
+  "success_handling": {
+    "criteria": "Index build flow completes and the deleted entry no longer appears in the rebuilt index",
+    "event": {
+      "action": "knowledge_delete_regenerate_index",
+      "status": "success",
+      "message": "Knowledge index rebuilt after deletion of entry {entry_id}",
+      "data_fields": [
+        "total_entries",
+        "deleted_entry_id",
+        "build_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build fails",
+      "criteria": "The knowledge-index-build flow returns an error or does not complete",
+      "action": "Log index build failure as warning, the entry is deleted but may still appear in stale index until next rebuild",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_delete_regenerate_index",
+        "status": "warning",
+        "message": "Index rebuild failed after deleting entry {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "build_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index rebuilt successfully",
+      "outcome": "Knowledge delete flow complete"
+    },
+    {
+      "condition": "Index rebuild fails",
+      "outcome": "Log warning, deletion still considered successful — index will rebuild on next trigger"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/steps/"
+  ]
+}

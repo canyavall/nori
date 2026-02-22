@@ -1,0 +1,35 @@
+{
+  "type": "ui_action",
+  "what": "Display vault registration form — fields depend on vault type chosen in step 00",
+  "why": "Collect the information needed for the selected vault type: git URL + branch for git vaults, vault name only for local vaults",
+  "where": {
+    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx",
+    "step_component_git": "features/vault/vault-registration/VaultRegistrationForm.tsx",
+    "step_component_local": "features/vault/vault-registration/VaultRegistrationForm.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields_git": ["vault_name", "git_url", "branch"],
+    "fields_local": ["vault_name"],
+    "validation_schema_git": "@nori/shared:vaultRegistrationSchema",
+    "validation_schema_local": "@nori/shared:vaultLocalRegistrationSchema"
+  },
+  "transitions": {
+    "on_valid": "02-validate-input",
+    "on_cancel": "close_dialog"
+  },
+  "error_handling": [
+    {
+      "type": "validation_error",
+      "display": "inline_field_errors",
+      "description": "Show validation errors next to the corresponding form fields"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Reuse single form component with conditional fields",
+      "rationale": "VaultRegistrationForm renders git URL / branch fields only when vault_type='git'. Avoids a separate LocalVaultForm component."
+    }
+  ]
+}

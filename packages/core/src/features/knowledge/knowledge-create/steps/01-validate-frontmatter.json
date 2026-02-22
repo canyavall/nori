@@ -1,0 +1,74 @@
+{
+  "type": "action",
+  "what": "Validate frontmatter fields (tags, description, auto_load) against schema",
+  "why": "Ensure knowledge metadata is complete and valid before writing file",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-create/steps/01-validate-frontmatter.json",
+    "implementation": "features/knowledge/knowledge-create/actions/validate-frontmatter.ts"
+  },
+  "output": {
+    "console": "Validation result listing any missing or invalid frontmatter fields",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "All required frontmatter fields (tags, description, auto_load) are present and conform to schema types and constraints",
+    "event": {
+      "action": "knowledge_create_validate_frontmatter",
+      "status": "success",
+      "message": "Frontmatter validation passed",
+      "data_fields": [
+        "tags",
+        "description",
+        "auto_load",
+        "validated_fields_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Missing required fields",
+      "criteria": "One or more required frontmatter fields (tags, description) are absent from the input",
+      "action": "Return validation error listing missing fields, prompt user to provide them",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_validate_frontmatter",
+        "status": "error",
+        "message": "Missing required frontmatter fields: {missing_fields}",
+        "data_fields": [
+          "missing_fields",
+          "provided_fields"
+        ]
+      }
+    },
+    {
+      "scenario": "Invalid tag format",
+      "criteria": "Tags array contains entries that do not match the allowed tag format (e.g., non-string, empty, special characters)",
+      "action": "Return validation error with invalid tags listed and expected format hint",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_create_validate_frontmatter",
+        "status": "error",
+        "message": "Invalid tag format: {invalid_tags}",
+        "data_fields": [
+          "invalid_tags",
+          "expected_format"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All frontmatter fields valid",
+      "outcome": "Proceed to validate-content step"
+    },
+    {
+      "condition": "Missing or invalid frontmatter fields",
+      "outcome": "Abort creation, return validation errors to user"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-create/actions/validate-frontmatter.ts"
+  ]
+}

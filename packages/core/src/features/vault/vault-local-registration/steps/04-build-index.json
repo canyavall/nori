@@ -1,0 +1,36 @@
+{
+  "type": "flow_call",
+  "what": "Build initial knowledge index for the new local vault",
+  "why": "Makes vault content searchable immediately after registration; non-fatal so a fresh empty vault still registers successfully",
+  "where": {
+    "entry_point": "features/vault/vault-local-registration/vault-local-registration.ts",
+    "implementation": "features/vault/vault-local-registration/actions/build-index.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Knowledge index created at {local_path}/.nori-index",
+    "event": {
+      "action": "vault_local_registration_build_index",
+      "status": "success",
+      "message": "Knowledge index built",
+      "data_fields": ["entry_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index build failure",
+      "criteria": "Any error from the knowledge-index-build sub-flow",
+      "action": "Log warning, return entry_count=0, do NOT fail registration",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Non-fatal: a fresh vault has no markdown files so empty index is expected",
+      "rationale": "Registration should always succeed even if indexing fails"
+    }
+  ],
+  "calls": ["features/vault/vault-local-registration/actions/build-index.ts"]
+}

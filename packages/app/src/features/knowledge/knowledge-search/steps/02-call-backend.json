@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "Execute knowledge search query against the backend",
+  "why": "Search the indexed knowledge entries using the provided query and filters to return ranked results",
+  "where": {
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx"
+  },
+  "contract": {
+    "endpoint": "GET /api/knowledge/search?q=...",
+    "request_type": "@nori/shared:KnowledgeSearchRequest",
+    "response_type": "@nori/shared:KnowledgeSearchResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": []
+  },
+  "backend_flow": "core/features/knowledge/knowledge-search",
+  "transitions": {
+    "on_success": "03-show-results"
+  },
+  "error_handling": [
+    {
+      "type": "search_failed",
+      "display": "toast_error",
+      "description": "Show error that the search query could not be executed"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Validate all frontmatter against schema",
+  "why": "Ensure every vault entry has correct and complete metadata",
+  "where": {
+    "entry_point": "features/vault/vault-audit/steps/02-validate-frontmatter.json",
+    "implementation": "features/vault/vault-audit/actions/validate-frontmatter.ts"
+  },
+  "output": "Frontmatter validation results with per-entry pass/fail status and error details",
+  "success_handling": {
+    "criteria": "Schema validation completes for all entries",
+    "event": {
+      "action": "vault_audit_vault_validate_frontmatter",
+      "status": "success",
+      "message": "Frontmatter validation complete",
+      "data_fields": [
+        "vault_id",
+        "valid_count",
+        "invalid_count",
+        "missing_fields",
+        "type_errors"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Frontmatter validation errors found",
+      "criteria": "One or more entries have missing required fields or type mismatches",
+      "action": "Record all errors, continue audit with remaining checks",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_audit_vault_validate_frontmatter",
+        "status": "warning",
+        "message": "Frontmatter validation errors found in {invalid_count} entries",
+        "data_fields": [
+          "vault_id",
+          "invalid_entries",
+          "invalid_count",
+          "error_details"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All frontmatter valid",
+      "outcome": "Proceed to validate-content step"
+    },
+    {
+      "condition": "Some frontmatter invalid",
+      "outcome": "Record issues, proceed to validate-content step"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-audit/actions/validate-frontmatter.ts"
+  ]
+}

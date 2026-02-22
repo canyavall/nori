@@ -1,0 +1,72 @@
+{
+  "type": "action",
+  "what": "Query vector store for semantic matches if text query",
+  "why": "Supplement keyword matching with semantic understanding",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/05-semantic-search.json",
+    "implementation": "features/knowledge/knowledge-search/actions/semantic-search.ts"
+  },
+  "output": {
+    "console": "Semantic search results with similarity scores",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Vector store query returns semantically similar entries with similarity scores above the minimum threshold",
+    "event": {
+      "action": "knowledge_search_semantic_search",
+      "status": "success",
+      "message": "Semantic search returned {result_count} matches",
+      "data_fields": [
+        "result_count",
+        "top_similarity_score",
+        "query_embedding_duration_ms",
+        "search_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vector store unavailable",
+      "criteria": "Vector store is not initialized or connection fails",
+      "action": "Skip semantic search, rely on keyword results only, log warning",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_semantic_search",
+        "status": "warning",
+        "message": "Vector store unavailable, skipping semantic search: {error}",
+        "data_fields": [
+          "error"
+        ]
+      }
+    },
+    {
+      "scenario": "No text query component",
+      "criteria": "Parsed query contains only structured filters (tags, category) with no free text component",
+      "action": "Skip semantic search, proceed with keyword results only",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_semantic_search",
+        "status": "info",
+        "message": "No text query for semantic search, skipping",
+        "data_fields": [
+          "filters_only"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Semantic results found",
+      "outcome": "Proceed to merge-results step with both keyword and semantic results"
+    },
+    {
+      "condition": "Vector store unavailable or no text query",
+      "outcome": "Skip to merge-results step with keyword results only"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/semantic-search.ts"
+  ]
+}

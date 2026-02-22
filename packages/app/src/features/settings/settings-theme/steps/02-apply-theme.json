@@ -1,0 +1,30 @@
+{
+  "type": "validation",
+  "what": "Apply the selected theme synchronously to the DOM and persist it to localStorage",
+  "why": "Theme must be applied immediately without a round-trip to the server; localStorage is the right persistence layer for UI-only global preferences",
+  "where": {
+    "implementation": "stores/settings.store.ts",
+    "function": "setTheme"
+  },
+  "logic": {
+    "steps": [
+      "Call _setTheme(t) to update the SolidJS signal (triggers reactive re-renders)",
+      "Call applyTheme(t): set data-theme='light' on <html> for light, remove attribute for dark (root CSS vars are dark by default)",
+      "Write { theme: t } to localStorage under key 'nori:settings'"
+    ]
+  },
+  "output": {
+    "console": false,
+    "file": false
+  },
+  "error_handling": [
+    {
+      "scenario": "localStorage write fails (e.g. private browsing quota)",
+      "criteria": "setItem throws",
+      "action": "Silently ignore — theme is still applied to DOM for the current session",
+      "severity": "low",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

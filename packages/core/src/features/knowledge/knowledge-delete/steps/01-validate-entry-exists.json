@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Verify the knowledge entry exists in vault",
+  "why": "Cannot delete non-existent entry",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-delete/steps/01-validate-entry-exists.json",
+    "implementation": "features/knowledge/knowledge-delete/actions/validate-entry-exists.ts"
+  },
+  "output": {
+    "console": "Existence check result with file path and metadata summary",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "The target knowledge entry markdown file exists at the expected vault path and is readable",
+    "event": {
+      "action": "knowledge_delete_validate_entry_exists",
+      "status": "success",
+      "message": "Knowledge entry found at {file_path}",
+      "data_fields": [
+        "file_path",
+        "entry_id",
+        "file_size"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Entry not found",
+      "criteria": "No markdown file exists at the expected vault path for the given entry identifier",
+      "action": "Abort deletion, return error indicating the entry does not exist",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_delete_validate_entry_exists",
+        "status": "error",
+        "message": "Knowledge entry not found: {entry_id}",
+        "data_fields": [
+          "entry_id",
+          "expected_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Entry exists",
+      "outcome": "Proceed to check-dependencies step"
+    },
+    {
+      "condition": "Entry not found",
+      "outcome": "Abort delete flow"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-delete/actions/validate-entry-exists.ts"
+  ]
+}

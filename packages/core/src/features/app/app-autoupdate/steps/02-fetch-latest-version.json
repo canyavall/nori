@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Query update server for latest available version",
+  "why": "Compare remote version against local to determine if update needed",
+  "where": {
+    "entry_point": "features/app/app-autoupdate/steps/02-fetch-latest-version.json",
+    "implementation": "features/app/app-autoupdate/actions/fetch-latest-version.ts"
+  },
+  "output": "Latest available version string from update server",
+  "success_handling": {
+    "criteria": "Latest version fetched successfully",
+    "event": {
+      "action": "app_autoupdate_fetch_latest_version_success",
+      "status": "success",
+      "message": "Latest available version fetched from update server",
+      "data_fields": ["latest_version", "release_date"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Network unavailable",
+      "criteria": "HTTP request to update server fails due to network connectivity issues",
+      "action": "Skip update check, continue boot",
+      "severity": "info",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_fetch_latest_version_network_error",
+        "status": "info",
+        "message": "Network unavailable — skipping update check",
+        "data_fields": ["server_url", "error_code"]
+      }
+    },
+    {
+      "scenario": "Server error",
+      "criteria": "Update server responds with a non-200 status code",
+      "action": "Skip update check",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "app_autoupdate_fetch_latest_version_server_error",
+        "status": "warning",
+        "message": "Update server returned error {status_code} — skipping update check",
+        "data_fields": ["server_url", "status_code", "error_body"]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Latest version fetched",
+      "outcome": "Proceed to version comparison"
+    },
+    {
+      "condition": "Network unavailable or server error",
+      "outcome": "Skip update check entirely, continue boot"
+    }
+  ],
+  "calls": [
+    "features/app/app-autoupdate/actions/fetch-latest-version.ts"
+  ]
+}

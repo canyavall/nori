@@ -1,0 +1,72 @@
+{
+  "type": "action",
+  "what": "Read vault config and validate git remote",
+  "why": "Cannot push without a configured remote",
+  "where": {
+    "entry_point": "features/vault/vault-push/steps/01-validate-config.json",
+    "implementation": "features/vault/vault-push/actions/validate-config.ts"
+  },
+  "output": "Vault configuration object with validated remote URL and local path",
+  "success_handling": {
+    "criteria": "Vault config exists in database and git remote is configured in local repository",
+    "event": {
+      "action": "vault_push_validate_config",
+      "status": "success",
+      "message": "Vault configuration is valid with remote configured",
+      "data_fields": [
+        "vault_id",
+        "vault_name",
+        "remote_url",
+        "local_path"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault config not found",
+      "criteria": "Vault ID does not exist in database or config is missing",
+      "action": "Abort push, suggest re-registering the vault",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_push_validate_config",
+        "status": "fatal",
+        "message": "Vault configuration not found: {vault_id}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    },
+    {
+      "scenario": "No remote configured",
+      "criteria": "Local git repository has no remote origin set",
+      "action": "Abort push, suggest user configure remote",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_push_validate_config",
+        "status": "fatal",
+        "message": "No git remote configured for vault: {vault_name}",
+        "data_fields": [
+          "vault_id",
+          "vault_name",
+          "local_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Config valid and remote set",
+      "outcome": "Proceed to check-changes step"
+    },
+    {
+      "condition": "Config missing or no remote",
+      "outcome": "Abort push operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-push/actions/validate-config.ts"
+  ]
+}

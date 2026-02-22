@@ -1,0 +1,26 @@
+{
+  "type": "ui_action",
+  "what": "Render the Register Project modal dialog",
+  "why": "Entry point for the registration flow — collects folder path (via OS picker) and optional name",
+  "where": {
+    "component": "features/project/project-register/ProjectRegisterDialog.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": ["path (read-only, populated by folder picker)", "name (optional text input)"],
+    "validation_schema": "@nori/shared:projectRegisterSchema"
+  },
+  "transitions": {
+    "on_browse": "02-pick-folder",
+    "on_submit": "03-submit-registration",
+    "on_cancel": "close_dialog"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Path is read-only, populated only by the OS folder picker",
+      "rationale": "Prevents invalid paths from being typed manually; picker guarantees the path exists on disk"
+    }
+  ]
+}

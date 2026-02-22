@@ -1,0 +1,56 @@
+{
+  "type": "action",
+  "what": "Build reconciliation report with conflict details",
+  "why": "Provide actionable summary of vault state divergence for user or automated resolution",
+  "where": {
+    "entry_point": "features/vault/vault-reconciliation/steps/05-generate-report.json",
+    "implementation": "features/vault/vault-reconciliation/actions/generate-report.ts"
+  },
+  "output": "Reconciliation report object with per-file status, conflict details, and recommended actions",
+  "success_handling": {
+    "criteria": "Report is generated with complete file-by-file breakdown and summary statistics",
+    "event": {
+      "action": "vault_reconciliation_generate_report",
+      "status": "success",
+      "message": "Reconciliation report generated",
+      "data_fields": [
+        "vault_id",
+        "report_path",
+        "total_files",
+        "conflict_count",
+        "action_items"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Report generation fails",
+      "criteria": "Unexpected error during report formatting or file write",
+      "action": "Return raw comparison data as fallback",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_reconciliation_generate_report",
+        "status": "warning",
+        "message": "Report generation failed, returning raw data: {error}",
+        "data_fields": [
+          "vault_id",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Report generated",
+      "outcome": "Proceed to save-cache step"
+    },
+    {
+      "condition": "Report generation fails",
+      "outcome": "Proceed to save-cache step with raw data"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-reconciliation/actions/generate-report.ts"
+  ]
+}

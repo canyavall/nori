@@ -1,0 +1,71 @@
+{
+  "type": "action",
+  "what": "Verify the target vault is registered and accessible",
+  "why": "Cannot link a non-existent vault",
+  "where": {
+    "entry_point": "features/vault/vault-link-project/steps/01-validate-vault-exists.json",
+    "implementation": "features/vault/vault-link-project/actions/validate-vault-exists.ts"
+  },
+  "output": "Vault record from database confirming existence and accessibility",
+  "success_handling": {
+    "criteria": "Vault ID exists in database and local vault directory is accessible",
+    "event": {
+      "action": "vault_link_project_validate_vault_exists",
+      "status": "success",
+      "message": "Vault exists and is accessible",
+      "data_fields": [
+        "vault_id",
+        "vault_name",
+        "local_path"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault not found",
+      "criteria": "Vault ID does not exist in database",
+      "action": "Abort link, return error with list of available vaults",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_link_project_validate_vault_exists",
+        "status": "error",
+        "message": "Vault not found: {vault_id}",
+        "data_fields": [
+          "vault_id",
+          "available_vaults"
+        ]
+      }
+    },
+    {
+      "scenario": "Vault directory missing",
+      "criteria": "Vault record exists but local directory is not accessible",
+      "action": "Abort link, suggest re-registering the vault",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "vault_link_project_validate_vault_exists",
+        "status": "error",
+        "message": "Vault directory missing: {local_path}",
+        "data_fields": [
+          "vault_id",
+          "vault_name",
+          "local_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Vault exists and is accessible",
+      "outcome": "Proceed to validate-project-path step"
+    },
+    {
+      "condition": "Vault not found or inaccessible",
+      "outcome": "Abort link operation"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-link-project/actions/validate-vault-exists.ts"
+  ]
+}

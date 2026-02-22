@@ -1,0 +1,29 @@
+{
+  "type": "ui_action",
+  "what": "Display search form with query input and filter options",
+  "why": "Allow the user to enter a search query and optionally filter by category or tags to find relevant knowledge entries",
+  "where": {
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx",
+    "step_component": "features/knowledge/knowledge-search/SearchForm.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields": [
+      "query",
+      "category_filter",
+      "tag_filter"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_submit": "02-call-backend"
+  },
+  "error_handling": [
+    {
+      "type": "validation_error",
+      "display": "inline_field_errors",
+      "description": "The search query format is invalid. Show an inline error on the query field indicating the expected format."
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,39 @@
+{
+  "type": "ui_action",
+  "what": "Open the native OS folder picker via Tauri dialog plugin",
+  "why": "Lets the user select a project directory without typing a path; guarantees the path exists on disk",
+  "where": {
+    "component": "features/project/project-register/ProjectRegisterDialog.tsx#handleBrowse",
+    "implementation": "lib/folder-picker.ts#pickFolder"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "01-show-register-form",
+    "on_cancel": "01-show-register-form"
+  },
+  "error_handling": [
+    {
+      "scenario": "Running outside Tauri (browser/test env)",
+      "criteria": "window.__TAURI_INTERNALS__ not present",
+      "action": "pickFolder() returns null; path field unchanged",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-21",
+      "reason": "Wrapped in lib/folder-picker.ts to allow mocking in unit tests",
+      "rationale": "Tauri API is unavailable in happy-dom test environment; the thin wrapper is the only seam that needs to be mocked"
+    },
+    {
+      "date": "2026-02-21",
+      "reason": "Browse button shows '…' while picker is open (picking signal)",
+      "rationale": "Prevents double-click opening two pickers and gives visible loading state"
+    }
+  ]
+}

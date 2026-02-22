@@ -1,0 +1,63 @@
+{
+  "type": "action",
+  "what": "Write updated markdown file",
+  "why": "Persist the edited knowledge entry",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-edit/steps/03-write-changes.json",
+    "implementation": "features/knowledge/knowledge-edit/actions/write-changes.ts"
+  },
+  "output": {
+    "console": "Confirmation of file update with path and new size",
+    "file": "Updated markdown file in vault directory with modified frontmatter and content"
+  },
+  "success_handling": {
+    "criteria": "Updated markdown file is written atomically (temp file + rename) and the resulting file is readable and valid",
+    "event": {
+      "action": "knowledge_edit_write_changes",
+      "status": "success",
+      "message": "Knowledge entry updated at {file_path}",
+      "data_fields": [
+        "file_path",
+        "entry_id",
+        "file_size",
+        "changed_fields"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Permission denied",
+      "criteria": "Filesystem returns EACCES or EPERM when attempting to write the temp file or rename",
+      "action": "Abort edit, report permission error with the target path",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_edit_write_changes",
+        "status": "error",
+        "message": "Permission denied writing to {file_path}",
+        "data_fields": [
+          "file_path",
+          "error_code",
+          "vault_directory"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "File written successfully via atomic write",
+      "outcome": "Proceed to audit-knowledge step"
+    },
+    {
+      "condition": "Permission denied",
+      "outcome": "Abort edit, report fatal error"
+    },
+    {
+      "decision": "Atomic write (temp file + rename) to prevent corruption",
+      "rationale": "Writing to a temporary file first and then renaming ensures the original file is not corrupted if the write is interrupted"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-edit/actions/write-changes.ts"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Merge keyword and semantic results with deduplication",
+  "why": "Combine both search strategies into a single ranked result set without duplicates",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-search/steps/06-merge-results.json",
+    "implementation": "features/knowledge/knowledge-search/actions/merge-results.ts"
+  },
+  "output": {
+    "console": "Merged result count with deduplication stats",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Keyword and semantic results are merged, duplicates removed, and final ranking computed from combined scores",
+    "event": {
+      "action": "knowledge_search_merge_results",
+      "status": "success",
+      "message": "Merged results: {merged_count} unique entries from {keyword_count} keyword + {semantic_count} semantic",
+      "data_fields": [
+        "merged_count",
+        "keyword_count",
+        "semantic_count",
+        "duplicates_removed"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Merge fails",
+      "criteria": "Unable to combine result sets (incompatible formats, scoring normalization error)",
+      "action": "Fall back to keyword results only, log warning",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_search_merge_results",
+        "status": "warning",
+        "message": "Result merge failed, using keyword results only: {error}",
+        "data_fields": [
+          "error",
+          "keyword_count",
+          "semantic_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Results merged successfully",
+      "outcome": "Proceed to output-results step"
+    },
+    {
+      "condition": "Merge fails",
+      "outcome": "Use keyword results as fallback, proceed to output-results step"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-search/actions/merge-results.ts"
+  ]
+}

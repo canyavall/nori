@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Detect uncommitted local changes in vault",
+  "why": "Prevent pull conflicts by warning about local modifications",
+  "where": {
+    "entry_point": "features/vault/vault-pull/steps/02-check-local-changes.json",
+    "implementation": "features/vault/vault-pull/actions/check-local-changes.ts"
+  },
+  "output": "Local change detection result with list of modified, added, and deleted files",
+  "success_handling": {
+    "criteria": "Local change detection completes and working directory status is known",
+    "event": {
+      "action": "vault_pull_check_local_changes",
+      "status": "success",
+      "message": "Local change check complete",
+      "data_fields": [
+        "vault_id",
+        "has_local_changes",
+        "modified_files",
+        "added_files",
+        "deleted_files",
+        "change_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Git status fails",
+      "criteria": "git status command returns non-zero exit code",
+      "action": "Abort pull, report git error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_pull_check_local_changes",
+        "status": "fatal",
+        "message": "Failed to check local changes: {error}",
+        "data_fields": [
+          "vault_id",
+          "local_path",
+          "error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "No local changes detected",
+      "outcome": "Proceed to git-fetch step"
+    },
+    {
+      "condition": "Local changes detected",
+      "outcome": "Warn user about local modifications, proceed to git-fetch step"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-pull/actions/check-local-changes.ts"
+  ]
+}

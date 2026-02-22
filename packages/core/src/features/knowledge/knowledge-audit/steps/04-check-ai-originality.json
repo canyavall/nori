@@ -1,0 +1,64 @@
+{
+  "type": "action",
+  "what": "Validate content is not generic AI-generated boilerplate",
+  "why": "Knowledge should contain domain-specific expertise that AI wouldn't produce on its own",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/steps/04-check-ai-originality.json",
+    "implementation": "features/knowledge/knowledge-audit/actions/check-ai-originality.ts"
+  },
+  "output": {
+    "console": "Originality assessment with specificity score and heuristic results",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Content passes originality heuristics: contains specific examples, project-specific terms, concrete details, and non-generic patterns",
+    "event": {
+      "action": "knowledge_audit_check_ai_originality",
+      "status": "success",
+      "message": "Originality check passed for entry {entry_id}",
+      "data_fields": [
+        "entry_id",
+        "specificity_score",
+        "domain_terms_found",
+        "concrete_examples_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Content appears to be generic AI boilerplate",
+      "criteria": "Content scores below originality thresholds on heuristic checks (low specificity, no project-specific terms, generic patterns)",
+      "action": "Record originality concern as audit finding, continue to generate final result",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_audit_check_ai_originality",
+        "status": "warning",
+        "message": "Content may be generic AI boilerplate for entry {entry_id}: {originality_issues}",
+        "data_fields": [
+          "entry_id",
+          "specificity_score",
+          "originality_issues",
+          "threshold"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Content passes originality heuristics",
+      "outcome": "Proceed to generate-audit-result step"
+    },
+    {
+      "condition": "Content appears generic",
+      "outcome": "Record findings, proceed to generate-audit-result step"
+    },
+    {
+      "decision": "Use heuristics (specificity, concrete examples, project-specific terms) not AI detection",
+      "rationale": "AI detection models are unreliable and produce false positives; heuristic checks for specificity and domain relevance are more actionable"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/check-ai-originality.ts"
+  ]
+}

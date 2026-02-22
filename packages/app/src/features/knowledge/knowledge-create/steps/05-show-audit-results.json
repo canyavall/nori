@@ -1,0 +1,28 @@
+{
+  "type": "ui_action",
+  "what": "Display audit findings with pass/warn/fail indicators",
+  "why": "Show the user the quality audit results for their newly created knowledge entry so they can address any warnings or failures",
+  "where": {
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/AuditResults.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "audit_status",
+      "audit_findings"
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_continue": "navigate:/knowledge/{entry_id}"
+  },
+  "error_handling": [
+    {
+      "type": "data_missing",
+      "display": "inline_banner",
+      "description": "Audit results are unavailable. Show a warning that the quality audit could not be displayed, but the entry was created successfully."
+    }
+  ],
+  "decisions": []
+}

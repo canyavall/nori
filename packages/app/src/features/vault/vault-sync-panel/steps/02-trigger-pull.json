@@ -1,0 +1,40 @@
+{
+  "type": "api_call",
+  "what": "Trigger a vault pull to fetch and merge upstream changes",
+  "why": "Synchronize the local vault with the remote repository to get the latest knowledge updates",
+  "where": {
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/vault/:id/pull",
+    "request_type": "@nori/shared:VaultPullRequest",
+    "response_type": "@nori/shared:VaultPullResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": [
+      "vault:pull:started",
+      "vault:pull:fetching",
+      "vault:pull:merging",
+      "vault:pull:completed",
+      "vault:pull:conflict",
+      "vault:pull:error"
+    ]
+  },
+  "backend_flow": "core/features/vault/vault-pull",
+  "transitions": {
+    "on_success": "03-show-pull-results",
+    "on_error": "01-show-sync-status"
+  },
+  "error_handling": [
+    {
+      "type": "pull_failed",
+      "display": "toast_error",
+      "description": "Show error that the pull operation failed"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the remote repository is unreachable"
+    }
+  ],
+  "decisions": []
+}

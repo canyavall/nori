@@ -1,0 +1,59 @@
+{
+  "type": "action",
+  "what": "Build hierarchical knowledge index from metadata",
+  "why": "Organize validated entries into a structured index for efficient search and retrieval",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/04-build-index.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/build-index.ts"
+  },
+  "output": {
+    "console": "Index structure summary with category tree and entry counts",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Hierarchical index is built from validated metadata with categories, tags, and entry references organized for efficient lookup",
+    "event": {
+      "action": "knowledge_index_build_build_index",
+      "status": "success",
+      "message": "Knowledge index built: {entry_count} entries in {category_count} categories",
+      "data_fields": [
+        "entry_count",
+        "category_count",
+        "tag_count",
+        "build_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index construction fails",
+      "criteria": "Unable to organize entries into hierarchical structure (e.g., circular references, invalid category paths)",
+      "action": "Fall back to flat index without hierarchy, log error with details",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_build_index",
+        "status": "error",
+        "message": "Failed to build hierarchical index, falling back to flat index: {error}",
+        "data_fields": [
+          "error",
+          "entry_count",
+          "fallback_used"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Index built successfully",
+      "outcome": "Proceed to write-index step"
+    },
+    {
+      "condition": "Hierarchical build fails",
+      "outcome": "Use flat index as fallback, proceed to write-index step"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/build-index.ts"
+  ]
+}

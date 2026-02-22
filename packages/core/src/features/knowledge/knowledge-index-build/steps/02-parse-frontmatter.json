@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Extract YAML frontmatter from each file",
+  "why": "Parse metadata from each knowledge entry for indexing",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-index-build/steps/02-parse-frontmatter.json",
+    "implementation": "features/knowledge/knowledge-index-build/actions/parse-frontmatter.ts"
+  },
+  "output": {
+    "console": "Parse results with success/failure count per file",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "YAML frontmatter is extracted from all discovered markdown files and parsed into structured objects",
+    "event": {
+      "action": "knowledge_index_build_parse_frontmatter",
+      "status": "success",
+      "message": "Frontmatter parsed from {parsed_count}/{total_count} files",
+      "data_fields": [
+        "parsed_count",
+        "total_count",
+        "parse_duration_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Frontmatter parse error",
+      "criteria": "One or more files contain malformed YAML frontmatter that cannot be parsed",
+      "action": "Skip the malformed file, log warning with file path and error, continue parsing remaining files",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "knowledge_index_build_parse_frontmatter",
+        "status": "warning",
+        "message": "Failed to parse frontmatter in {file_path}: {parse_error}",
+        "data_fields": [
+          "file_path",
+          "parse_error",
+          "skipped_count"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "All files parsed successfully",
+      "outcome": "Proceed to validate-metadata step"
+    },
+    {
+      "condition": "Some files failed to parse",
+      "outcome": "Skip failed files, proceed to validate-metadata step with successfully parsed entries"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-index-build/actions/parse-frontmatter.ts"
+  ]
+}

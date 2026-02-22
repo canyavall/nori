@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Write index to SQLite database",
+  "why": "Persist searchable index to durable storage for query access",
+  "where": {
+    "entry_point": "features/vault/vault-regenerate-db/steps/05-write-database.json",
+    "implementation": "features/vault/vault-regenerate-db/actions/write-database.ts"
+  },
+  "output": "Database write confirmation with row count and file path",
+  "success_handling": {
+    "criteria": "All index entries are written to SQLite and database file is valid",
+    "event": {
+      "action": "vault_regenerate_db_write_database",
+      "status": "success",
+      "message": "Index written to SQLite database",
+      "data_fields": [
+        "vault_id",
+        "db_path",
+        "row_count",
+        "db_size_bytes",
+        "write_time_ms"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database write fails",
+      "criteria": "SQLite write throws error (SQLITE_BUSY, SQLITE_FULL, permission denied)",
+      "action": "Abort regeneration, report database error",
+      "severity": "fatal",
+      "recoverable": false,
+      "event": {
+        "action": "vault_regenerate_db_write_database",
+        "status": "fatal",
+        "message": "Failed to write to database: {error}",
+        "data_fields": [
+          "vault_id",
+          "db_path",
+          "error",
+          "rows_written"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Database written",
+      "outcome": "Proceed to report-metrics step"
+    },
+    {
+      "condition": "Database write fails",
+      "outcome": "Abort regeneration"
+    }
+  ],
+  "calls": [
+    "features/vault/vault-regenerate-db/actions/write-database.ts"
+  ]
+}

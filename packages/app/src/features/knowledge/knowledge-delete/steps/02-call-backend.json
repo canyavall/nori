@@ -1,0 +1,44 @@
+{
+  "type": "api_call",
+  "what": "Submit knowledge entry deletion request to the backend",
+  "why": "Remove the knowledge entry from the vault after checking dependencies, then re-index to update search",
+  "where": {
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "DELETE /api/knowledge/:id",
+    "request_type": "@nori/shared:KnowledgeDeleteRequest",
+    "response_type": "@nori/shared:KnowledgeDeleteResponse",
+    "error_type": "@nori/shared:ApiError",
+    "sse_events": [
+      "knowledge:delete:checking",
+      "knowledge:delete:deleting",
+      "knowledge:delete:indexing",
+      "knowledge:delete:completed",
+      "knowledge:delete:error"
+    ]
+  },
+  "backend_flow": "core/features/knowledge/knowledge-delete",
+  "transitions": {
+    "on_success": "03-show-result",
+    "on_error": "01-show-confirmation"
+  },
+  "error_handling": [
+    {
+      "type": "not_found",
+      "display": "toast_error",
+      "description": "Show error that the knowledge entry no longer exists"
+    },
+    {
+      "type": "deletion_blocked",
+      "display": "toast_error",
+      "description": "Show error that the entry cannot be deleted due to active dependencies"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Show error that the backend is unreachable"
+    }
+  ],
+  "decisions": []
+}

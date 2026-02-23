@@ -34,6 +34,55 @@ After editing `index.ts`, run `bun run --filter @nori/shared build` before runni
 - Run core tests: `bun run --filter @nori/core test`
 - Run server tests: `bun run --filter @nori/server test`
 
+## VaultsPage — master-detail layout (2026-02-22)
+- When a vault is selected (`activeVault()`), VaultsPage switches to master-detail: left `w-96` vault list + right `flex-1` `VaultKnowledgeTree`
+- When no vault selected: full-width `grid-cols-2` grid (original behavior)
+- VaultsPage calls `clearVaultContext()` on mount (NOT `clearContext`) — clears vault only, not project
+- Tests: mock `clearVaultContext` not `clearContext`; to test pre-selected vault, use `mockImplementationOnce(() => {})` to skip the mount clear
+
+## Convention audit fixes (2026-02-22)
+All 8 convention audit issues resolved on `feat/tauri-monorepo-restructure`:
+- Deleted dead `VaultSyncPanel.tsx` + `VaultSyncPanel.hook.ts`
+- Fixed `SearchResultItem` import to use `.type.ts` files
+- Extracted `ProjectListSection.hook.ts` + subcomponents (`GitBadge`, `ProjectCard`)
+- Extracted `VaultCard`, `VaultTypeBadge` into `components/` subfolder; added `handleLinkProject`/`handleSyncToggle` to hook
+- Replaced inline `() => setStep('list')` with `handleCancelCreate` in `SessionListSection`
+- Replaced all `as` type casts with type guard functions or property narrowing
+- Converted all hook declarations from `export function` to `export const`
+- Converted all section/page exports to `export const X: Component`
+- Created 4 section tests (KnowledgeListSection, KnowledgeDetailSection, SessionListSection, SettingsSection)
+- Rebuilt `@nori/shared` to sync `project_count`/`knowledge_count` to dist
+- All 147 tests pass, 0 TypeScript errors
+
+## Component folder reorganization (2026-02-22)
+All feature flow folders now use one-component-per-folder structure. Each .tsx component has its own named subfolder (e.g., `knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog.tsx`). Affected flows: knowledge-create, knowledge-edit, knowledge-delete, knowledge-search, vault-registration, vault-sync-panel, vault-link-project, vault-knowledge-tree, session-browser, components/layout. The `components/layout/` folder now has `ContextualSidebar/` and `TopNav/` subfolders. All imports updated; 0 TS errors.
+
+## Convention migration (2026-02-22)
+Completed full convention migration on `feat/tauri-monorepo-restructure`:
+- Phase 1: TypeScript safety (no `!`, no `as any`, `??` over `||` for display fallbacks)
+  - Exception: `entry.category || 'Uncategorized'` stays `||` — empty string is also falsy/invalid
+- Phase 2: Component structure (33 `.type.ts`, 9 `.hook.ts`, 1 `.style.ts` sibling files)
+  - `ContextualSidebar.hook.ts` — extracted all reactive logic
+  - `ThemeSwitcher.style.ts` — dynamic button class logic
+  - `KnowledgeCreateDialog.hook.ts`, `KnowledgeEditDialog.hook.ts`, `VaultSyncPanel.hook.ts` — extracted SSE/step logic
+- Phase 3: Section pattern (6 pages → thin wrappers; logic in `features/` sections)
+  - `KnowledgePage → knowledge-list/KnowledgeListSection`
+  - `KnowledgeDetailPage → knowledge-detail/KnowledgeDetailSection`
+  - `ProjectsPage → project-list/ProjectListSection`
+  - `VaultsPage → vault-list/VaultListSection`
+  - `SessionsPage → session-list/SessionListSection`
+  - `SettingsPage → settings-main/SettingsSection`
+- isomorphic-git `(git as any)` replaced with named imports (`statusMatrix`, `add`, `remove`, `commit`, `gitPush`, `isoFetch`, `fastForward`, `gitMerge`)
+- SolidJS `keyed` pattern used for Show+non-null (e.g., `<Show when={vault()} keyed>{(v) => ...}</Show>`)
+- `Match` component does NOT support `keyed` — use `<Match when={...}><Show when={...} keyed>{...}</Show></Match>` pattern instead
+
+## vault-knowledge-tree FE flow (2026-02-22)
+- Location: `packages/app/src/features/vault/vault-knowledge-tree/`
+- Components: `VaultKnowledgeTree.tsx` (orchestrator), `CategoryTree.tsx` (tree display)
+- Uses `GET /api/knowledge?vault_id=` (existing endpoint) — no new backend flow
+- On entry click: opens `KnowledgeEditDialog`, reloads tree on close
+- Categories sorted alphabetically, collapsible, edit button revealed on hover
+
 ## Frontend vault-registration flow (updated 2026-02-21)
 Steps: `00-choose-type` → `01-show-form` → `02-validate-input` → `03-call-backend` → `04-show-result`
 Components:

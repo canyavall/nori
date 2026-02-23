@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:codeload.github.com)",
+      "WebSearch",
+      "WebFetch(domain:formulae.brew.sh)",
+      "WebFetch(domain:eu-central-1-1.aws.cloud2.influxdata.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:codeforreal.com)",
+      "Bash(cd:*)",
+      "Bash(cd /c/Users/canya/Documents/projects/nori && bun install 2>&1)",
+      "Bash(cd /c/Users/canya/Documents/projects/nori && bun run typecheck 2>&1)",
+      "mcp__serena__find_symbol",
+      "mcp__serena__activate_project",
+      "Bash(cd /c/Users/canya/Documents/projects/nori && bun run build 2>&1)",
+      "Bash(cd /c/Users/canya/Documents/projects/nori/packages/shared && npx tsc 2>&1)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

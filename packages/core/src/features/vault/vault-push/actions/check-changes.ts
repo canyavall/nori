@@ -1,4 +1,4 @@
-import git from 'isomorphic-git';
+import { statusMatrix } from 'isomorphic-git';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
 
@@ -10,7 +10,7 @@ export interface ChangesResult {
 
 export async function checkChanges(dir: string): Promise<StepResult<ChangesResult> | FlowError> {
   try {
-    const matrix = await (git as any).statusMatrix({ fs, dir });
+    const matrix = await statusMatrix({ fs, dir });
 
     // statusMatrix returns rows of [filepath, head, workdir, stage]
     // HEAD=1, WORKDIR=1, STAGE=1 means unchanged

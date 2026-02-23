@@ -11,6 +11,23 @@ import type { AppEnv } from '../types.js';
 
 const knowledge = new Hono<AppEnv>();
 
+// AI-generate knowledge proposals from a prompt
+knowledge.post('/ai-generate', async (c) => {
+  const body = await c.req.json().catch(() => null);
+  if (!body || !body.vault_id || !body.prompt) {
+    return c.json({ error: { code: 'INVALID_INPUT', message: 'vault_id and prompt are required' } }, 400);
+  }
+
+  const db = c.get('db');
+  const { runKnowledgeAiGenerate } = await import('@nori/core');
+  const result = await runKnowledgeAiGenerate({ vault_id: body.vault_id, prompt: body.prompt, db });
+
+  if (!result.success) {
+    return c.json({ error: result.error }, 500);
+  }
+  return c.json({ data: result.data });
+});
+
 // Search knowledge entries
 knowledge.get('/search', async (c) => {
   const query = c.req.query('q') ?? '';

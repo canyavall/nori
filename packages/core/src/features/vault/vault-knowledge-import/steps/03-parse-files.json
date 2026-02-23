@@ -1,0 +1,34 @@
+{
+  "type": "action",
+  "what": "Read each .md file and parse frontmatter + content",
+  "why": "Need title, category, tags from frontmatter to register entries in the vault",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/vault/vault-knowledge-import/actions/parse-files.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All files processed (some may be skipped if frontmatter is invalid)",
+    "event": { "action": "vault_knowledge_import_parse_files", "status": "success", "message": "Files parsed", "data_fields": ["parsed_count", "skipped_count"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "File missing required frontmatter fields",
+      "criteria": "title or category absent from parsed frontmatter",
+      "action": "Add to skipped list with reason, continue",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "File read error",
+      "criteria": "readFileSync throws",
+      "action": "Add to skipped list with error reason, continue",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Non-fatal per-file errors", "rationale": "A single bad file should not abort the entire import; it is tracked and reported" }
+  ],
+  "calls": ["features/vault/vault-knowledge-import/actions/parse-files.ts"]
+}

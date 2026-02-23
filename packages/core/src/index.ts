@@ -19,11 +19,15 @@ export { runVaultLinkProject } from './features/vault/vault-link-project/vault-l
 export { runKnowledgeIndexBuild } from './features/knowledge/knowledge-index-build/knowledge-index-build.js';
 export { runKnowledgeSearch } from './features/knowledge/knowledge-search/knowledge-search.js';
 export { runKnowledgeCreate } from './features/knowledge/knowledge-create/knowledge-create.js';
+export { runKnowledgeAiGenerate } from './features/knowledge/knowledge-ai-generate/knowledge-ai-generate.js';
 export { runKnowledgeEdit } from './features/knowledge/knowledge-edit/knowledge-edit.js';
 export { loadExisting } from './features/knowledge/knowledge-edit/actions/load-existing.js';
 export { runKnowledgeDelete } from './features/knowledge/knowledge-delete/knowledge-delete.js';
 export { runVaultPull } from './features/vault/vault-pull/vault-pull.js';
 export { runVaultPush } from './features/vault/vault-push/vault-push.js';
+export { runVaultUnlinkProject } from './features/vault/vault-unlink-project/vault-unlink-project.js';
+export { runVaultKnowledgeImport } from './features/vault/vault-knowledge-import/vault-knowledge-import.js';
+export { runVaultKnowledgeExport } from './features/vault/vault-knowledge-export/vault-knowledge-export.js';
 export { runSessionCreate } from './features/session/session-create/session-create.js';
 export { runSessionResume } from './features/session/session-resume/session-resume.js';
 export { runSessionArchive } from './features/session/session-archive/session-archive.js';

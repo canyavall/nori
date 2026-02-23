@@ -5,6 +5,9 @@ import { Hono } from 'hono';
 const mockRunVaultRegistration = vi.fn();
 const mockRunVaultLocalRegistration = vi.fn();
 const mockRunVaultLinkProject = vi.fn();
+const mockRunVaultUnlinkProject = vi.fn();
+const mockRunVaultKnowledgeImport = vi.fn();
+const mockRunVaultKnowledgeExport = vi.fn();
 const mockQueryAll = vi.fn();
 const mockQueryOne = vi.fn();
 
@@ -12,6 +15,9 @@ vi.mock('@nori/core', () => ({
   runVaultRegistration: mockRunVaultRegistration,
   runVaultLocalRegistration: mockRunVaultLocalRegistration,
   runVaultLinkProject: mockRunVaultLinkProject,
+  runVaultUnlinkProject: mockRunVaultUnlinkProject,
+  runVaultKnowledgeImport: mockRunVaultKnowledgeImport,
+  runVaultKnowledgeExport: mockRunVaultKnowledgeExport,
   queryAll: mockQueryAll,
   queryOne: mockQueryOne,
 }));
@@ -250,5 +256,209 @@ describe('GET /api/vault', () => {
     expect(res.status).toBe(200);
     const body = await res.json() as { data: typeof mockVault[] };
     expect(body.data).toHaveLength(2);
+  });
+});
+
+// ─── GET /api/vault/:id/links ────────────────────────────────────────────────
+
+describe('GET /api/vault/:id/links', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const mockLink = {
+    id: 'link-id-1',
+    vault_id: 'vault-id-123',
+    project_path: '/home/user/my-project',
+    created_at: '2026-02-22T00:00:00.000Z',
+  };
+
+  it('returns links for the vault', async () => {
+    mockQueryAll.mockReturnValueOnce([mockLink]);
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/links');
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { data: typeof mockLink[] };
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0].project_path).toBe('/home/user/my-project');
+  });
+
+  it('returns empty array when vault has no links', async () => {
+    mockQueryAll.mockReturnValueOnce([]);
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/links');
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { data: unknown[] };
+    expect(body.data).toHaveLength(0);
+  });
+});
+
+// ─── DELETE /api/vault/:id/links/:linkId ─────────────────────────────────────
+
+describe('DELETE /api/vault/:id/links/:linkId', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls runVaultUnlinkProject and returns result', async () => {
+    mockRunVaultUnlinkProject.mockResolvedValueOnce({
+      success: true,
+      data: { link_id: 'link-1', vault_id: 'vault-id-123', project_path: '/home/user/proj' },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/links/link-1', { method: 'DELETE' });
+
+    expect(res.status).toBe(200);
+    expect(mockRunVaultUnlinkProject).toHaveBeenCalledOnce();
+    expect(mockSaveDb).toHaveBeenCalledOnce();
+    const body = await res.json() as { data: { link_id: string } };
+    expect(body.data.link_id).toBe('link-1');
+  });
+
+  it('returns 404 when link not found', async () => {
+    mockRunVaultUnlinkProject.mockResolvedValueOnce({
+      success: false,
+      error: { code: 'LINK_NOT_FOUND', message: 'Link not found', step: '02', severity: 'error', recoverable: true },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/links/bad-link', { method: 'DELETE' });
+
+    expect(res.status).toBe(404);
+    expect(mockSaveDb).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when vault not found', async () => {
+    mockRunVaultUnlinkProject.mockResolvedValueOnce({
+      success: false,
+      error: { code: 'VAULT_NOT_FOUND', message: 'Vault not found', step: '01', severity: 'error', recoverable: true },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/bad-vault/links/link-1', { method: 'DELETE' });
+
+    expect(res.status).toBe(404);
+  });
+});
+
+// ─── POST /api/vault/:id/knowledge/import ────────────────────────────────────
+
+describe('POST /api/vault/:id/knowledge/import', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls runVaultKnowledgeImport and saves db on success', async () => {
+    mockRunVaultKnowledgeImport.mockResolvedValueOnce({
+      success: true,
+      data: { imported_count: 3, skipped_count: 1 },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source_paths: ['/home/user/docs/note.md'] }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(mockRunVaultKnowledgeImport).toHaveBeenCalledOnce();
+    expect(mockSaveDb).toHaveBeenCalledOnce();
+    const body = await res.json() as { success: boolean; data: { imported_count: number } };
+    expect(body.data.imported_count).toBe(3);
+  });
+
+  it('returns 400 when source_paths is missing', async () => {
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    expect(res.status).toBe(400);
+    expect(mockRunVaultKnowledgeImport).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for invalid JSON', async () => {
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not-json',
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('does not save db on flow failure', async () => {
+    mockRunVaultKnowledgeImport.mockResolvedValueOnce({
+      success: false,
+      error: { code: 'VAULT_NOT_FOUND', message: 'Vault not found', step: '01', severity: 'error', recoverable: true },
+    });
+
+    const app = buildApp();
+    await app.request('/api/vault/vault-id-123/knowledge/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source_paths: ['/home/user/note.md'] }),
+    });
+
+    expect(mockSaveDb).not.toHaveBeenCalled();
+  });
+});
+
+// ─── POST /api/vault/:id/knowledge/export ────────────────────────────────────
+
+describe('POST /api/vault/:id/knowledge/export', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls runVaultKnowledgeExport and returns result', async () => {
+    mockRunVaultKnowledgeExport.mockResolvedValueOnce({
+      success: true,
+      data: { exported_count: 5, destination_path: '/home/user/export' },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ destination_path: '/home/user/export' }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(mockRunVaultKnowledgeExport).toHaveBeenCalledOnce();
+    const body = await res.json() as { success: boolean; data: { exported_count: number } };
+    expect(body.data.exported_count).toBe(5);
+  });
+
+  it('returns 400 when destination_path is missing', async () => {
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    expect(res.status).toBe(400);
+    expect(mockRunVaultKnowledgeExport).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for invalid JSON', async () => {
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123/knowledge/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not-json',
+    });
+
+    expect(res.status).toBe(400);
   });
 });

@@ -8,6 +8,8 @@ export interface Vault {
   created_at: string;
   updated_at: string;
   last_synced_at: string | null;
+  project_count?: number;
+  knowledge_count?: number;
 }
 
 export interface VaultLink {

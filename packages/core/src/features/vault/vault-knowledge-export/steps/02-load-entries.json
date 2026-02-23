@@ -1,0 +1,25 @@
+{
+  "type": "action",
+  "what": "Query all knowledge entries for the vault from the database",
+  "why": "Need the full list of entries with their file_path to know what to export",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-export/vault-knowledge-export.ts",
+    "implementation": "features/vault/vault-knowledge-export/actions/load-entries.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Query succeeds (may return empty list for vault with no knowledge)",
+    "event": { "action": "vault_knowledge_export_load_entries", "status": "success", "message": "Entries loaded", "data_fields": ["entry_count"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database query fails",
+      "criteria": "db.exec throws",
+      "action": "Return DB_QUERY_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [],
+  "calls": ["features/vault/vault-knowledge-export/actions/load-entries.ts"]
+}

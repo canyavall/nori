@@ -40,6 +40,7 @@ const { getActiveProject, setMockActiveProject, selectProjectMock } = vi.hoisted
 vi.mock('../stores/navigation.store', () => ({
   activeProject: getActiveProject,
   selectProject: selectProjectMock,
+  clearContext: vi.fn(),
 }));
 
 // Stub out the register dialog so it doesn't need its own deps

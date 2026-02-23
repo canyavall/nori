@@ -1,0 +1,34 @@
+{
+  "type": "action",
+  "what": "Write each parsed entry to the vault directory and register it in the database",
+  "why": "Makes knowledge entries available for search and knowledge injection",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/vault/vault-knowledge-import/actions/import-entries.ts"
+  },
+  "output": { "console": false, "file": true },
+  "success_handling": {
+    "criteria": "All parseable entries processed (duplicates skipped)",
+    "event": { "action": "vault_knowledge_import_import_entries", "status": "success", "message": "Entries imported", "data_fields": ["imported_count", "skipped_count"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "File already exists at destination path",
+      "criteria": "existsSync returns true for the target path",
+      "action": "Increment skipped_count, continue",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "Write error",
+      "criteria": "writeFileSync or db.run throws",
+      "action": "Increment skipped_count, continue",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Skip-on-conflict rather than overwrite", "rationale": "Overwriting existing vault knowledge could destroy user edits; skipping is safer" }
+  ],
+  "calls": ["features/vault/vault-knowledge-import/actions/import-entries.ts"]
+}

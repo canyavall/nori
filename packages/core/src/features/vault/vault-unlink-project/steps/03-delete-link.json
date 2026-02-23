@@ -1,0 +1,27 @@
+{
+  "type": "action",
+  "what": "Delete the vault-project link from the database",
+  "why": "Removes the connection between vault and project so knowledge is no longer injected",
+  "where": {
+    "entry_point": "features/vault/vault-unlink-project/vault-unlink-project.ts",
+    "implementation": "features/vault/vault-unlink-project/actions/delete-link.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "DELETE statement affects exactly one row",
+    "event": { "action": "vault:unlink-project:completed", "status": "success", "message": "Project unlinked", "data_fields": ["vault_id", "link_id", "project_path"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database write fails",
+      "criteria": "sql.js throws during DELETE",
+      "action": "Return DB_DELETE_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Simple DELETE by id and vault_id", "rationale": "Double-keyed DELETE ensures the link belongs to the vault even if a race condition occurs after validate-link-exists" }
+  ],
+  "calls": ["features/vault/vault-unlink-project/actions/delete-link.ts"]
+}

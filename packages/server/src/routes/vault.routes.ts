@@ -1,9 +1,18 @@
 import { Hono } from 'hono';
-import { vaultRegistrationSchema, vaultLocalRegistrationSchema, vaultLinkProjectSchema } from '@nori/shared';
+import {
+  vaultRegistrationSchema,
+  vaultLocalRegistrationSchema,
+  vaultLinkProjectSchema,
+  vaultKnowledgeImportSchema,
+  vaultKnowledgeExportSchema,
+} from '@nori/shared';
 import {
   runVaultRegistration,
   runVaultLocalRegistration,
   runVaultLinkProject,
+  runVaultUnlinkProject,
+  runVaultKnowledgeImport,
+  runVaultKnowledgeExport,
   queryAll,
   queryOne,
 } from '@nori/core';
@@ -13,10 +22,19 @@ import type { AppEnv } from '../types.js';
 
 const vault = new Hono<AppEnv>();
 
-// List all vaults
+// List all vaults with project and knowledge counts
 vault.get('/', async (c) => {
   const db = c.get('db');
-  const vaults = queryAll(db, 'SELECT * FROM vaults ORDER BY created_at DESC');
+  const vaults = queryAll(db, `
+    SELECT v.*,
+      COUNT(DISTINCT vl.id) AS project_count,
+      COUNT(DISTINCT ke.id) AS knowledge_count
+    FROM vaults v
+    LEFT JOIN vault_links vl ON vl.vault_id = v.id
+    LEFT JOIN knowledge_entries ke ON ke.vault_id = v.id
+    GROUP BY v.id
+    ORDER BY v.created_at DESC
+  `);
   return c.json({ data: vaults });
 });
 
@@ -88,6 +106,80 @@ vault.post('/:id/link', async (c) => {
   }
 
   return c.json({ data: result.data });
+});
+
+// List links for a vault
+vault.get('/:id/links', async (c) => {
+  const vaultId = c.req.param('id');
+  const db = c.get('db');
+  const links = queryAll(db, 'SELECT * FROM vault_links WHERE vault_id = ? ORDER BY created_at DESC', [vaultId]);
+  return c.json({ data: links });
+});
+
+// Unlink a project from a vault
+vault.delete('/:id/links/:linkId', async (c) => {
+  const vaultId = c.req.param('id');
+  const linkId = c.req.param('linkId');
+  const db = c.get('db');
+
+  const result = await runVaultUnlinkProject({ vault_id: vaultId, link_id: linkId, db });
+
+  if (!result.success) {
+    const status = result.error.code === 'VAULT_NOT_FOUND' || result.error.code === 'LINK_NOT_FOUND' ? 404 : 500;
+    return c.json({ error: result.error }, status);
+  }
+
+  saveDb();
+  return c.json({ data: result.data });
+});
+
+// Import knowledge from filesystem paths (SSE)
+vault.post('/:id/knowledge/import', async (c) => {
+  const vaultId = c.req.param('id');
+  const body = await c.req.json().catch(() => null);
+  if (!body) {
+    return c.json({ error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON' } }, 400);
+  }
+
+  const parsed = vaultKnowledgeImportSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message ?? 'Invalid input' } }, 400);
+  }
+
+  const db = c.get('db');
+
+  return withSSE(c, async (emitter) => {
+    const result = await runVaultKnowledgeImport(
+      { vault_id: vaultId, source_paths: parsed.data.source_paths, db },
+      emitter
+    );
+    if (result.success) saveDb();
+    return result;
+  });
+});
+
+// Export knowledge to a destination folder (SSE)
+vault.post('/:id/knowledge/export', async (c) => {
+  const vaultId = c.req.param('id');
+  const body = await c.req.json().catch(() => null);
+  if (!body) {
+    return c.json({ error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON' } }, 400);
+  }
+
+  const parsed = vaultKnowledgeExportSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message ?? 'Invalid input' } }, 400);
+  }
+
+  const db = c.get('db');
+
+  return withSSE(c, async (emitter) => {
+    const result = await runVaultKnowledgeExport(
+      { vault_id: vaultId, destination_path: parsed.data.destination_path, db },
+      emitter
+    );
+    return result;
+  });
 });
 
 // Pull vault (SSE)

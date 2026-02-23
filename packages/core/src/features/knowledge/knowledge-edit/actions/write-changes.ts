@@ -17,10 +17,10 @@ export function writeChanges(
   const tmpPath = join(dir, `.${Date.now()}.tmp`);
 
   try {
-    const updatedFrontmatter = {
-      ...frontmatter,
-      updated: new Date().toISOString(),
-    };
+    const updatedFrontmatter = Object.fromEntries(
+      Object.entries({ ...frontmatter, updated: new Date().toISOString() })
+        .filter(([, v]) => v !== undefined)
+    );
 
     const fileContent = matter.stringify(content, updatedFrontmatter);
 

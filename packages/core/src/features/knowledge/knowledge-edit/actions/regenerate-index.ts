@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import type { Database } from 'sql.js';
 import type { StepResult, FlowError } from '@nori/shared';
 
 export interface RegenerateIndexResult {
@@ -5,19 +7,42 @@ export interface RegenerateIndexResult {
   build_duration_ms: number;
 }
 
-/**
- * Stub: delegates to knowledge-index-build flow later.
- * For now, returns success unconditionally.
- */
 export function regenerateIndex(
-  _vaultId: string,
-  _vaultPath: string
+  filePath: string,
+  title: string,
+  category: string,
+  tags: string[],
+  content: string,
+  db: Database
 ): StepResult<RegenerateIndexResult> | FlowError {
-  return {
-    success: true,
-    data: {
-      total_entries: 0,
-      build_duration_ms: 0,
-    },
-  };
+  const start = Date.now();
+  const contentHash = createHash('sha256').update(content).digest('hex').slice(0, 16);
+  const now = new Date().toISOString();
+
+  try {
+    db.run(
+      `UPDATE knowledge_entries
+       SET title=?, category=?, tags=?, content_hash=?, updated_at=?
+       WHERE file_path=?`,
+      [title, category, JSON.stringify(tags), contentHash, now, filePath]
+    );
+
+    return {
+      success: true,
+      data: { total_entries: 1, build_duration_ms: Date.now() - start },
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      success: false,
+      error: {
+        code: 'INDEX_UPDATE_FAILED',
+        message: `Failed to update knowledge entry in database: ${message}`,
+        step: '05-regenerate-index',
+        severity: 'error',
+        recoverable: false,
+        details: { error: message },
+      },
+    };
+  }
 }

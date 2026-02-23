@@ -1,7 +1,7 @@
 import type { ParentProps } from 'solid-js';
 import { Show } from 'solid-js';
-import { TopNav } from './components/layout/TopNav';
-import { ContextualSidebar } from './components/layout/ContextualSidebar';
+import { TopNav } from './components/layout/TopNav/TopNav';
+import { ContextualSidebar } from './components/layout/ContextualSidebar/ContextualSidebar';
 import { sidebarContext } from './stores/navigation.store';
 
 export function App(props: ParentProps) {

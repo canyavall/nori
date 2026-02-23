@@ -1,4 +1,4 @@
-import git from 'isomorphic-git';
+import git, { fastForward, merge as gitMerge } from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
@@ -18,7 +18,7 @@ export async function mergeChanges(
 
   try {
     // Attempt fast-forward first (most common case for pull)
-    await (git as any).fastForward({
+    await fastForward({
       fs,
       http,
       dir,
@@ -68,7 +68,7 @@ export async function mergeChanges(
         };
       }
 
-      await (git as any).merge({
+      await gitMerge({
         fs,
         dir,
         ours,

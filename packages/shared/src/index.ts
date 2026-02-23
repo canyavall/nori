@@ -1,7 +1,7 @@
 // Types
 export type { FlowEmitter, StepResult, FlowError, FlowResult } from './types/flow.js';
 export type { Vault, VaultLink, VaultSyncStatus } from './types/vault.js';
-export type { KnowledgeEntry, KnowledgeFrontmatter } from './types/knowledge.js';
+export type { KnowledgeEntry, KnowledgeFrontmatter, KnowledgeProposal } from './types/knowledge.js';
 export type { Session, Message } from './types/session.js';
 export type { Project, ProjectSettings } from './types/project.js';
 export type { SSEEventMap, SSEEventName } from './types/events.js';
@@ -15,6 +15,10 @@ export {
   type VaultLocalRegistrationInput,
   vaultLinkProjectSchema,
   type VaultLinkProjectInput,
+  vaultKnowledgeImportSchema,
+  type VaultKnowledgeImportInput,
+  vaultKnowledgeExportSchema,
+  type VaultKnowledgeExportInput,
 } from './schemas/vault.schema.js';
 
 // Schemas — Knowledge
@@ -46,6 +50,13 @@ export {
   type VaultLocalRegistrationEvents,
   type VaultLinkProjectResponse,
   type VaultLinkProjectEvents,
+  type VaultListLinksResponse,
+  type VaultUnlinkProjectResponse,
+  type VaultUnlinkProjectEvents,
+  type VaultKnowledgeImportResponse,
+  type VaultKnowledgeImportEvents,
+  type VaultKnowledgeExportResponse,
+  type VaultKnowledgeExportEvents,
   type VaultPullResponse,
   type VaultPullEvents,
   type VaultPushResponse,
@@ -58,6 +69,10 @@ export {
   VAULT_LOCAL_REGISTRATION_API,
   VAULT_LIST_API,
   VAULT_LINK_PROJECT_API,
+  VAULT_LIST_LINKS_API,
+  VAULT_UNLINK_PROJECT_API,
+  VAULT_KNOWLEDGE_IMPORT_API,
+  VAULT_KNOWLEDGE_EXPORT_API,
   VAULT_PULL_API,
   VAULT_PUSH_API,
   VAULT_RECONCILIATION_API,
@@ -92,6 +107,9 @@ export {
   KNOWLEDGE_EDIT_API,
   KNOWLEDGE_DELETE_API,
   KNOWLEDGE_AUDIT_API,
+  KNOWLEDGE_AI_GENERATE_API,
+  type KnowledgeAiGenerateRequest,
+  type KnowledgeAiGenerateResponse,
 } from './contracts/knowledge.contract.js';
 
 // Contracts — Session

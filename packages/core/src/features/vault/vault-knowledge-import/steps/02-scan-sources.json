@@ -1,0 +1,34 @@
+{
+  "type": "action",
+  "what": "Expand source paths into a flat list of .md file paths",
+  "why": "Users may provide individual files or folders; this step normalizes them to file paths",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/vault/vault-knowledge-import/actions/scan-sources.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "At least one .md file found",
+    "event": { "action": "vault_knowledge_import_scan_sources", "status": "success", "message": "Sources scanned", "data_fields": ["file_count"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Source path inaccessible",
+      "criteria": "statSync throws on a given path",
+      "action": "Return SOURCE_NOT_ACCESSIBLE error",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "No markdown files found",
+      "criteria": "filePaths array is empty after scanning all sources",
+      "action": "Return NO_MARKDOWN_FILES error",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Recursive directory scan", "rationale": "Users may have nested folder structures — scanning recursively captures all .md files" }
+  ],
+  "calls": ["features/vault/vault-knowledge-import/actions/scan-sources.ts"]
+}

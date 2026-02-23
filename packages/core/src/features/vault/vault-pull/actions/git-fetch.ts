@@ -1,4 +1,4 @@
-import git from 'isomorphic-git';
+import { fetch as isoFetch } from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
@@ -16,7 +16,7 @@ export async function gitFetch(
   const start = Date.now();
 
   try {
-    await (git as any).fetch({
+    await isoFetch({
       fs,
       http,
       dir,

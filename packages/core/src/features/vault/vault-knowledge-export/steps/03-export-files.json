@@ -1,0 +1,34 @@
+{
+  "type": "action",
+  "what": "Copy each knowledge .md file to destination/{category}/{filename}.md",
+  "why": "Preserves category folder structure so the export is organized and re-importable",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-export/vault-knowledge-export.ts",
+    "implementation": "features/vault/vault-knowledge-export/actions/export-files.ts"
+  },
+  "output": { "console": false, "file": true },
+  "success_handling": {
+    "criteria": "All readable entries exported; unreachable files silently skipped",
+    "event": { "action": "vault_knowledge_export_export_files", "status": "success", "message": "Export complete", "data_fields": ["exported_count", "destination_path"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Destination directory cannot be created",
+      "criteria": "mkdirSync throws on destinationPath",
+      "action": "Return DESTINATION_NOT_WRITABLE error",
+      "severity": "fatal",
+      "recoverable": false
+    },
+    {
+      "scenario": "Source file missing or unreadable",
+      "criteria": "existsSync returns false or readFileSync throws",
+      "action": "Skip entry, continue",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Copy, not move", "rationale": "Export should never modify the vault — files are copied to destination, originals untouched" }
+  ],
+  "calls": ["features/vault/vault-knowledge-export/actions/export-files.ts"]
+}

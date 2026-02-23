@@ -55,16 +55,7 @@ export function connectSSE(
             try {
               const data = JSON.parse(dataStr);
               if (currentEvent === 'result') {
-                // Unwrap FlowResult envelope: { success, data } → data
-                if (data && typeof data === 'object' && 'success' in data) {
-                  if (data.success === false) {
-                    callbacks.onError(data.error?.message ?? 'Flow failed');
-                  } else {
-                    callbacks.onResult(data.data);
-                  }
-                } else {
-                  callbacks.onResult(data);
-                }
+                callbacks.onResult(data);
               } else if (currentEvent === 'error') {
                 callbacks.onError(data.error ?? 'Unknown error');
               } else if (currentEvent) {

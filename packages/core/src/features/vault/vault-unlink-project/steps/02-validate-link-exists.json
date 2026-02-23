@@ -1,0 +1,34 @@
+{
+  "type": "action",
+  "what": "Confirm the vault link exists and belongs to this vault",
+  "why": "Prevents deleting links that don't exist or belong to other vaults",
+  "where": {
+    "entry_point": "features/vault/vault-unlink-project/vault-unlink-project.ts",
+    "implementation": "features/vault/vault-unlink-project/actions/validate-link-exists.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Link row found with matching vault_id",
+    "event": { "action": "vault:unlink-project:validating-link", "status": "success", "message": "Link verified", "data_fields": ["link_id"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Link not found",
+      "criteria": "No row returned for link_id",
+      "action": "Return LINK_NOT_FOUND error",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Link belongs to different vault",
+      "criteria": "vault_id on link does not match input vault_id",
+      "action": "Return LINK_NOT_FOUND error (avoid leaking data)",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-02-22", "reason": "Combined ownership check", "rationale": "Checking vault_id prevents one vault from deleting another vault's links" }
+  ],
+  "calls": ["features/vault/vault-unlink-project/actions/validate-link-exists.ts"]
+}

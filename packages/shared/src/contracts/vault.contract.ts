@@ -4,6 +4,8 @@ import type { Vault, VaultLink } from '../types/vault.js';
 export { vaultRegistrationSchema, type VaultRegistrationInput } from '../schemas/vault.schema.js';
 export { vaultLocalRegistrationSchema, type VaultLocalRegistrationInput } from '../schemas/vault.schema.js';
 export { vaultLinkProjectSchema, type VaultLinkProjectInput } from '../schemas/vault.schema.js';
+export { vaultKnowledgeImportSchema, type VaultKnowledgeImportInput } from '../schemas/vault.schema.js';
+export { vaultKnowledgeExportSchema, type VaultKnowledgeExportInput } from '../schemas/vault.schema.js';
 
 // ─── Response types ───────────────────────────────────────────────
 
@@ -15,6 +17,26 @@ export interface VaultRegistrationResponse {
 export interface VaultLinkProjectResponse {
   link: VaultLink;
   vault_name: string;
+}
+
+export interface VaultListLinksResponse {
+  links: import('../types/vault.js').VaultLink[];
+}
+
+export interface VaultUnlinkProjectResponse {
+  link_id: string;
+  vault_id: string;
+  project_path: string;
+}
+
+export interface VaultKnowledgeImportResponse {
+  imported_count: number;
+  skipped_count: number;
+}
+
+export interface VaultKnowledgeExportResponse {
+  exported_count: number;
+  destination_path: string;
 }
 
 export interface VaultPullResponse {
@@ -85,6 +107,36 @@ export interface VaultPushEvents {
   'vault:push:committed': { vault_id: string; commit_hash: string; commit_message: string };
   'vault:push:pushing': { vault_id: string; url: string };
   'vault:push:completed': { vault_id: string; vault_name: string; commit_hash: string; files_pushed: number };
+}
+
+export interface VaultUnlinkProjectEvents {
+  'vault:unlink-project:started': { vault_id: string; link_id: string };
+  'vault:unlink-project:validating-vault': { vault_id: string };
+  'vault:unlink-project:validating-link': { link_id: string };
+  'vault:unlink-project:deleting-link': { link_id: string };
+  'vault:unlink-project:completed': { vault_id: string; link_id: string; project_path: string };
+}
+
+export interface VaultKnowledgeImportEvents {
+  'vault:knowledge-import:started': { vault_id: string; source_count: number };
+  'vault:knowledge-import:scanning': { source_count: number };
+  'vault:knowledge-import:found': { file_count: number };
+  'vault:knowledge-import:parsing': { file_path: string };
+  'vault:knowledge-import:importing': { title: string };
+  'vault:knowledge-import:entry-imported': { title: string };
+  'vault:knowledge-import:entry-skipped': { file_path: string; reason: string };
+  'vault:knowledge-import:rebuilding-index': { vault_id: string };
+  'vault:knowledge-import:completed': { vault_id: string; imported_count: number; skipped_count: number };
+  'vault:knowledge-import:error': { error: string; step: string };
+}
+
+export interface VaultKnowledgeExportEvents {
+  'vault:knowledge-export:started': { vault_id: string };
+  'vault:knowledge-export:loading-entries': { vault_id: string };
+  'vault:knowledge-export:exporting': { entry_count: number };
+  'vault:knowledge-export:entry-exported': { title: string };
+  'vault:knowledge-export:completed': { vault_id: string; exported_count: number; destination_path: string };
+  'vault:knowledge-export:error': { error: string; step: string };
 }
 
 export interface VaultAuditEvents {
@@ -177,4 +229,24 @@ export const VAULT_VECTOR_EMBEDDING_API = {
 export const VAULT_AUDIT_API = {
   method: 'POST' as const,
   path: '/api/vault/:id/audit',
+} as const;
+
+export const VAULT_LIST_LINKS_API = {
+  method: 'GET' as const,
+  path: '/api/vault/:id/links',
+} as const;
+
+export const VAULT_UNLINK_PROJECT_API = {
+  method: 'DELETE' as const,
+  path: '/api/vault/:id/links/:linkId',
+} as const;
+
+export const VAULT_KNOWLEDGE_IMPORT_API = {
+  method: 'POST' as const,
+  path: '/api/vault/:id/knowledge/import',
+} as const;
+
+export const VAULT_KNOWLEDGE_EXPORT_API = {
+  method: 'POST' as const,
+  path: '/api/vault/:id/knowledge/export',
 } as const;

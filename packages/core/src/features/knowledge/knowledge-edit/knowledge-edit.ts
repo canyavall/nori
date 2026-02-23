@@ -65,9 +65,16 @@ export async function runKnowledgeEdit(
     });
   }
 
-  // Step 05: Regenerate index (non-fatal)
+  // Step 05: Regenerate index — update existing DB entry (non-fatal)
   emit.emit('knowledge:edit:regenerating-index', { vault_id: input.vault_id });
-  const indexResult = regenerateIndex(input.vault_id, input.vault_path);
+  const indexResult = regenerateIndex(
+    input.file_path,
+    input.title,
+    input.category,
+    input.tags,
+    input.content,
+    input.db
+  );
   if (!indexResult.success) {
     emit.emit('knowledge:edit:index-warning', {
       entry_id: entryId,

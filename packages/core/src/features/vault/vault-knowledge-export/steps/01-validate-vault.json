@@ -1,0 +1,25 @@
+{
+  "type": "action",
+  "what": "Verify the vault exists in the database",
+  "why": "Cannot export from a vault that doesn't exist",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-export/vault-knowledge-export.ts",
+    "implementation": "features/vault/vault-knowledge-export/actions/validate-vault.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Vault row found in database",
+    "event": { "action": "vault_knowledge_export_validate_vault", "status": "success", "message": "Vault verified", "data_fields": ["vault_id"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault not found",
+      "criteria": "No row returned for vault_id",
+      "action": "Return VAULT_NOT_FOUND error",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [],
+  "calls": ["features/vault/vault-knowledge-export/actions/validate-vault.ts"]
+}

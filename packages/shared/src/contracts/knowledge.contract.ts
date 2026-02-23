@@ -17,13 +17,13 @@ export type { KnowledgeSearchInput as KnowledgeSearchRequest } from '../schemas/
 // ─── Response types ───────────────────────────────────────────────
 
 export interface KnowledgeCreateResponse {
-  id: string;
+  entry_id: string;
   title: string;
   file_path: string;
 }
 
 export interface KnowledgeEditResponse {
-  id: string;
+  entry_id: string;
   title: string;
   file_path: string;
 }
@@ -179,3 +179,17 @@ export const KNOWLEDGE_AUDIT_API = {
   method: 'POST' as const,
   path: '/api/knowledge/:id/audit',
 } as const;
+
+export const KNOWLEDGE_AI_GENERATE_API = {
+  method: 'POST' as const,
+  path: '/api/knowledge/ai-generate',
+} as const;
+
+export interface KnowledgeAiGenerateRequest {
+  vault_id: string;
+  prompt: string;
+}
+
+export interface KnowledgeAiGenerateResponse {
+  proposals: import('../types/knowledge.js').KnowledgeProposal[];
+}

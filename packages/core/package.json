@@ -20,7 +20,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.46",
     "@nori/shared": "workspace:*",
+    "ai": "^6.0.97",
     "gray-matter": "^4.0.3",
     "isomorphic-git": "^1.27.0",
     "sql.js": "^1.11.0",

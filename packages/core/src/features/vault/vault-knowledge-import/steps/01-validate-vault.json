@@ -1,0 +1,25 @@
+{
+  "type": "action",
+  "what": "Verify the vault exists and retrieve its local_path",
+  "why": "Cannot import into a vault that doesn't exist; local_path determines where files are written",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/vault/vault-knowledge-import/actions/validate-vault.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Vault row found in database",
+    "event": { "action": "vault_knowledge_import_validate_vault", "status": "success", "message": "Vault verified", "data_fields": ["vault_id", "local_path"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault not found",
+      "criteria": "No row returned for vault_id",
+      "action": "Return VAULT_NOT_FOUND error",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [],
+  "calls": ["features/vault/vault-knowledge-import/actions/validate-vault.ts"]
+}

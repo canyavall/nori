@@ -17,3 +17,10 @@ export interface KnowledgeFrontmatter {
   created?: string;
   updated?: string;
 }
+
+export interface KnowledgeProposal {
+  title: string;
+  category: string;
+  tags: string[];
+  content: string;
+}

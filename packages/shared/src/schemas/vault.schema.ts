@@ -35,3 +35,17 @@ export const vaultLinkProjectSchema = z.object({
 });
 
 export type VaultLinkProjectInput = z.infer<typeof vaultLinkProjectSchema>;
+
+export const vaultKnowledgeImportSchema = z.object({
+  source_paths: z
+    .array(z.string().min(1))
+    .min(1, 'At least one source path is required'),
+});
+
+export type VaultKnowledgeImportInput = z.infer<typeof vaultKnowledgeImportSchema>;
+
+export const vaultKnowledgeExportSchema = z.object({
+  destination_path: z.string().min(1, 'Destination path is required'),
+});
+
+export type VaultKnowledgeExportInput = z.infer<typeof vaultKnowledgeExportSchema>;

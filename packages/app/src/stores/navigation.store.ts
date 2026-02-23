@@ -35,3 +35,7 @@ export function clearContext() {
   setActiveProject(null);
   setActiveVault(null);
 }
+
+export function clearVaultContext() {
+  setActiveVault(null);
+}

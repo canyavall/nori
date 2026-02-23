@@ -17,6 +17,10 @@
     "on_valid": "03-call-backend",
     "on_back": "01-show-vault-picker"
   },
+  "success_handling": {
+    "criteria": "User selects a project to link to the chosen vault",
+    "transition": "03-call-backend"
+  },
   "error_handling": [
     {
       "type": "invalid_directory",

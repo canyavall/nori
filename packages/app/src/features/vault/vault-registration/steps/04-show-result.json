@@ -17,6 +17,10 @@
   "transitions": {
     "on_continue": "navigate:/vaults/{vault_id}"
   },
+  "success_handling": {
+    "criteria": "User acknowledges the registration success screen",
+    "transition": "navigate:/vaults/{vault_id}"
+  },
   "error_handling": [
     {
       "type": "data_missing",

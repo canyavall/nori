@@ -19,6 +19,10 @@
     "on_resume": "04-call-resume-session",
     "on_back": "01-show-session-list"
   },
+  "success_handling": {
+    "criteria": "User chooses to resume the displayed session",
+    "transition": "04-call-resume-session"
+  },
   "error_handling": [
     {
       "type": "session_not_found",

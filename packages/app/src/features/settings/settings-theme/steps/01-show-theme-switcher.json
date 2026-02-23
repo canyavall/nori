@@ -14,6 +14,10 @@
   "transitions": {
     "on_select": "02-apply-theme"
   },
+  "success_handling": {
+    "criteria": "User selects a theme option",
+    "transition": "02-apply-theme"
+  },
   "error_handling": [],
   "decisions": [
     {

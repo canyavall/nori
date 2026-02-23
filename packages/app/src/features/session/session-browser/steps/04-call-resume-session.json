@@ -17,6 +17,10 @@
     "on_success": "navigate:/chat/{session_id}",
     "on_error": "02-show-session-detail"
   },
+  "success_handling": {
+    "criteria": "Backend restores the session context and returns the session ID",
+    "transition": "navigate:/chat/{session_id}"
+  },
   "error_handling": [
     {
       "type": "session_not_found",

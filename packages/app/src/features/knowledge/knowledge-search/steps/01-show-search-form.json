@@ -18,6 +18,10 @@
   "transitions": {
     "on_submit": "02-call-backend"
   },
+  "success_handling": {
+    "criteria": "User enters a query and submits the search form",
+    "transition": "02-call-backend"
+  },
   "error_handling": [
     {
       "type": "validation_error",

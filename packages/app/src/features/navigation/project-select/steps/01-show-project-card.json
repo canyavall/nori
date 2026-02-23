@@ -8,11 +8,21 @@
   "ui": {
     "renders": "display",
     "layout": "grid",
-    "fields": ["name", "path", "is_git", "connected_vaults", "created_at"],
+    "fields": [
+      "name",
+      "path",
+      "is_git",
+      "connected_vaults",
+      "created_at"
+    ],
     "validation_schema": null
   },
   "transitions": {
     "on_select": "02-set-active-project"
+  },
+  "success_handling": {
+    "criteria": "User clicks a project card to select it",
+    "transition": "02-set-active-project"
   },
   "error_handling": [],
   "decisions": [

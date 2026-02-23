@@ -17,6 +17,10 @@
   "transitions": {
     "on_pull": "02-trigger-pull"
   },
+  "success_handling": {
+    "criteria": "Sync status is rendered and user triggers a pull",
+    "transition": "02-trigger-pull"
+  },
   "error_handling": [
     {
       "type": "status_fetch_failed",

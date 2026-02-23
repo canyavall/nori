@@ -1,0 +1,40 @@
+{
+  "type": "api_call",
+  "what": "Call backend export flow and stream progress via SSE",
+  "why": "The backend reads all knowledge entries and writes them as .md files to the destination",
+  "where": {
+    "component": "features/vault/vault-knowledge-export/VaultKnowledgeExportDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/vault/:id/knowledge/export",
+    "request_type": "VaultKnowledgeExportInput",
+    "response_type": "VaultKnowledgeExportResponse",
+    "sse_events": [
+      "vault:knowledge-export:loading-entries",
+      "vault:knowledge-export:exporting",
+      "vault:knowledge-export:entry-exported",
+      "vault:knowledge-export:completed"
+    ]
+  },
+  "transitions": {
+    "on_success": "show done state with exported count and destination path",
+    "on_error": "show error state with retry option"
+  },
+  "success_handling": {
+    "criteria": "Backend exports all entries and the SSE completed event is received with total exported count",
+    "transition": "show done state with exported count and destination path"
+  },
+  "error_handling": [
+    {
+      "type": "export_failed",
+      "display": "toast_error",
+      "description": "Backend failed to write one or more files — show error count and allow retry"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Backend is unreachable — show generic network error with retry option"
+    }
+  ],
+  "decisions": []
+}

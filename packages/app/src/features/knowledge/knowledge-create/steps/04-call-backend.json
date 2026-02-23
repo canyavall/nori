@@ -24,6 +24,10 @@
     "on_success": "05-show-audit-results",
     "on_error": "01-show-frontmatter-form"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the entry is written, audited, and indexed — SSE completed event received",
+    "transition": "05-show-audit-results"
+  },
   "error_handling": [
     {
       "type": "validation_failed",

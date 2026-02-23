@@ -1,0 +1,27 @@
+{
+  "type": "ui_action",
+  "what": "Clear the active vault from the navigation store and navigate back to the vault grid",
+  "why": "Allows the user to deselect the current vault by clicking its name in the ContextualSidebar header, returning to the full vault list",
+  "where": {
+    "component": "components/layout/ContextualSidebar.tsx"
+  },
+  "ui": {
+    "renders": "button in sidebar header",
+    "trigger": "User clicks the vault name button (title='Back to list') in the ContextualSidebar header"
+  },
+  "transitions": {
+    "on_click": "navigate:/vaults"
+  },
+  "success_handling": {
+    "criteria": "Active vault is cleared from the navigation store",
+    "transition": "navigate:/vaults"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "clearVaultContext() only clears activeVault; clearContext() clears both — vault deselect uses the narrower function",
+      "rationale": "Using clearVaultContext preserves any future project context that might co-exist. navigate('/vaults') returns the user to the vault grid, which becomes visible again once activeVault() is null."
+    }
+  ]
+}

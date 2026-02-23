@@ -15,6 +15,10 @@
     "on_select": "01-show-register-form",
     "on_cancel": "01-show-register-form"
   },
+  "success_handling": {
+    "criteria": "User selects a folder via the native directory picker",
+    "transition": "01-show-register-form (path pre-filled)"
+  },
   "error_handling": [
     {
       "scenario": "Running outside Tauri (browser/test env)",

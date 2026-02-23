@@ -8,10 +8,20 @@
   },
   "ui": {
     "renders": "form",
-    "fields": ["vault_type"],
+    "fields": [
+      "vault_type"
+    ],
     "options": [
-      { "value": "git", "label": "Git Repository", "description": "Clone from a remote git repo (GitHub, GitLab, etc.)" },
-      { "value": "local", "label": "Local Vault", "description": "Create a new vault stored locally in ~/.nori/vaults/" }
+      {
+        "value": "git",
+        "label": "Git Repository",
+        "description": "Clone from a remote git repo (GitHub, GitLab, etc.)"
+      },
+      {
+        "value": "local",
+        "label": "Local Vault",
+        "description": "Create a new vault stored locally in ~/.nori/vaults/"
+      }
     ]
   },
   "transitions": {
@@ -19,6 +29,11 @@
     "on_select_local": "01-show-form",
     "on_cancel": "close_dialog"
   },
+  "success_handling": {
+    "criteria": "User selects a vault type (git or local)",
+    "transition": "01-show-form"
+  },
+  "error_handling": [],
   "decisions": [
     {
       "date": "2026-02-21",

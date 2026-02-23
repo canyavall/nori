@@ -1,17 +1,26 @@
 {
   "type": "ui_action",
-  "what": "Display vault card in the vaults list",
-  "why": "Let the user see vault details and select a vault to activate the contextual sidebar",
+  "what": "Display vault card in the global vaults list",
+  "why": "Let the user see vault details and select a vault to activate the contextual sidebar. /vaults always shows ALL registered vaults — it is never filtered by an active project.",
   "where": {
     "component": "pages/VaultsPage.tsx"
   },
   "ui": {
     "renders": "display",
-    "fields": ["name", "git_url", "branch", "last_synced_at"],
+    "fields": [
+      "name",
+      "git_url",
+      "branch",
+      "last_synced_at"
+    ],
     "validation_schema": null
   },
   "transitions": {
     "on_select": "02-set-active-vault"
+  },
+  "success_handling": {
+    "criteria": "User clicks a vault card to select it",
+    "transition": "02-set-active-vault"
   },
   "error_handling": [],
   "decisions": [
@@ -19,6 +28,11 @@
       "date": "2026-02-21",
       "reason": "Card p-4 div is the click target; Sync/Link buttons call stopPropagation",
       "rationale": "Clicking vault info selects context; action buttons remain independent and do not trigger vault selection"
+    },
+    {
+      "date": "2026-02-22",
+      "reason": "/vaults is always global — no project filter applied",
+      "rationale": "Global vault management (/vaults) and project-linked vaults are separate concerns. Project-linked vaults are displayed as informational text in the ContextualSidebar when a project is active — they do not share the /vaults page."
     }
   ]
 }

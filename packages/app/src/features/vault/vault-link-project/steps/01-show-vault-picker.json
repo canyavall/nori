@@ -16,6 +16,10 @@
   "transitions": {
     "on_valid": "02-show-project-picker"
   },
+  "success_handling": {
+    "criteria": "User selects a vault from the list",
+    "transition": "02-show-project-picker"
+  },
   "error_handling": [
     {
       "type": "no_vaults_available",

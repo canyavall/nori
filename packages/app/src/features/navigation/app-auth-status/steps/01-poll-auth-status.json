@@ -21,6 +21,10 @@
   "transitions": {
     "on_result": "02-show-auth-indicator"
   },
+  "success_handling": {
+    "criteria": "Auth status response is received from the backend",
+    "transition": "02-show-auth-indicator"
+  },
   "error_handling": [
     {
       "scenario": "Server unreachable or SSE error",

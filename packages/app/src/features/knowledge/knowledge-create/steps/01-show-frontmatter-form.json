@@ -19,6 +19,10 @@
   "transitions": {
     "on_valid": "02-show-content-editor"
   },
+  "success_handling": {
+    "criteria": "All required frontmatter fields are filled and pass schema validation",
+    "transition": "02-show-content-editor"
+  },
   "error_handling": [
     {
       "type": "validation_error",

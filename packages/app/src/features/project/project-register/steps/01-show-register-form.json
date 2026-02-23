@@ -7,13 +7,20 @@
   },
   "ui": {
     "renders": "dialog",
-    "fields": ["path (read-only, populated by folder picker)", "name (optional text input)"],
+    "fields": [
+      "path (read-only, populated by folder picker)",
+      "name (optional text input)"
+    ],
     "validation_schema": "@nori/shared:projectRegisterSchema"
   },
   "transitions": {
     "on_browse": "02-pick-folder",
     "on_submit": "03-submit-registration",
     "on_cancel": "close_dialog"
+  },
+  "success_handling": {
+    "criteria": "User fills in the project name and path fields",
+    "transition": "03-submit-registration (or 02-pick-folder for directory browse)"
   },
   "error_handling": [],
   "decisions": [

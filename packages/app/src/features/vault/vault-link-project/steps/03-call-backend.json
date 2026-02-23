@@ -17,6 +17,10 @@
     "on_success": "04-show-confirmation",
     "on_error": "01-show-vault-picker"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the vault–project link is written",
+    "transition": "04-show-confirmation"
+  },
   "error_handling": [
     {
       "type": "vault_not_found",

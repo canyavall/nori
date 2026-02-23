@@ -17,6 +17,10 @@
     "on_save": "03-preview-knowledge",
     "on_back": "01-show-frontmatter-form"
   },
+  "success_handling": {
+    "criteria": "User saves content and it is non-empty",
+    "transition": "03-preview-knowledge"
+  },
   "error_handling": [
     {
       "type": "editor_init_failed",

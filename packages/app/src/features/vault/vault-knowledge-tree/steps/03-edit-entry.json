@@ -1,0 +1,47 @@
+{
+  "type": "ui_action",
+  "what": "Open the edit dialog for the knowledge entry the user clicked",
+  "why": "User clicked an entry in the tree and wants to modify its content or metadata",
+  "where": {
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditDialog.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": [
+      "title",
+      "category",
+      "tags",
+      "content"
+    ],
+    "validation_schema": "@nori/shared:KnowledgeEditRequest"
+  },
+  "transitions": {
+    "on_save": "02-show-tree",
+    "on_cancel": "02-show-tree"
+  },
+  "success_handling": {
+    "criteria": "User saves changes to the entry",
+    "transition": "02-show-tree"
+  },
+  "error_handling": [
+    {
+      "scenario": "Entry not found",
+      "criteria": "GET /api/knowledge/:id returns 404",
+      "action": "Show error message inside dialog",
+      "severity": "error",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "Reuse existing KnowledgeEditDialog",
+      "rationale": "KnowledgeEditDialog already handles load → edit → save → audit; no duplication needed"
+    },
+    {
+      "date": "2026-02-22",
+      "reason": "Reload tree after save or cancel",
+      "rationale": "Ensures the tree reflects latest data after an edit (title/category may have changed)"
+    }
+  ]
+}

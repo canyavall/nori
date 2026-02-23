@@ -16,6 +16,10 @@
   "transitions": {
     "on_success": "03-show-results"
   },
+  "success_handling": {
+    "criteria": "Backend returns a ranked list of matching knowledge entries",
+    "transition": "03-show-results"
+  },
   "error_handling": [
     {
       "type": "search_failed",

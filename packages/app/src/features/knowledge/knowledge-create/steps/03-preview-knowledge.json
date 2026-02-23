@@ -18,6 +18,10 @@
     "on_confirm": "04-call-backend",
     "on_edit": "02-show-content-editor"
   },
+  "success_handling": {
+    "criteria": "User reviews the rendered preview and confirms creation",
+    "transition": "04-call-backend"
+  },
   "error_handling": [
     {
       "type": "render_failed",

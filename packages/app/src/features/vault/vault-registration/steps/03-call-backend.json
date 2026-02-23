@@ -36,6 +36,10 @@
     "on_success": "04-show-result",
     "on_error": "01-show-form"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the vault is registered and the index is built — SSE completed event received",
+    "transition": "04-show-result"
+  },
   "error_handling": [
     {
       "type": "git_access_denied",

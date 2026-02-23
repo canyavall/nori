@@ -1,17 +1,29 @@
 {
   "type": "validation",
-  "what": "Set the active vault in the navigation store",
-  "why": "Updates global navigation context so ContextualSidebar renders with vault-specific links (Knowledge only)",
+  "what": "Set the active vault in the navigation store so the UI switches to master-detail layout",
+  "why": "Updates global navigation context: VaultsPage reacts by replacing the vault grid with a left vault list + right VaultKnowledgeTree panel; ContextualSidebar switches to vault mode showing Knowledge and Linked Projects links",
   "where": {
     "implementation": "stores/navigation.store#selectVault"
   },
-  "transitions": {},
+  "transitions": {
+    "on_vault_selected": "vault-knowledge-tree/01-load-knowledge",
+    "on_deselect": "03-clear-vault-context"
+  },
+  "success_handling": {
+    "criteria": "Selected vault is stored as the active vault and knowledge tree begins loading",
+    "transition": "vault-knowledge-tree/01-load-knowledge"
+  },
   "error_handling": [],
   "decisions": [
     {
       "date": "2026-02-21",
-      "reason": "selectVault clears activeProject; no navigation occurs",
-      "rationale": "Vault context shows Knowledge only (no Sessions). Sidebar appears reactively — no further step or dialog needed."
+      "reason": "selectVault clears activeProject; no route navigation occurs",
+      "rationale": "Vault context activates the ContextualSidebar (Knowledge link only, no Sessions). No separate navigation needed."
+    },
+    {
+      "date": "2026-02-22",
+      "reason": "VaultsPage uses Show when={activeVault()} to switch layouts reactively",
+      "rationale": "Setting activeVault() signal triggers Show when={activeVault()} in VaultsPage, replacing the full-width grid with a master-detail layout: w-96 vault list on the left, VaultKnowledgeTree filling the right column."
     }
   ]
 }

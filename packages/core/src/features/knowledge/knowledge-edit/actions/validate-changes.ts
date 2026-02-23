@@ -11,10 +11,22 @@ export function validateChanges(
   title: string,
   category: string,
   tags: string[],
+  description: string,
+  required_knowledge: string[],
+  rules: string[],
+  optional_knowledge: string[] | undefined,
   content: string
 ): StepResult<ValidatedChanges> | FlowError {
   // Validate frontmatter
-  const result = knowledgeFrontmatterSchema.safeParse({ title, category, tags });
+  const result = knowledgeFrontmatterSchema.safeParse({
+    title,
+    category,
+    tags,
+    description,
+    required_knowledge,
+    rules,
+    optional_knowledge,
+  });
 
   if (!result.success) {
     const issues = result.error.issues;

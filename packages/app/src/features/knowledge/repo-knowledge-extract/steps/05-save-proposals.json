@@ -1,0 +1,36 @@
+{
+  "type": "api_call",
+  "what": "Save selected proposals one-by-one as knowledge entries via SSE",
+  "why": "Each proposal is saved as an individual knowledge entry through the existing create endpoint",
+  "where": {
+    "component": "features/knowledge/repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/knowledge",
+    "request_type": "KnowledgeCreateInput",
+    "response_type": "KnowledgeCreateResponse",
+    "sse_events": [
+      "knowledge:create:started",
+      "knowledge:create:completed"
+    ]
+  },
+  "transitions": {
+    "on_all_saved": "close_dialog"
+  },
+  "error_handling": [
+    {
+      "scenario": "Individual save fails",
+      "criteria": "SSE onError for one proposal",
+      "action": "Skip and continue with next proposal",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Sequential saves",
+      "rationale": "Save one-by-one to avoid overwhelming the server and to provide accurate progress updates"
+    }
+  ]
+}

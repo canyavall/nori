@@ -3,7 +3,7 @@
   "what": "Clear the active project (and vault) from the navigation store and navigate back to the project grid",
   "why": "Allows the user to deselect the current project by clicking its name in the ContextualSidebar header, returning to the full project list",
   "where": {
-    "component": "components/layout/ContextualSidebar.tsx"
+    "component": "components/layout/ContextualSidebar/ContextualSidebar.tsx"
   },
   "ui": {
     "renders": "button in sidebar header",

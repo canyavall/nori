@@ -6,7 +6,7 @@ import { queryOne } from '../../../shared/utils/database.js';
 export function validateVaultExists(db: Database, vaultId: string): StepResult<Vault> | FlowError {
   const row = queryOne(
     db,
-    'SELECT id, name, git_url, branch, local_path, created_at, updated_at, last_synced_at FROM vaults WHERE id = ?',
+    'SELECT id, name, vault_type, git_url, branch, local_path, created_at, updated_at, last_synced_at FROM vaults WHERE id = ?',
     [vaultId]
   );
 
@@ -27,8 +27,9 @@ export function validateVaultExists(db: Database, vaultId: string): StepResult<V
   const vault: Vault = {
     id: row.id as string,
     name: row.name as string,
-    git_url: row.git_url as string,
-    branch: row.branch as string,
+    vault_type: (row.vault_type as 'git' | 'local') ?? 'git',
+    git_url: (row.git_url as string) ?? null,
+    branch: (row.branch as string) ?? null,
     local_path: row.local_path as string,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,

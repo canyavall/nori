@@ -1,0 +1,52 @@
+{
+  "type": "action",
+  "what": "Rebuild index after import",
+  "why": "Newly imported entries must be searchable immediately",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/knowledge/knowledge-create/actions/regenerate-index.ts"
+  },
+  "output": {
+    "console": "Index rebuild status",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "regenerateIndex call completes without error",
+    "event": {
+      "action": "vault_knowledge_import_rebuild_index",
+      "status": "success",
+      "message": "Index rebuilt after import",
+      "data_fields": [
+        "vault_id"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Index rebuild fails",
+      "criteria": "regenerateIndex returns an error",
+      "action": "Log as warning, imported entries exist but may not be searchable until next full rebuild",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "vault_knowledge_import_rebuild_index",
+        "status": "warning",
+        "message": "Index rebuild failed after import, entries may not be searchable",
+        "data_fields": [
+          "vault_id",
+          "build_error"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2025-01-01",
+      "reason": "Reuse regenerateIndex from knowledge-create",
+      "rationale": "Cross-flow action reuse — the same DB insert logic applies after import"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-create/actions/regenerate-index.ts"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "type": "action",
+  "what": "Validate and auto-fix LLM-generated knowledge proposals",
+  "why": "LLM output may have formatting issues (non-kebab tags, long descriptions) that need correction before saving",
+  "where": {
+    "entry_point": "features/knowledge/repo-knowledge-extract/repo-knowledge-extract.ts",
+    "implementation": "features/knowledge/repo-knowledge-extract/actions/validate-proposals.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All proposals pass validation after auto-fixes",
+    "event": {
+      "action": "repo_knowledge_extract_validated",
+      "status": "success",
+      "message": "Proposals validated",
+      "data_fields": ["proposal_count", "warning_count"]
+    }
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Auto-fix over reject",
+      "rationale": "Better UX to fix common issues automatically than to reject proposals and require regeneration"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Reference validation",
+      "rationale": "required_knowledge and optional_knowledge references must point to other proposals in the batch or existing entries"
+    }
+  ],
+  "calls": ["features/knowledge/repo-knowledge-extract/actions/validate-proposals.ts"]
+}

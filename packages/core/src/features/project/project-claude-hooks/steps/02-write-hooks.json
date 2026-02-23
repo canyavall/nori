@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Write updated hooks configuration to the specified settings file",
+  "why": "Persists hook edits — user chooses whether to save to shared or local settings",
+  "where": {
+    "entry_point": "features/project/project-claude-hooks/project-claude-hooks.ts",
+    "implementation": "features/project/project-claude-hooks/actions/write-hooks.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Settings file updated with new hooks section, other keys preserved",
+    "event": {
+      "action": "project_claude_hooks_write",
+      "status": "success",
+      "message": "Hooks configuration saved successfully",
+      "data_fields": ["target"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid JSON in new content",
+      "criteria": "JSON.parse throws SyntaxError on the incoming hooks data",
+      "action": "Return error with code INVALID_JSON (don't corrupt the file)",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Target file doesn't exist",
+      "criteria": "File not found at target path",
+      "action": "Create it with { hooks: ... } (auto-create)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "Write failure",
+      "criteria": "writeFile throws error",
+      "action": "Return error with code FILE_WRITE_FAILED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Validate JSON before writing",
+      "rationale": "Critical: a broken settings.json breaks Claude Code entirely"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Read-modify-write: update only the hooks key",
+      "rationale": "Preserve other settings like permissions, allowed tools, etc."
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Write target specified by caller: shared or local",
+      "rationale": "Shared hooks go to settings.json (committed), local to settings.local.json (personal)"
+    }
+  ],
+  "calls": ["features/project/project-claude-hooks/actions/write-hooks.ts"]
+}

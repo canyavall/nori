@@ -1,0 +1,37 @@
+{
+  "type": "api_call",
+  "what": "Start repository scan and initial LLM analysis via SSE",
+  "why": "Triggers backend to scan project files and run the first analysis pass",
+  "where": {
+    "component": "features/knowledge/repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/knowledge/repo-extract",
+    "request_type": "RepoKnowledgeExtractStartInput",
+    "response_type": "RepoKnowledgeExtractStartResponse",
+    "sse_events": [
+      "repo-extract:started",
+      "repo-extract:scanning",
+      "repo-extract:scan-complete",
+      "repo-extract:analyzing",
+      "repo-extract:llm-thinking",
+      "repo-extract:questions",
+      "repo-extract:proposals-ready",
+      "repo-extract:completed"
+    ]
+  },
+  "transitions": {
+    "on_questions": "02-show-conversation",
+    "on_proposals": "04-review-proposals"
+  },
+  "error_handling": [
+    {
+      "scenario": "SSE connection fails",
+      "criteria": "onError callback triggered",
+      "action": "Show error state with retry option",
+      "severity": "fatal",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

@@ -3,7 +3,7 @@
   "what": "Create a new chat session via the backend",
   "why": "Initialize a new session so the user can start a fresh conversation with knowledge context",
   "where": {
-    "component": "features/session/session-browser/SessionBrowserPage.tsx"
+    "component": "features/session/session-browser/SessionBrowserPage/SessionBrowserPage.tsx"
   },
   "contract": {
     "endpoint": "POST /api/session",

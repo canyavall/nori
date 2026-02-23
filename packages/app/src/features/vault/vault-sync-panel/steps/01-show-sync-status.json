@@ -3,8 +3,8 @@
   "what": "Display current vault sync status including last pull time and pending changes",
   "why": "Give the user visibility into the synchronization state of their vault so they can decide whether to pull updates",
   "where": {
-    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx",
-    "step_component": "features/vault/vault-sync-panel/SyncStatus.tsx"
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel/VaultSyncPanel.tsx",
+    "step_component": "features/vault/vault-sync-panel/SyncStatus/SyncStatus.tsx"
   },
   "ui": {
     "renders": "display",

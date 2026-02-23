@@ -11,6 +11,7 @@ export const KnowledgeEditDialog = (props: KnowledgeEditDialogProps) => {
     progressMessage,
     entry,
     content,
+    frontmatter,
     handleSave,
     onClose,
   } = useKnowledgeEditDialog(props.entryId, props.onClose);
@@ -47,6 +48,10 @@ export const KnowledgeEditDialog = (props: KnowledgeEditDialogProps) => {
               initialTitle={entry()?.title ?? ''}
               initialCategory={entry()?.category ?? ''}
               initialTags={entry()?.tags ?? []}
+              initialDescription={entry()?.description ?? ''}
+              initialRequiredKnowledge={entry()?.required_knowledge ?? []}
+              initialRules={entry()?.rules ?? []}
+              initialOptionalKnowledge={frontmatter()?.optional_knowledge}
               initialContent={content()}
               error={saveError()}
               onSave={handleSave}

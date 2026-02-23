@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "PUT /api/project/claude/mcps with updated .mcp.json content",
+  "why": "Persists MCP server configuration edits",
+  "where": {
+    "component": "features/project/project-claude-mcps/McpsSection.hook.ts#handleSave"
+  },
+  "contract": {
+    "endpoint": "PUT /api/project/claude/mcps",
+    "request_type": "{ content: string }",
+    "response_type": "@nori/shared:ClaudeMcpWriteResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-mcps-list",
+    "on_error": "03-show-mcp-editor"
+  },
+  "success_handling": {
+    "criteria": "MCP config saved to disk",
+    "transition": "02-show-mcps-list with success toast"
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid JSON",
+      "criteria": "API returns INVALID_JSON error",
+      "action": "Show validation error in editor",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

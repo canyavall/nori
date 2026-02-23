@@ -3,7 +3,7 @@
   "what": "Execute knowledge search query against the backend",
   "why": "Search the indexed knowledge entries using the provided query and filters to return ranked results",
   "where": {
-    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx"
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage/KnowledgeSearchPage.tsx"
   },
   "contract": {
     "endpoint": "GET /api/knowledge/search?q=...",

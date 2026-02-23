@@ -1,0 +1,33 @@
+{
+  "type": "api_call",
+  "what": "Send user reply to LLM for continued analysis",
+  "why": "Continues the multi-turn conversation, providing user answers to LLM questions",
+  "where": {
+    "component": "features/knowledge/repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/knowledge/repo-extract/:sessionId/reply",
+    "request_type": "RepoKnowledgeExtractReplyInput",
+    "response_type": "RepoKnowledgeExtractReplyResponse",
+    "sse_events": [
+      "repo-extract:llm-thinking",
+      "repo-extract:questions",
+      "repo-extract:proposals-ready",
+      "repo-extract:completed"
+    ]
+  },
+  "transitions": {
+    "on_questions": "02-show-conversation",
+    "on_proposals": "04-review-proposals"
+  },
+  "error_handling": [
+    {
+      "scenario": "Session expired",
+      "criteria": "404 response from server",
+      "action": "Show error with option to restart",
+      "severity": "fatal",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

@@ -6,7 +6,6 @@ import { validateVault } from './actions/validate-vault.js';
 import { scanSources } from './actions/scan-sources.js';
 import { parseFiles } from './actions/parse-files.js';
 import { importEntries } from './actions/import-entries.js';
-import { regenerateIndex } from '../../knowledge/knowledge-create/actions/regenerate-index.js';
 
 export interface VaultKnowledgeImportInput {
   vault_id: string;
@@ -62,9 +61,8 @@ export async function runVaultKnowledgeImport(
 
   const { imported_count, skipped_count } = importResult.data;
 
-  // Step 05: Rebuild index (non-fatal)
+  // Step 05: Index already populated — importEntries inserts each entry into DB in step 04
   emit.emit('vault:knowledge-import:rebuilding-index', { vault_id: input.vault_id });
-  regenerateIndex(input.vault_id, local_path);
 
   emit.emit('vault:knowledge-import:completed', {
     vault_id: input.vault_id,

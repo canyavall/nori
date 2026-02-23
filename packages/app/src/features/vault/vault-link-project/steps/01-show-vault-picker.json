@@ -3,8 +3,8 @@
   "what": "Display vault picker for selecting a registered vault to link",
   "why": "Allow the user to choose which registered vault they want to link to a project",
   "where": {
-    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
-    "step_component": "features/vault/vault-link-project/VaultPicker.tsx"
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/VaultPicker/VaultPicker.tsx"
   },
   "ui": {
     "renders": "form",

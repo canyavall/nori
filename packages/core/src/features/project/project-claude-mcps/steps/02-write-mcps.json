@@ -1,0 +1,53 @@
+{
+  "type": "action",
+  "what": "Write updated MCP configuration to .mcp.json",
+  "why": "Persists MCP server edits from the editor",
+  "where": {
+    "entry_point": "features/project/project-claude-mcps/project-claude-mcps.ts",
+    "implementation": "features/project/project-claude-mcps/actions/write-mcps.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": ".mcp.json written with updated mcpServers, other keys preserved",
+    "event": {
+      "action": "project_claude_mcps_write",
+      "status": "success",
+      "message": "MCP configuration saved successfully",
+      "data_fields": ["server_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid JSON in new content",
+      "criteria": "JSON.parse throws SyntaxError",
+      "action": "Return error with code INVALID_JSON",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Write failure",
+      "criteria": "writeFile throws error",
+      "action": "Return error with code FILE_WRITE_FAILED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Validate JSON before writing",
+      "rationale": "Critical: broken .mcp.json breaks Claude Code MCP server connections"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Read-modify-write: update only mcpServers",
+      "rationale": "Preserve other keys if any exist in .mcp.json"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Create .mcp.json if it doesn't exist",
+      "rationale": "Users may want to add MCP servers to a project that doesn't have any yet"
+    }
+  ],
+  "calls": ["features/project/project-claude-mcps/actions/write-mcps.ts"]
+}

@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "Fetch rule list from GET /api/project/claude/rules",
+  "why": "Populates the rules page with all project rules grouped by type",
+  "where": {
+    "component": "features/project/project-claude-rules/RulesSection.hook.ts"
+  },
+  "contract": {
+    "endpoint": "GET /api/project/claude/rules",
+    "request_type": "{ projectPath: string (query param) }",
+    "response_type": "@nori/shared:ClaudeRuleListResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-rules-list",
+    "on_error": "show error state"
+  },
+  "success_handling": {
+    "criteria": "API returns rule array",
+    "transition": "02-show-rules-list"
+  },
+  "error_handling": [
+    {
+      "scenario": "API request fails",
+      "criteria": "Network error or non-2xx response",
+      "action": "Show error message in the rules section",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

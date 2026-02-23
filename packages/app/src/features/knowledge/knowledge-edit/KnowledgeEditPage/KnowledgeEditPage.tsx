@@ -23,6 +23,9 @@ export const KnowledgeEditPage = (props: KnowledgeEditPageProps) => {
             initialTitle={entry()?.title ?? ''}
             initialCategory={entry()?.category ?? ''}
             initialTags={entry()?.tags ?? []}
+            initialDescription={entry()?.description ?? ''}
+            initialRequiredKnowledge={entry()?.required_knowledge ?? []}
+            initialRules={entry()?.rules ?? []}
             initialContent={content()}
             error={error()}
             onSave={handleSave}

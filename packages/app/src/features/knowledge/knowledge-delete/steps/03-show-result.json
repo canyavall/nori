@@ -3,8 +3,8 @@
   "what": "Display deletion confirmed message",
   "why": "Confirm to the user that the knowledge entry has been successfully deleted and guide them back to the knowledge list",
   "where": {
-    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx",
-    "step_component": "features/knowledge/knowledge-delete/DeleteResult.tsx"
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog/KnowledgeDeleteDialog.tsx",
+    "step_component": "features/knowledge/knowledge-delete/DeleteResult/DeleteResult.tsx"
   },
   "ui": {
     "renders": "display",

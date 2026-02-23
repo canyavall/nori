@@ -1,0 +1,50 @@
+{
+  "type": "action",
+  "what": "Write updated content to a rule file",
+  "why": "Persists user edits from the rule editor",
+  "where": {
+    "entry_point": "features/project/project-claude-rules/project-claude-rules.ts",
+    "implementation": "features/project/project-claude-rules/actions/write-rule.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Rule file written successfully",
+    "event": {
+      "action": "project_claude_rules_write",
+      "status": "success",
+      "message": "Rule saved successfully",
+      "data_fields": ["relativePath"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Path traversal attempt",
+      "criteria": "Resolved path escapes project root",
+      "action": "Return error with code INVALID_PATH",
+      "severity": "error",
+      "recoverable": false
+    },
+    {
+      "scenario": "Permission denied",
+      "criteria": "EACCES error from writeFile",
+      "action": "Return error with code PERMISSION_DENIED",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Write failure",
+      "criteria": "writeFile throws error",
+      "action": "Return error with code FILE_WRITE_FAILED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Same path traversal guard as read-rule",
+      "rationale": "Write operations need at least the same security as read operations"
+    }
+  ],
+  "calls": ["features/project/project-claude-rules/actions/write-rule.ts"]
+}

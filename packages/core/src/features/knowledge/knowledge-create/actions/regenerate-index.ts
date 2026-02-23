@@ -14,6 +14,9 @@ export function regenerateIndex(
   title: string,
   category: string,
   tags: string[],
+  description: string,
+  requiredKnowledge: string[],
+  rules: string[],
   content: string,
   db: Database
 ): StepResult<RegenerateIndexResult> | FlowError {
@@ -24,9 +27,9 @@ export function regenerateIndex(
   try {
     db.run(
       `INSERT OR REPLACE INTO knowledge_entries
-         (id, vault_id, file_path, title, category, tags, content_hash, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [entryId, vaultId, filePath, title, category, JSON.stringify(tags), contentHash, now, now]
+         (id, vault_id, file_path, title, category, tags, description, required_knowledge, rules, content_hash, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [entryId, vaultId, filePath, title, category, JSON.stringify(tags), description, JSON.stringify(requiredKnowledge), JSON.stringify(rules), contentHash, now, now]
     );
 
     return {

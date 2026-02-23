@@ -21,6 +21,15 @@ export const useKnowledgeEditDialog = (entryId: string, onClose: () => void) => 
       if (typeof e.tags === 'string') {
         try { e.tags = JSON.parse(e.tags); } catch { e.tags = []; }
       }
+      if (typeof (e as unknown as Record<string, unknown>).required_knowledge === 'string') {
+        try { e.required_knowledge = JSON.parse((e as unknown as Record<string, unknown>).required_knowledge as string); } catch { e.required_knowledge = []; }
+      }
+      if (typeof (e as unknown as Record<string, unknown>).rules === 'string') {
+        try { e.rules = JSON.parse((e as unknown as Record<string, unknown>).rules as string); } catch { e.rules = []; }
+      }
+      e.description = e.description ?? '';
+      e.required_knowledge = e.required_knowledge ?? [];
+      e.rules = e.rules ?? [];
 
       const contentRes = await apiGet<{ data: { content: string; frontmatter: KnowledgeFrontmatter } }>(
         `/api/knowledge/${entryId}/content`
@@ -35,7 +44,16 @@ export const useKnowledgeEditDialog = (entryId: string, onClose: () => void) => 
     }
   });
 
-  function handleSave(data: { title: string; category: string; tags: string[]; content: string }) {
+  function handleSave(data: {
+    title: string;
+    category: string;
+    tags: string[];
+    description: string;
+    required_knowledge: string[];
+    rules: string[];
+    optional_knowledge?: string[];
+    content: string;
+  }) {
     setStep('saving');
     setProgressMessage('Saving changes...');
     setSaveError('');
@@ -68,6 +86,9 @@ export const useKnowledgeEditDialog = (entryId: string, onClose: () => void) => 
             title: data.title,
             category: data.category,
             tags: data.tags,
+            description: data.description,
+            required_knowledge: data.required_knowledge,
+            rules: data.rules,
             updated_at: new Date().toISOString(),
           });
           setStep('done');

@@ -3,7 +3,7 @@
   "what": "Clear the active vault from the navigation store and navigate back to the vault grid",
   "why": "Allows the user to deselect the current vault by clicking its name in the ContextualSidebar header, returning to the full vault list",
   "where": {
-    "component": "components/layout/ContextualSidebar.tsx"
+    "component": "components/layout/ContextualSidebar/ContextualSidebar.tsx"
   },
   "ui": {
     "renders": "button in sidebar header",

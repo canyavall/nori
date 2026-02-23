@@ -1,0 +1,38 @@
+{
+  "type": "action",
+  "what": "Detect whether the project directory is a Git repository by checking for a .git folder",
+  "why": "Determine Git status so downstream features (vault sync, hooks) can adapt behavior for Git vs non-Git projects",
+  "where": {
+    "entry_point": "features/project/project-register/project-register.ts",
+    "implementation": "features/project/project-register/actions/detect-git.ts"
+  },
+  "output": {
+    "console": "Boolean flag indicating whether the project is a Git repository",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Successfully checked for .git directory existence and returned is_git boolean",
+    "event": {
+      "action": "project_register_detect_git",
+      "status": "success",
+      "message": "Git detection completed",
+      "data_fields": [
+        "is_git"
+      ]
+    }
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "condition": ".git directory exists at project root",
+      "outcome": "Set is_git to true, proceed to init-nori-dir step"
+    },
+    {
+      "condition": ".git directory does not exist at project root",
+      "outcome": "Set is_git to false, proceed to init-nori-dir step"
+    }
+  ],
+  "calls": [
+    "features/project/project-register/actions/detect-git.ts"
+  ]
+}

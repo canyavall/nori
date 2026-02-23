@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render a list of skill cards with name, description, globs, alwaysApply badge",
+  "why": "Entry point — users see all skills and can click to view/edit",
+  "where": {
+    "component": "features/project/project-claude-skills/SkillsSection.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": ["name", "description", "globs", "alwaysApply"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "03-show-skill-editor",
+    "on_back": "navigate_back"
+  },
+  "success_handling": {
+    "criteria": "Skills displayed in card grid",
+    "transition": "03-show-skill-editor on card click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

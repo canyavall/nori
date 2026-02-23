@@ -3,8 +3,8 @@
   "what": "Display markdown editor for composing knowledge content",
   "why": "Provide a rich editing experience for writing the knowledge entry body in markdown format",
   "where": {
-    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
-    "step_component": "features/knowledge/knowledge-create/ContentEditor.tsx"
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/ContentEditor/ContentEditor.tsx"
   },
   "ui": {
     "renders": "editor",

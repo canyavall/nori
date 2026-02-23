@@ -33,6 +33,9 @@ export const useKnowledgeCreateDialog = (vaultId: () => string) => {
         ...p,
         included: true,
         tagsInput: p.tags.join(', '),
+        requiredKnowledgeInput: p.required_knowledge.join(', '),
+        rulesInput: p.rules.join('\n'),
+        optionalKnowledgeInput: (p.optional_knowledge ?? []).join(', '),
       }));
       setProposals(editable);
       setStep('review');
@@ -48,6 +51,18 @@ export const useKnowledgeCreateDialog = (vaultId: () => string) => {
       if (field === 'tags') {
         const tags = (value as string).split(',').map((t) => t.trim()).filter(Boolean);
         return { ...p, tagsInput: value as string, tags };
+      }
+      if (field === 'required_knowledge') {
+        const items = (value as string).split(',').map((t) => t.trim()).filter(Boolean);
+        return { ...p, requiredKnowledgeInput: value as string, required_knowledge: items };
+      }
+      if (field === 'rules') {
+        const items = (value as string).split('\n').map((t) => t.trim()).filter(Boolean);
+        return { ...p, rulesInput: value as string, rules: items };
+      }
+      if (field === 'optional_knowledge') {
+        const items = (value as string).split(',').map((t) => t.trim()).filter(Boolean);
+        return { ...p, optionalKnowledgeInput: value as string, optional_knowledge: items.length > 0 ? items : undefined };
       }
       return { ...p, [field]: value };
     }));
@@ -72,6 +87,10 @@ export const useKnowledgeCreateDialog = (vaultId: () => string) => {
           title: p.title,
           category: p.category,
           tags: p.tags,
+          description: p.description,
+          required_knowledge: p.required_knowledge,
+          rules: p.rules,
+          optional_knowledge: p.optional_knowledge,
           content: p.content,
         }, {
           onEvent: () => {},
@@ -92,6 +111,9 @@ export const useKnowledgeCreateDialog = (vaultId: () => string) => {
                 title: resultData.data.title,
                 category: p.category,
                 tags: p.tags,
+                description: p.description,
+                required_knowledge: p.required_knowledge,
+                rules: p.rules,
                 content_hash: '',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),

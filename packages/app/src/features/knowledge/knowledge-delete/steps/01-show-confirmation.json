@@ -3,8 +3,8 @@
   "what": "Display delete confirmation dialog with entry name and dependency warnings",
   "why": "Ensure the user explicitly confirms deletion and is aware of any dependent entries or sessions that reference this knowledge",
   "where": {
-    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx",
-    "step_component": "features/knowledge/knowledge-delete/DeleteConfirmation.tsx"
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog/KnowledgeDeleteDialog.tsx",
+    "step_component": "features/knowledge/knowledge-delete/DeleteConfirmation/DeleteConfirmation.tsx"
   },
   "ui": {
     "renders": "dialog",

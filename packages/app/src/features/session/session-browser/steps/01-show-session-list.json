@@ -3,8 +3,8 @@
   "what": "Display list of all sessions with dates, message counts, and status",
   "why": "Give the user an overview of their sessions so they can select one to view details, resume, or create a new session",
   "where": {
-    "component": "features/session/session-browser/SessionBrowserPage.tsx",
-    "step_component": "features/session/session-browser/SessionList.tsx"
+    "component": "features/session/session-browser/SessionBrowserPage/SessionBrowserPage.tsx",
+    "step_component": "features/session/session-browser/SessionList/SessionList.tsx"
   },
   "ui": {
     "renders": "display",

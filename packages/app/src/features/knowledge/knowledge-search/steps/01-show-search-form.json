@@ -3,8 +3,8 @@
   "what": "Display search form with query input and filter options",
   "why": "Allow the user to enter a search query and optionally filter by category or tags to find relevant knowledge entries",
   "where": {
-    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx",
-    "step_component": "features/knowledge/knowledge-search/SearchForm.tsx"
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage/KnowledgeSearchPage.tsx",
+    "step_component": "features/knowledge/knowledge-search/SearchForm/SearchForm.tsx"
   },
   "ui": {
     "renders": "form",

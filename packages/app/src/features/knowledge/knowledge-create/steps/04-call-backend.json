@@ -3,7 +3,7 @@
   "what": "Submit knowledge entry creation request to the backend",
   "why": "Persist the new knowledge entry by validating, writing to the vault, auditing content quality, and indexing for search",
   "where": {
-    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx"
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog.tsx"
   },
   "contract": {
     "endpoint": "POST /api/knowledge",
@@ -11,12 +11,13 @@
     "response_type": "@nori/shared:KnowledgeCreateResponse",
     "error_type": "@nori/shared:ApiError",
     "sse_events": [
-      "knowledge:create:validating",
-      "knowledge:create:writing",
+      "knowledge:create:started",
+      "knowledge:create:validating-frontmatter",
+      "knowledge:create:validating-content",
+      "knowledge:create:writing-file",
       "knowledge:create:auditing",
-      "knowledge:create:indexing",
-      "knowledge:create:completed",
-      "knowledge:create:error"
+      "knowledge:create:regenerating-index",
+      "knowledge:create:completed"
     ]
   },
   "backend_flow": "core/features/knowledge/knowledge-create",

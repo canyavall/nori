@@ -15,6 +15,8 @@ vi.mock('../../../lib/api', () => ({
 vi.mock('../../../stores/project.store', () => ({
   addProject: vi.fn(),
   setRegisterOpen: vi.fn(),
+  registerPrefilledPath: () => '',
+  setRegisterPrefilledPath: vi.fn(),
 }));
 
 import { pickFolder } from '../../../lib/folder-picker';

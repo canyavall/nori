@@ -1,0 +1,57 @@
+{
+  "type": "action",
+  "what": "Gather vault context (name, type, existing categories, sample titles) from the database for LLM prompt construction",
+  "why": "The LLM needs to understand the vault's existing structure and naming conventions to generate knowledge entries that fit naturally alongside existing content",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-ai-generate/knowledge-ai-generate.ts",
+    "implementation": "features/knowledge/knowledge-ai-generate/actions/gather-context.ts"
+  },
+  "output": {
+    "console": "Vault context object with name, type, up to 10 categories, and up to 5 sample titles",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Vault exists in the database and context is assembled with vault name, vault type, existing categories (up to 10), and sample titles (up to 5 from most recent entries)",
+    "event": {
+      "action": "knowledge_ai_generate_gather_context",
+      "status": "success",
+      "message": "Vault context gathered successfully",
+      "data_fields": [
+        "vault_name",
+        "vault_type",
+        "existing_categories_count",
+        "sample_titles_count"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault not found",
+      "criteria": "No row returned from SELECT on vaults table for the given vault_id",
+      "action": "Return VAULT_NOT_FOUND error — the vault must exist before AI generation can run",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_ai_generate_gather_context",
+        "status": "error",
+        "message": "Vault {vault_id} not found",
+        "data_fields": [
+          "vault_id"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Vault found and context assembled",
+      "outcome": "Proceed to call-llm step with vault context"
+    },
+    {
+      "condition": "Vault not found in database",
+      "outcome": "Abort generation, return VAULT_NOT_FOUND error"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-ai-generate/actions/gather-context.ts"
+  ]
+}

@@ -1,7 +1,7 @@
 import { createSignal, createMemo, onMount } from 'solid-js';
 import type { KnowledgeEntry } from '@nori/shared';
 import { apiGet } from '../../../lib/api';
-import { knowledgeEntries, setKnowledgeEntries, searchQuery, setSearchQuery, createOpen, setCreateOpen } from '../../../stores/knowledge.store';
+import { knowledgeEntries, setKnowledgeEntries, searchQuery, setSearchQuery, createOpen, setCreateOpen, extractOpen, setExtractOpen } from '../../../stores/knowledge.store';
 import { vaults } from '../../../stores/vault.store';
 import { activeVault, activeProject } from '../../../stores/navigation.store';
 import type { SearchResultItem } from '../knowledge-search/SearchResults/SearchResults.type';
@@ -89,5 +89,7 @@ export const useKnowledgeListSection = () => {
     activeProject,
     handleSearch,
     handleClearSearch,
+    extractOpen,
+    setExtractOpen,
   };
 }

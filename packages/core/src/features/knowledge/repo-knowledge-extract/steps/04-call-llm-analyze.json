@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Call the LLM to analyze repository files and generate knowledge proposals or clarifying questions",
+  "why": "The LLM is the core intelligence that identifies knowledge-worthy content and structures it into proposals",
+  "where": {
+    "entry_point": "features/knowledge/repo-knowledge-extract/repo-knowledge-extract.ts",
+    "implementation": "features/knowledge/repo-knowledge-extract/actions/call-llm-analyze.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "LLM returns valid JSON with status 'questions' or 'proposals'",
+    "event": {
+      "action": "repo_knowledge_extract_llm_complete",
+      "status": "success",
+      "message": "LLM analysis complete",
+      "data_fields": ["status", "proposal_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No authentication credentials",
+      "criteria": "resolveAuth returns type: none",
+      "action": "Return NO_AUTH error",
+      "severity": "fatal",
+      "recoverable": false
+    },
+    {
+      "scenario": "LLM returns invalid JSON",
+      "criteria": "JSON.parse fails or structure doesn't match expected format",
+      "action": "Return INVALID_LLM_RESPONSE error",
+      "severity": "fatal",
+      "recoverable": false
+    },
+    {
+      "scenario": "API call fails",
+      "criteria": "Network error or non-200 response",
+      "action": "Return LLM_ERROR error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Model choice",
+      "rationale": "Uses claude-sonnet-4-6 for better code analysis capability compared to haiku"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Max tokens 8192",
+      "rationale": "Multiple proposals with full content need more output tokens than single-entry generation"
+    }
+  ],
+  "calls": ["features/knowledge/repo-knowledge-extract/actions/call-llm-analyze.ts"]
+}

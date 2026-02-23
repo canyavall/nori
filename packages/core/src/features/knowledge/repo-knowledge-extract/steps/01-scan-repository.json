@@ -1,0 +1,48 @@
+{
+  "type": "action",
+  "what": "Recursively scan the project directory for scannable files",
+  "why": "Need to collect all relevant source, config, and documentation files to analyze for knowledge extraction",
+  "where": {
+    "entry_point": "features/knowledge/repo-knowledge-extract/repo-knowledge-extract.ts",
+    "implementation": "features/knowledge/repo-knowledge-extract/actions/scan-repository.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "At least one scannable file found",
+    "event": {
+      "action": "repo_knowledge_extract_scan_complete",
+      "status": "success",
+      "message": "Repository scan complete",
+      "data_fields": ["file_count", "categories_found"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No scannable files found",
+      "criteria": "files array is empty",
+      "action": "Return EMPTY_REPOSITORY error",
+      "severity": "fatal",
+      "recoverable": false
+    },
+    {
+      "scenario": "Directory read error",
+      "criteria": "Filesystem throws on readdir/stat",
+      "action": "Return SCAN_ERROR error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "File size limit",
+      "rationale": "Skip files > 50KB to avoid noise from generated/minified files"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Extension whitelist",
+      "rationale": "Only scan code, config, and documentation files to keep analysis focused"
+    }
+  ],
+  "calls": ["features/knowledge/repo-knowledge-extract/actions/scan-repository.ts"]
+}

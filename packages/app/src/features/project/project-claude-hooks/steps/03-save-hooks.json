@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "PUT /api/project/claude/hooks with target (shared|local) and hooks data",
+  "why": "Persists hook configuration edits to the appropriate settings file",
+  "where": {
+    "component": "features/project/project-claude-hooks/HooksSection.hook.ts#handleSave"
+  },
+  "contract": {
+    "endpoint": "PUT /api/project/claude/hooks",
+    "request_type": "{ target: 'shared'|'local', hooks: string }",
+    "response_type": "@nori/shared:ClaudeHooksWriteResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-hooks-editor",
+    "on_error": "02-show-hooks-editor"
+  },
+  "success_handling": {
+    "criteria": "Hooks saved to settings file",
+    "transition": "Show success toast, stay on editor"
+  },
+  "error_handling": [
+    {
+      "scenario": "Invalid JSON",
+      "criteria": "API returns INVALID_JSON error",
+      "action": "Show validation error in editor",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

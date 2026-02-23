@@ -3,7 +3,7 @@
   "what": "Open the edit dialog for the knowledge entry the user clicked",
   "why": "User clicked an entry in the tree and wants to modify its content or metadata",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditDialog.tsx"
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditDialog/KnowledgeEditDialog.tsx"
   },
   "ui": {
     "renders": "dialog",

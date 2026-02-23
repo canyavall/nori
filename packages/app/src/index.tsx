@@ -9,6 +9,10 @@ import { KnowledgePage } from './pages/KnowledgePage';
 import { SessionsPage } from './pages/SessionsPage';
 import { KnowledgeDetailPage } from './pages/KnowledgeDetailPage';
 import { ProjectsPage } from './pages/ProjectsPage';
+import { SkillsPage } from './pages/SkillsPage';
+import { RulesPage } from './pages/RulesPage';
+import { HooksPage } from './pages/HooksPage';
+import { McpsPage } from './pages/McpsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ensureServer } from './lib/server';
 
@@ -50,6 +54,10 @@ function Root() {
         <Route path="/knowledge/:id" component={KnowledgeDetailPage} />
         <Route path="/sessions" component={SessionsPage} />
         <Route path="/projects" component={ProjectsPage} />
+        <Route path="/project/skills" component={SkillsPage} />
+        <Route path="/project/rules" component={RulesPage} />
+        <Route path="/project/hooks" component={HooksPage} />
+        <Route path="/project/mcps" component={McpsPage} />
         <Route path="/settings" component={SettingsPage} />
       </Router>
     </Show>

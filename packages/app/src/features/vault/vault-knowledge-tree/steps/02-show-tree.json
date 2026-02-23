@@ -3,7 +3,7 @@
   "what": "Display knowledge entries grouped by category as a collapsible tree",
   "why": "Gives the user a clear structural overview of vault content organized by category",
   "where": {
-    "component": "features/vault/vault-knowledge-tree/CategoryTree.tsx"
+    "component": "features/vault/vault-knowledge-tree/CategoryTree/CategoryTree.tsx"
   },
   "ui": {
     "renders": "display",

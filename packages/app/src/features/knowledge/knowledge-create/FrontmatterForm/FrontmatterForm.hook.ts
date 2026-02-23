@@ -8,10 +8,20 @@ const parseTags = (input: string): string[] =>
     .map((t) => t.trim())
     .filter(Boolean);
 
-export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'onNext'>) => {
+const parseLines = (input: string): string[] =>
+  input
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'initialOptionalKnowledge' | 'onNext'>) => {
   const [title, setTitle] = createSignal(props.initialTitle);
   const [category, setCategory] = createSignal(props.initialCategory);
   const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
+  const [description, setDescription] = createSignal(props.initialDescription);
+  const [requiredKnowledgeInput, setRequiredKnowledgeInput] = createSignal(props.initialRequiredKnowledge.join(', '));
+  const [rulesInput, setRulesInput] = createSignal(props.initialRules.join('\n'));
+  const [optionalKnowledgeInput, setOptionalKnowledgeInput] = createSignal((props.initialOptionalKnowledge ?? []).join(', '));
   const [errors, setErrors] = createSignal<Record<string, string>>({});
 
   const tags = () => parseTags(tagsInput());
@@ -19,25 +29,52 @@ export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTit
   const handleSubmit = (e: Event) => {
     e.preventDefault();
 
+    const requiredKnowledge = parseTags(requiredKnowledgeInput());
+    const rules = parseLines(rulesInput());
+    const optionalKnowledge = parseTags(optionalKnowledgeInput());
+
     const result = knowledgeFrontmatterSchema.safeParse({
       title: title(),
       category: category(),
       tags: tags(),
+      description: description(),
+      required_knowledge: requiredKnowledge,
+      rules,
+      optional_knowledge: optionalKnowledge.length > 0 ? optionalKnowledge : undefined,
     });
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
         const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
+        if (!fieldErrors[field]) {
+          fieldErrors[field] = issue.message;
+        }
       }
       setErrors(fieldErrors);
       return;
     }
 
     setErrors({});
-    props.onNext({ title: result.data.title, category: result.data.category, tags: result.data.tags });
+    props.onNext({
+      title: result.data.title,
+      category: result.data.category,
+      tags: result.data.tags,
+      description: result.data.description,
+      required_knowledge: result.data.required_knowledge,
+      rules: result.data.rules,
+      optional_knowledge: result.data.optional_knowledge,
+    });
   };
 
-  return { title, setTitle, category, setCategory, tagsInput, setTagsInput, errors, tags, handleSubmit };
+  return {
+    title, setTitle,
+    category, setCategory,
+    tagsInput, setTagsInput,
+    description, setDescription,
+    requiredKnowledgeInput, setRequiredKnowledgeInput,
+    rulesInput, setRulesInput,
+    optionalKnowledgeInput, setOptionalKnowledgeInput,
+    errors, tags, handleSubmit,
+  };
 };

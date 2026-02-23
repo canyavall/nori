@@ -10,7 +10,7 @@ export function withSSE(
     let id = 0;
 
     const emitter: FlowEmitter = {
-      emit: (event, data) => {
+      emit: (event: string, data?: Record<string, unknown>) => {
         stream.writeSSE({
           id: String(id++),
           event,

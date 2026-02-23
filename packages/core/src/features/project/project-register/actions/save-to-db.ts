@@ -25,6 +25,8 @@ export function saveToDb(
       error: {
         code: 'DB_WRITE_FAILED',
         message: err instanceof Error ? err.message : 'Failed to save project to database',
+        severity: 'error',
+        recoverable: false,
       },
     };
   }

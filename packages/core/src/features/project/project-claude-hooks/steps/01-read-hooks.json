@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Read .claude/settings.json and .claude/settings.local.json, extract and merge hooks field",
+  "why": "Users need to see all hooks (shared + local) in one view",
+  "where": {
+    "entry_point": "features/project/project-claude-hooks/project-claude-hooks.ts",
+    "implementation": "features/project/project-claude-hooks/actions/read-hooks.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Settings files read and hooks extracted",
+    "event": {
+      "action": "project_claude_hooks_read",
+      "status": "success",
+      "message": "Hooks configuration read successfully",
+      "data_fields": ["has_shared", "has_local"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Neither settings file exists",
+      "criteria": "Both .claude/settings.json and .claude/settings.local.json not found",
+      "action": "Return empty hooks object (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "Malformed JSON in settings file",
+      "criteria": "JSON.parse throws SyntaxError",
+      "action": "Return error with code INVALID_JSON and file path",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "No hooks key in either file",
+      "criteria": "Parsed JSON has no 'hooks' property",
+      "action": "Return empty hooks (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Show both shared and local hooks, labeled by source file",
+      "rationale": "Users need to distinguish between committed hooks and personal overrides"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Return raw JSON of the hooks section",
+      "rationale": "Editor will show the full JSON for each settings file"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Parse settings files with try/catch for graceful degradation",
+      "rationale": "One broken file shouldn't prevent showing the other"
+    }
+  ],
+  "calls": ["features/project/project-claude-hooks/actions/read-hooks.ts"]
+}

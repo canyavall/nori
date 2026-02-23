@@ -3,7 +3,7 @@
   "what": "Resume an existing chat session via the backend",
   "why": "Reactivate a previous session so the user can continue their conversation with the same knowledge context",
   "where": {
-    "component": "features/session/session-browser/SessionBrowserPage.tsx"
+    "component": "features/session/session-browser/SessionBrowserPage/SessionBrowserPage.tsx"
   },
   "contract": {
     "endpoint": "POST /api/session/:id/resume",

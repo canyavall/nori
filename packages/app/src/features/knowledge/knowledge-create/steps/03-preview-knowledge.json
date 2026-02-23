@@ -3,8 +3,8 @@
   "what": "Display rendered markdown preview with frontmatter summary",
   "why": "Allow the user to review the final appearance of the knowledge entry before committing to creation",
   "where": {
-    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
-    "step_component": "features/knowledge/knowledge-create/KnowledgePreview.tsx"
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/KnowledgePreview/KnowledgePreview.tsx"
   },
   "ui": {
     "renders": "display",

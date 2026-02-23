@@ -10,6 +10,8 @@ import { knowledgeRoutes } from './routes/knowledge.routes.js';
 import { sessionRoutes } from './routes/session.routes.js';
 import { appRoutes } from './routes/app.routes.js';
 import { projectRoutes } from './routes/project.routes.js';
+import { claudeConfigRoutes } from './routes/claude-config.routes.js';
+import { repoExtractRoutes } from './routes/repo-extract.routes.js';
 import type { AppEnv } from './types.js';
 
 const app = new Hono<AppEnv>();
@@ -36,6 +38,8 @@ app.route('/api/vault', vaultRoutes);
 app.route('/api/knowledge', knowledgeRoutes);
 app.route('/api/session', sessionRoutes);
 app.route('/api/project', projectRoutes);
+app.route('/api/project/claude', claudeConfigRoutes);
+app.route('/api/knowledge/repo-extract', repoExtractRoutes);
 
 // Initialize database at startup, then start serving
 await initDatabase();

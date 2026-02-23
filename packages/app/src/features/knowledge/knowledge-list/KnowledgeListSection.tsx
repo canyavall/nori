@@ -3,6 +3,7 @@ import type { Component } from 'solid-js';
 import { A } from '@solidjs/router';
 import { KnowledgeCreateDialog } from '../knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog';
 import { KnowledgeEditDialog } from '../knowledge-edit/KnowledgeEditDialog/KnowledgeEditDialog';
+import { RepoExtractDialog } from '../repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog';
 import { SearchForm } from '../knowledge-search/SearchForm/SearchForm';
 import { SearchResults } from '../knowledge-search/SearchResults/SearchResults';
 import { useKnowledgeListSection } from './KnowledgeListSection.hook';
@@ -29,6 +30,8 @@ export const KnowledgeListSection: Component = () => {
     activeProject,
     handleSearch,
     handleClearSearch,
+    extractOpen,
+    setExtractOpen,
   } = useKnowledgeListSection();
 
   return (
@@ -47,6 +50,16 @@ export const KnowledgeListSection: Component = () => {
                 {(vault) => <option value={vault.id}>{vault.name}</option>}
               </For>
             </select>
+          </Show>
+          <Show when={activeProject()}>
+            <button
+              type="button"
+              disabled={!effectiveVaultId()}
+              onClick={() => setExtractOpen(true)}
+              class="px-4 py-2 rounded-md border border-[var(--color-accent)] text-[var(--color-accent)] text-sm font-medium hover:bg-[var(--color-accent)]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Analyze Repository
+            </button>
           </Show>
           <button
             type="button"
@@ -157,6 +170,14 @@ export const KnowledgeListSection: Component = () => {
 
       <Show when={createOpen()}>
         <KnowledgeCreateDialog vaultId={effectiveVaultId()} />
+      </Show>
+
+      <Show when={extractOpen() && activeProject()}>
+        <RepoExtractDialog
+          projectPath={activeProject()!.path}
+          vaultId={effectiveVaultId()}
+          onClose={() => setExtractOpen(false)}
+        />
       </Show>
 
       <Show when={editEntryId()} keyed>

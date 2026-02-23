@@ -1,83 +1,6 @@
-import { join } from 'node:path';
-import { homedir } from 'node:os';
-import { readFileSync, existsSync } from 'node:fs';
-import { generateText } from 'ai';
-import { createAnthropic } from '@ai-sdk/anthropic';
 import type { StepResult, FlowError, KnowledgeProposal } from '@nori/shared';
 import type { VaultContext } from './gather-context.js';
-
-interface ClaudeCredentials {
-  claudeAiOauth?: { accessToken: string };
-}
-
-type AuthSource =
-  | { type: 'api_key'; key: string }
-  | { type: 'oauth'; token: string }
-  | { type: 'none' };
-
-function resolveAuth(): AuthSource {
-  // 1. Explicit API key
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (apiKey) return { type: 'api_key', key: apiKey };
-
-  // 2. Claude Code subscription OAuth token
-  const credPath = join(homedir(), '.claude', '.credentials.json');
-  if (existsSync(credPath)) {
-    try {
-      const creds = JSON.parse(readFileSync(credPath, 'utf-8')) as ClaudeCredentials;
-      const token = creds.claudeAiOauth?.accessToken;
-      if (token) return { type: 'oauth', token };
-    } catch {
-      // malformed credentials
-    }
-  }
-
-  return { type: 'none' };
-}
-
-async function callAnthropicApi(
-  auth: AuthSource,
-  systemPrompt: string,
-  userMessage: string
-): Promise<string> {
-  if (auth.type === 'api_key') {
-    const anthropic = createAnthropic({ apiKey: auth.key });
-    const result = await generateText({
-      model: anthropic('claude-haiku-4-5-20251001'),
-      system: systemPrompt,
-      prompt: userMessage,
-      maxTokens: 4096,
-    });
-    return result.text;
-  }
-
-  // OAuth subscription: use Bearer token with beta header
-  const body = {
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 4096,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userMessage }],
-  };
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'oauth-2025-04-20',
-      'Authorization': `Bearer ${(auth as { type: 'oauth'; token: string }).token}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
-    throw new Error(err?.error?.message ?? `Anthropic API error ${res.status}`);
-  }
-
-  const data = await res.json() as { content: Array<{ type: string; text: string }> };
-  return data.content.find((b) => b.type === 'text')?.text ?? '';
-}
+import { resolveAuth, callAnthropicApi, noAuthError } from '../../../shared/utils/llm-client.js';
 
 function extractJsonArray(text: string): KnowledgeProposal[] {
   // Find outermost [ ... ] to handle any preamble/postamble from the model
@@ -94,17 +17,7 @@ export async function callLlm(
   prompt: string
 ): Promise<StepResult<{ proposals: KnowledgeProposal[] }> | FlowError> {
   const auth = resolveAuth();
-  if (auth.type === 'none') {
-    return {
-      success: false,
-      error: {
-        code: 'NO_AUTH',
-        message: 'No Anthropic credentials found. Set ANTHROPIC_API_KEY or log in with the Claude CLI (`claude login`).',
-        severity: 'fatal',
-        recoverable: false,
-      },
-    };
-  }
+  if (auth.type === 'none') return noAuthError();
 
   const categoryHint = context.existing_categories.length > 0
     ? `Existing categories in this vault: ${context.existing_categories.join(', ')}.`
@@ -120,7 +33,8 @@ ${categoryHint}
 ${titlesHint}
 
 Always respond with a valid JSON array (no markdown, no explanation — raw JSON only).
-Each entry must have: title (string), category (string, lowercase slug like "guide" or "reference"), tags (string array), content (markdown string).
+Each entry must have: title (string), category (string, lowercase slug like "guide" or "reference"), tags (array of 3-12 lowercase kebab-case strings), description (string, max 300 chars), required_knowledge (string array of prerequisite topic names), rules (string array of rules this entry teaches), content (markdown string, max 10000 chars).
+Optionally include: optional_knowledge (string array).
 Generate 1 to 3 focused entries. Each entry should be self-contained and useful.`;
 
   const userMessage = `User request: ${prompt}
@@ -130,13 +44,19 @@ Return a JSON array of knowledge proposals. Example format:
   {
     "title": "How to do X",
     "category": "guide",
-    "tags": ["x", "howto"],
+    "tags": ["my-topic", "how-to", "getting-started"],
+    "description": "Explains how to do X step by step.",
+    "required_knowledge": [],
+    "rules": ["Always do Y before Z"],
     "content": "# How to do X\\n\\nExplanation..."
   }
 ]`;
 
   try {
-    const text = await callAnthropicApi(auth, systemPrompt, userMessage);
+    const text = await callAnthropicApi(auth, {
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+    });
     const parsed = extractJsonArray(text);
 
     if (!Array.isArray(parsed) || parsed.length === 0) {
@@ -150,6 +70,10 @@ Return a JSON array of knowledge proposals. Example format:
       title: String(p.title ?? 'Untitled'),
       category: String(p.category ?? 'general').toLowerCase().replace(/\s+/g, '-'),
       tags: Array.isArray(p.tags) ? p.tags.map(String) : [],
+      description: String(p.description ?? ''),
+      required_knowledge: Array.isArray(p.required_knowledge) ? p.required_knowledge.map(String) : [],
+      rules: Array.isArray(p.rules) ? p.rules.map(String) : [],
+      optional_knowledge: Array.isArray(p.optional_knowledge) ? p.optional_knowledge.map(String) : undefined,
       content: String(p.content ?? ''),
     }));
 

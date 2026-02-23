@@ -17,7 +17,7 @@
     ]
   },
   "transitions": {
-    "on_success": "show done state with exported count and destination path",
+    "on_success": "close_dialog",
     "on_error": "show error state with retry option"
   },
   "success_handling": {

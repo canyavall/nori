@@ -3,8 +3,8 @@
   "what": "Display ranked search results with relevance scores",
   "why": "Present the matching knowledge entries in order of relevance so the user can find and navigate to the entry they need",
   "where": {
-    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage.tsx",
-    "step_component": "features/knowledge/knowledge-search/SearchResults.tsx"
+    "component": "features/knowledge/knowledge-search/KnowledgeSearchPage/KnowledgeSearchPage.tsx",
+    "step_component": "features/knowledge/knowledge-search/SearchResults/SearchResults.tsx"
   },
   "ui": {
     "renders": "display",

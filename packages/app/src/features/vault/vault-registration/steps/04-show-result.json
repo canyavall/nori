@@ -3,8 +3,8 @@
   "what": "Display vault registration success with summary",
   "why": "Confirm to the user that the vault was registered successfully and show key details like vault name and knowledge count",
   "where": {
-    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx",
-    "step_component": "features/vault/vault-registration/VaultRegistrationResult.tsx"
+    "component": "features/vault/vault-registration/VaultRegistrationDialog/VaultRegistrationDialog.tsx",
+    "step_component": "features/vault/vault-registration/VaultRegistrationResult/VaultRegistrationResult.tsx"
   },
   "ui": {
     "renders": "display",

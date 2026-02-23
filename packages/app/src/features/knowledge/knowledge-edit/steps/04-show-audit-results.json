@@ -3,8 +3,8 @@
   "what": "Display audit results for the edited knowledge entry",
   "why": "Show the user the quality audit results after editing so they can verify the entry still meets quality standards",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx",
-    "step_component": "features/knowledge/knowledge-edit/EditAuditResults.tsx"
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage/KnowledgeEditPage.tsx",
+    "step_component": "features/knowledge/knowledge-edit/EditAuditResults/EditAuditResults.tsx"
   },
   "ui": {
     "renders": "display",

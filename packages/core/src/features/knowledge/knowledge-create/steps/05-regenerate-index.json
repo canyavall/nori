@@ -1,40 +1,38 @@
 {
-  "type": "flow_call",
-  "flow_id": "knowledge-index-build",
-  "what": "Rebuild knowledge index to include new entry",
-  "why": "New entry must be searchable immediately",
+  "type": "action",
+  "what": "Insert new entry into knowledge database",
+  "why": "New entry must be searchable immediately via the DB index",
   "where": {
-    "entry_point": "features/knowledge/knowledge-create/steps/05-regenerate-index.json",
-    "implementation": "features/knowledge/knowledge-index-build/steps/"
+    "entry_point": "features/knowledge/knowledge-create/knowledge-create.ts",
+    "implementation": "features/knowledge/knowledge-create/actions/regenerate-index.ts"
   },
   "output": {
-    "console": "Index rebuild result with entry count and duration",
-    "file": "Updated knowledge.json index file"
+    "console": "Index update result with entry count and duration",
+    "file": null
   },
   "success_handling": {
-    "criteria": "Index build flow completes and the new entry appears in the rebuilt index",
+    "criteria": "INSERT OR REPLACE into knowledge_entries succeeds",
     "event": {
       "action": "knowledge_create_regenerate_index",
       "status": "success",
-      "message": "Knowledge index rebuilt with new entry included",
+      "message": "Knowledge entry inserted into database",
       "data_fields": [
         "total_entries",
-        "new_entry_id",
         "build_duration_ms"
       ]
     }
   },
   "error_handling": [
     {
-      "scenario": "Index build fails",
-      "criteria": "The knowledge-index-build flow returns an error or does not complete",
-      "action": "Log index build failure as warning, the file exists but may not be searchable until next rebuild",
+      "scenario": "Database insert fails",
+      "criteria": "SQL INSERT throws an exception",
+      "action": "Log as warning, entry file exists but may not be searchable until next full index rebuild",
       "severity": "warning",
       "recoverable": true,
       "event": {
         "action": "knowledge_create_regenerate_index",
         "status": "warning",
-        "message": "Index rebuild failed after creating entry {entry_id}",
+        "message": "Index update failed after creating entry {entry_id}",
         "data_fields": [
           "entry_id",
           "build_error"
@@ -44,15 +42,12 @@
   ],
   "decisions": [
     {
-      "condition": "Index rebuilt successfully",
-      "outcome": "Knowledge creation flow complete"
-    },
-    {
-      "condition": "Index rebuild fails",
-      "outcome": "Log warning, creation still considered successful — index will rebuild on next trigger"
+      "date": "2025-01-01",
+      "reason": "Direct DB INSERT instead of full index rebuild",
+      "rationale": "Running the full knowledge-index-build flow after every create is too slow. A targeted INSERT OR REPLACE is sufficient and fast."
     }
   ],
   "calls": [
-    "features/knowledge/knowledge-index-build/steps/"
+    "features/knowledge/knowledge-create/actions/regenerate-index.ts"
   ]
 }

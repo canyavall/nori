@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Discover all rule files — CLAUDE.md (root), .claude/CLAUDE.md, .claude/rules/**/*.md",
+  "why": "Users need a unified view of all project rules regardless of where they live on disk",
+  "where": {
+    "entry_point": "features/project/project-claude-rules/project-claude-rules.ts",
+    "implementation": "features/project/project-claude-rules/actions/list-rules.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All rule files discovered and classified by type",
+    "event": {
+      "action": "project_claude_rules_list",
+      "status": "success",
+      "message": "Rules listed successfully",
+      "data_fields": ["rule_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No CLAUDE.md and no .claude/rules/ directory",
+      "criteria": "No rule files found at any expected location",
+      "action": "Return empty array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "Permission denied on directory read",
+      "criteria": "EACCES error",
+      "action": "Return error with code PERMISSION_DENIED",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Rule file has invalid frontmatter",
+      "criteria": "gray-matter throws parse error",
+      "action": "Include rule with parseError flag, skip broken fields",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Scan recursively in .claude/rules/",
+      "rationale": "Support nested subdirectories (frontend/, backend/, etc.) for organized rule sets"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Classify each file by location",
+      "rationale": "Help UI show origin context — root CLAUDE.md vs project vs modular rules"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Parse optional YAML frontmatter",
+      "rationale": ".claude/rules/*.md can have paths: globs for scoped rules"
+    }
+  ],
+  "calls": ["features/project/project-claude-rules/actions/list-rules.ts"]
+}

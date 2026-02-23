@@ -40,9 +40,9 @@ export async function runKnowledgeDelete(
   const deleteResult = deleteFile(input.file_path);
   if (!deleteResult.success) return deleteResult;
 
-  // Step 04: Regenerate index (non-fatal)
+  // Step 04: Regenerate index — remove entry from DB (non-fatal)
   emit.emit('knowledge:delete:regenerating-index', { vault_id: input.vault_id });
-  const indexResult = regenerateIndex(input.vault_id, input.vault_path);
+  const indexResult = regenerateIndex(input.file_path, input.db);
   if (!indexResult.success) {
     emit.emit('knowledge:delete:index-warning', {
       file_path: input.file_path,

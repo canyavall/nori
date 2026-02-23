@@ -22,7 +22,6 @@ export async function runProjectRegister(
   if (!pathResult.success) return pathResult;
 
   const gitResult = detectGit(path);
-  if (!gitResult.success) return gitResult;
 
   const projectId = randomUUID();
   const projectName = name ?? basename(path);

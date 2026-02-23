@@ -3,7 +3,7 @@
   "what": "Submit knowledge entry deletion request to the backend",
   "why": "Remove the knowledge entry from the vault after checking dependencies, then re-index to update search",
   "where": {
-    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog.tsx"
+    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog/KnowledgeDeleteDialog.tsx"
   },
   "contract": {
     "endpoint": "DELETE /api/knowledge/:id",

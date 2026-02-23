@@ -11,7 +11,7 @@
     "file": null
   },
   "success_handling": {
-    "criteria": "Markdown content is non-empty, exceeds minimum length threshold, and contains recognizable structure (headings, paragraphs, or code blocks)",
+    "criteria": "Markdown content is non-empty, between 10 and 10,000 characters, and contains recognizable structure (headings, paragraphs, or code blocks)",
     "event": {
       "action": "knowledge_create_validate_content",
       "status": "success",

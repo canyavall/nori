@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render a markdown editor with the rule file content",
+  "why": "Users can read and edit rule content directly",
+  "where": {
+    "component": "features/project/project-claude-rules/RuleEditor.tsx"
+  },
+  "ui": {
+    "renders": "editor",
+    "fields": ["content (raw markdown)"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "04-save-rule",
+    "on_cancel": "02-show-rules-list"
+  },
+  "success_handling": {
+    "criteria": "User edits rule content",
+    "transition": "04-save-rule on save button click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

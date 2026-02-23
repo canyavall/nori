@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render a JSON editor showing the full .mcp.json content",
+  "why": "MCP config is a single JSON file — editing the full file is simpler than per-server editing",
+  "where": {
+    "component": "features/project/project-claude-mcps/McpEditor.tsx"
+  },
+  "ui": {
+    "renders": "editor",
+    "fields": ["content (raw .mcp.json)"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "04-save-mcps",
+    "on_cancel": "02-show-mcps-list"
+  },
+  "success_handling": {
+    "criteria": "User edits MCP JSON",
+    "transition": "04-save-mcps on save button click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

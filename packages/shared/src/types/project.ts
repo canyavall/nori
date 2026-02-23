@@ -13,3 +13,14 @@ export interface ProjectSettings {
   connected_vaults: string[];
   created_at: string;
 }
+
+export type ProjectSource = 'nori' | 'claude-code' | 'both';
+
+export interface DiscoveredProject extends Project {
+  source: ProjectSource;
+  has_nori: boolean;
+  claude_code?: {
+    last_session_id?: string;
+    has_trust_dialog_accepted?: boolean;
+  };
+}

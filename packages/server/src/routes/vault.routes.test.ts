@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
+import type { AppEnv } from '../types.js';
 
 // ─── Mock @nori/core ──────────────────────────────────────────────
 const mockRunVaultRegistration = vi.fn();
@@ -43,10 +44,10 @@ const { vaultRoutes } = await import('./vault.routes.js');
 // ─── Test helpers ─────────────────────────────────────────────────
 
 function buildApp() {
-  const app = new Hono();
+  const app = new Hono<AppEnv>();
   // Inject a stub db into context
   app.use('*', (c, next) => {
-    c.set('db', {} as import('sql.js').Database);
+    c.set('db', {} as never);
     return next();
   });
   app.route('/api/vault', vaultRoutes);

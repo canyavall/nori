@@ -1,0 +1,33 @@
+{
+  "type": "action",
+  "what": "Group scanned files into knowledge-relevant categories and prioritize for LLM analysis",
+  "why": "Files must be organized and truncated to fit within the LLM context window while maximizing useful content",
+  "where": {
+    "entry_point": "features/knowledge/repo-knowledge-extract/repo-knowledge-extract.ts",
+    "implementation": "features/knowledge/repo-knowledge-extract/actions/categorize-files.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Files categorized into groups with total chars within limit",
+    "event": {
+      "action": "repo_knowledge_extract_categorized",
+      "status": "success",
+      "message": "Files categorized",
+      "data_fields": ["file_count", "total_chars"]
+    }
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "100K char limit",
+      "rationale": "Stay well within LLM context window while leaving room for the system prompt and response"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Priority ordering",
+      "rationale": "Documentation and config files are more valuable for knowledge extraction than source code"
+    }
+  ],
+  "calls": ["features/knowledge/repo-knowledge-extract/actions/categorize-files.ts"]
+}

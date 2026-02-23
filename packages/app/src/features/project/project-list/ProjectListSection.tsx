@@ -2,10 +2,20 @@ import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { ProjectRegisterDialog } from '../project-register/ProjectRegisterDialog';
 import { ProjectCard } from './components/ProjectCard/ProjectCard';
+import { DiscoveredProjectCard } from './components/DiscoveredProjectCard/DiscoveredProjectCard';
 import { useProjectListSection } from './ProjectListSection.hook';
 
 export const ProjectListSection: Component = () => {
-  const { loading, projects, registerOpen, activeProject, handleAddProject, handleSelectProject } = useProjectListSection();
+  const {
+    loading,
+    noriProjects,
+    discoveredProjects,
+    registerOpen,
+    activeProject,
+    handleAddProject,
+    handleSelectProject,
+    handleSetupNori,
+  } = useProjectListSection();
 
   return (
     <div class="p-6">
@@ -31,10 +41,10 @@ export const ProjectListSection: Component = () => {
         }
       >
         <Show
-          when={projects().length > 0}
+          when={noriProjects().length > 0 || discoveredProjects().length > 0}
           fallback={
             <div class="text-center py-16 text-[var(--color-text-muted)]">
-              <p class="text-lg mb-2">No projects registered</p>
+              <p class="text-lg mb-2">No projects found</p>
               <p class="text-sm mb-4">
                 A project is a local folder with a <code class="font-mono">.nori/</code> config inside.
               </p>
@@ -47,17 +57,38 @@ export const ProjectListSection: Component = () => {
             </div>
           }
         >
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <For each={projects()}>
-              {(project) => (
-                <ProjectCard
-                  project={project}
-                  onSelect={() => handleSelectProject(project)}
-                  isSelected={activeProject()?.id === project.id}
-                />
-              )}
-            </For>
-          </div>
+          <Show when={noriProjects().length > 0}>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <For each={noriProjects()}>
+                {(project) => (
+                  <ProjectCard
+                    project={project}
+                    onSelect={() => handleSelectProject(project)}
+                    isSelected={activeProject()?.id === project.id}
+                  />
+                )}
+              </For>
+            </div>
+          </Show>
+
+          <Show when={discoveredProjects().length > 0}>
+            <div class={noriProjects().length > 0 ? 'mt-8' : ''}>
+              <h3 class="text-base font-medium mb-1">Discovered from Claude Code</h3>
+              <p class="text-sm text-[var(--color-text-muted)] mb-4">
+                Projects found in your Claude Code config that haven't been set up with Nori yet.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <For each={discoveredProjects()}>
+                  {(project) => (
+                    <DiscoveredProjectCard
+                      project={project}
+                      onSetup={() => handleSetupNori(project)}
+                    />
+                  )}
+                </For>
+              </div>
+            </div>
+          </Show>
         </Show>
       </Show>
 

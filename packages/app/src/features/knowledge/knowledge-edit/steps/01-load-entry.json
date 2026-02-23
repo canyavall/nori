@@ -3,7 +3,7 @@
   "what": "Load existing knowledge entry for editing",
   "why": "Fetch the current content and metadata of the knowledge entry so the edit form can be pre-populated",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx"
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage/KnowledgeEditPage.tsx"
   },
   "contract": {
     "endpoint": "GET /api/knowledge/:id",

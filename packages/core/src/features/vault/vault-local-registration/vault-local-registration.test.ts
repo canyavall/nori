@@ -84,7 +84,7 @@ describe('runVaultLocalRegistration', () => {
   it('creates vault directory and DB record on success', async () => {
     const result = await runVaultLocalRegistration(
       { vault_name: 'test-vault', db, vaults_dir: tmpVaultsDir },
-      { emit: (e, d) => events.push({ event: e, data: d ?? {} }) }
+      { emit: (e: string, d: Record<string, unknown>) => events.push({ event: e, data: d ?? {} }) }
     );
 
     expect(result.success).toBe(true);

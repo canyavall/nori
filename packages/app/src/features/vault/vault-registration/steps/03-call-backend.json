@@ -3,7 +3,7 @@
   "what": "Submit vault registration request to the backend",
   "why": "POST /api/vault with vault_type dispatches to the correct backend flow. For git: tests access, clones repo, indexes. For local: creates directory in ~/.nori/vaults/, writes config, indexes.",
   "where": {
-    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx"
+    "component": "features/vault/vault-registration/VaultRegistrationDialog/VaultRegistrationDialog.tsx"
   },
   "contract": {
     "endpoint": "POST /api/vault",

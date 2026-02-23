@@ -13,6 +13,10 @@ export interface KnowledgeCreateInput {
   title: string;
   category: string;
   tags: string[];
+  description: string;
+  required_knowledge: string[];
+  rules: string[];
+  optional_knowledge?: string[];
   content: string;
   db: Database;
 }
@@ -33,7 +37,7 @@ export async function runKnowledgeCreate(
 
   // Step 01: Validate frontmatter
   emit.emit('knowledge:create:validating-frontmatter', { title: input.title });
-  const frontmatterResult = validateFrontmatter(input.title, input.category, input.tags);
+  const frontmatterResult = validateFrontmatter(input.title, input.category, input.tags, input.description, input.required_knowledge, input.rules, input.optional_knowledge);
   if (!frontmatterResult.success) return frontmatterResult;
 
   // Step 02: Validate content
@@ -67,6 +71,9 @@ export async function runKnowledgeCreate(
     input.title,
     input.category,
     input.tags,
+    input.description,
+    input.required_knowledge,
+    input.rules,
     input.content,
     input.db
   );

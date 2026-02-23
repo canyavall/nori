@@ -1,11 +1,11 @@
 import { createSignal } from 'solid-js';
 import type { Project } from '@nori/shared';
 import { apiPost } from '../../../lib/api';
-import { addProject, setRegisterOpen } from '../../../stores/project.store';
+import { addProject, setRegisterOpen, registerPrefilledPath, setRegisterPrefilledPath } from '../../../stores/project.store';
 import { pickFolder } from '../../../lib/folder-picker';
 
 export const useProjectRegisterDialog = () => {
-  const [path, setPath] = createSignal('');
+  const [path, setPath] = createSignal(registerPrefilledPath());
   const [name, setName] = createSignal('');
   const [loading, setLoading] = createSignal(false);
   const [picking, setPicking] = createSignal(false);
@@ -36,6 +36,7 @@ export const useProjectRegisterDialog = () => {
       });
       addProject(result.data);
       setRegisterOpen(false);
+      setRegisterPrefilledPath('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to register project');
     } finally {
@@ -45,6 +46,7 @@ export const useProjectRegisterDialog = () => {
 
   const handleClose = () => {
     setRegisterOpen(false);
+    setRegisterPrefilledPath('');
   };
 
   const isSubmitDisabled = () => loading() || !path().trim();

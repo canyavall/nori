@@ -1,0 +1,43 @@
+{
+  "type": "action",
+  "what": "Read full content of a single SKILL.md file by skill name",
+  "why": "Needed when user opens a skill for viewing/editing — returns raw content for the editor",
+  "where": {
+    "entry_point": "features/project/project-claude-skills/project-claude-skills.ts",
+    "implementation": "features/project/project-claude-skills/actions/read-skill.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Skill file read successfully",
+    "event": {
+      "action": "project_claude_skills_read",
+      "status": "success",
+      "message": "Skill read successfully",
+      "data_fields": ["name", "path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Skill name doesn't map to existing directory",
+      "criteria": "Directory not found at .claude/skills/<name>/",
+      "action": "Return error with code SKILL_NOT_FOUND",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "File read failure",
+      "criteria": "readFile throws error",
+      "action": "Return error with code FILE_READ_FAILED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Return raw file content (not parsed)",
+      "rationale": "The editor needs the full text including frontmatter for editing"
+    }
+  ],
+  "calls": ["features/project/project-claude-skills/actions/read-skill.ts"]
+}

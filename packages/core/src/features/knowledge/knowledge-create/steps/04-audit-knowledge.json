@@ -1,18 +1,17 @@
 {
-  "type": "flow_call",
-  "flow_id": "knowledge-audit",
+  "type": "action",
   "what": "Run audit on the newly created knowledge entry",
   "why": "Validate quality immediately after creation",
   "where": {
-    "entry_point": "features/knowledge/knowledge-create/steps/04-audit-knowledge.json",
-    "implementation": "features/knowledge/knowledge-audit/steps/"
+    "entry_point": "features/knowledge/knowledge-create/knowledge-create.ts",
+    "implementation": "features/knowledge/knowledge-create/actions/audit-knowledge.ts"
   },
   "output": {
     "console": "Audit result summary with pass/fail status and findings",
     "file": null
   },
   "success_handling": {
-    "criteria": "Knowledge audit flow completes and returns a structured audit result",
+    "criteria": "Audit returns a structured result (currently a stub returning success)",
     "event": {
       "action": "knowledge_create_audit_knowledge",
       "status": "success",
@@ -20,15 +19,14 @@
       "data_fields": [
         "entry_id",
         "audit_passed",
-        "findings_count",
-        "audit_score"
+        "findings_count"
       ]
     }
   },
   "error_handling": [
     {
-      "scenario": "Audit flow fails",
-      "criteria": "The knowledge-audit flow returns an error or does not complete",
+      "scenario": "Audit fails",
+      "criteria": "The audit action returns an error",
       "action": "Log audit failure as warning, do not block creation since the file is already written",
       "severity": "warning",
       "recoverable": true,
@@ -45,15 +43,12 @@
   ],
   "decisions": [
     {
-      "condition": "Audit passes",
-      "outcome": "Proceed to regenerate-index step"
-    },
-    {
-      "condition": "Audit fails or returns warnings",
-      "outcome": "Log findings, proceed to regenerate-index step regardless"
+      "date": "2025-01-01",
+      "reason": "Use local stub instead of flow_call to knowledge-audit",
+      "rationale": "The full knowledge-audit flow is too heavyweight for inline use during create. A local stub returns success; will be replaced with a lightweight audit call later."
     }
   ],
   "calls": [
-    "features/knowledge/knowledge-audit/steps/"
+    "features/knowledge/knowledge-create/actions/audit-knowledge.ts"
   ]
 }

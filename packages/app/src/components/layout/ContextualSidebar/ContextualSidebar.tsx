@@ -156,6 +156,39 @@ export const ContextualSidebar = () => {
           >
             Sessions
           </A>
+
+          <div class="px-3 pt-2 pb-1">
+            <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5">Claude Code</p>
+          </div>
+
+          <A
+            href="/project/skills"
+            class="block px-3 py-2 rounded-md text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+            activeClass="!text-[var(--color-text)] bg-[var(--color-bg-tertiary)]"
+          >
+            Skills
+          </A>
+          <A
+            href="/project/rules"
+            class="block px-3 py-2 rounded-md text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+            activeClass="!text-[var(--color-text)] bg-[var(--color-bg-tertiary)]"
+          >
+            Rules
+          </A>
+          <A
+            href="/project/hooks"
+            class="block px-3 py-2 rounded-md text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+            activeClass="!text-[var(--color-text)] bg-[var(--color-bg-tertiary)]"
+          >
+            Hooks
+          </A>
+          <A
+            href="/project/mcps"
+            class="block px-3 py-2 rounded-md text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+            activeClass="!text-[var(--color-text)] bg-[var(--color-bg-tertiary)]"
+          >
+            MCPs
+          </A>
         </Show>
       </nav>
 

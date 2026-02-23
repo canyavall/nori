@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "Fetch hooks config from GET /api/project/claude/hooks",
+  "why": "Populates the hooks editor with current configuration",
+  "where": {
+    "component": "features/project/project-claude-hooks/HooksSection.hook.ts"
+  },
+  "contract": {
+    "endpoint": "GET /api/project/claude/hooks",
+    "request_type": "{ projectPath: string (query param) }",
+    "response_type": "@nori/shared:ClaudeHooksResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-hooks-editor",
+    "on_error": "show error state"
+  },
+  "success_handling": {
+    "criteria": "API returns hooks configuration",
+    "transition": "02-show-hooks-editor"
+  },
+  "error_handling": [
+    {
+      "scenario": "API request fails",
+      "criteria": "Network error or non-2xx response",
+      "action": "Show error message",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

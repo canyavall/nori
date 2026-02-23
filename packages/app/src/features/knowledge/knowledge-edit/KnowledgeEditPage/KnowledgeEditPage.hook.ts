@@ -29,7 +29,16 @@ export const useKnowledgeEditPage = (props: KnowledgeEditPageProps) => {
     }
   });
 
-  const handleSave = (data: { title: string; category: string; tags: string[]; content: string }) => {
+  const handleSave = (data: {
+    title: string;
+    category: string;
+    tags: string[];
+    description: string;
+    required_knowledge: string[];
+    rules: string[];
+    optional_knowledge?: string[];
+    content: string;
+  }) => {
     setStep('progress');
     setProgressMessage('Saving changes...');
     setError('');

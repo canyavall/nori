@@ -13,6 +13,9 @@ export const KnowledgePreview = (props: KnowledgePreviewProps) => {
             {props.category}
           </span>
         </div>
+        <Show when={props.description}>
+          <p class="text-sm text-[var(--color-text-muted)]">{props.description}</p>
+        </Show>
         <Show when={props.tags.length > 0}>
           <div class="flex flex-wrap gap-1.5">
             <For each={props.tags}>
@@ -22,6 +25,30 @@ export const KnowledgePreview = (props: KnowledgePreviewProps) => {
                 </span>
               )}
             </For>
+          </div>
+        </Show>
+        <Show when={props.rules.length > 0}>
+          <div>
+            <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Rules</p>
+            <ul class="text-xs text-[var(--color-text-muted)] list-disc list-inside">
+              <For each={props.rules}>
+                {(rule) => <li>{rule}</li>}
+              </For>
+            </ul>
+          </div>
+        </Show>
+        <Show when={props.required_knowledge.length > 0}>
+          <div>
+            <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Required Knowledge</p>
+            <div class="flex flex-wrap gap-1.5">
+              <For each={props.required_knowledge}>
+                {(item) => (
+                  <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                    {item}
+                  </span>
+                )}
+              </For>
+            </div>
           </div>
         </Show>
       </div>

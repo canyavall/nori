@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Read Claude Code config file (~/.claude.json) and extract project paths",
+  "why": "Claude Code stores all projects a user has worked with — this is our discovery source",
+  "where": {
+    "entry_point": "features/project/project-discover-claude-code/project-discover-claude-code.ts",
+    "implementation": "features/project/project-discover-claude-code/actions/read-claude-config.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Config file read and parsed, projects array extracted (may be empty)",
+    "event": {
+      "action": "project_discover_claude_code_read_config",
+      "status": "success",
+      "message": "Claude Code config read successfully",
+      "data_fields": ["project_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Config file does not exist",
+      "criteria": "File not found at ~/.claude.json",
+      "action": "Return empty projects array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "Malformed JSON",
+      "criteria": "JSON.parse fails",
+      "action": "Return empty projects array (graceful degradation)",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "No projects key in config",
+      "criteria": "Parsed object has no 'projects' property",
+      "action": "Return empty projects array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Config path injectable for tests",
+      "rationale": "Avoids reading real ~/.claude.json in test environment; allows fixture-based testing"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Always returns success with empty array on errors",
+      "rationale": "Discovery is best-effort — failure to read config should not block project listing"
+    }
+  ],
+  "calls": ["features/project/project-discover-claude-code/actions/read-claude-config.ts"]
+}

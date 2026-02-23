@@ -1,4 +1,4 @@
-import { add, remove } from 'isomorphic-git';
+import git from 'isomorphic-git';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
 
@@ -16,9 +16,9 @@ export async function stageChanges(
       // Check if file exists on disk to determine add vs remove
       const fullPath = `${dir}/${filepath}`;
       if (fs.existsSync(fullPath)) {
-        await add({ fs, dir, filepath });
+        await git.add({ fs, dir, filepath });
       } else {
-        await remove({ fs, dir, filepath });
+        await git.remove({ fs, dir, filepath });
       }
     }
 

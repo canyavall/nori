@@ -12,6 +12,9 @@ export function regenerateIndex(
   title: string,
   category: string,
   tags: string[],
+  description: string,
+  requiredKnowledge: string[],
+  rules: string[],
   content: string,
   db: Database
 ): StepResult<RegenerateIndexResult> | FlowError {
@@ -22,9 +25,9 @@ export function regenerateIndex(
   try {
     db.run(
       `UPDATE knowledge_entries
-       SET title=?, category=?, tags=?, content_hash=?, updated_at=?
+       SET title=?, category=?, tags=?, description=?, required_knowledge=?, rules=?, content_hash=?, updated_at=?
        WHERE file_path=?`,
-      [title, category, JSON.stringify(tags), contentHash, now, filePath]
+      [title, category, JSON.stringify(tags), description, JSON.stringify(requiredKnowledge), JSON.stringify(rules), contentHash, now, filePath]
     );
 
     return {

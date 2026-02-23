@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "Fetch MCP config from GET /api/project/claude/mcps",
+  "why": "Populates the MCPs page with configured servers",
+  "where": {
+    "component": "features/project/project-claude-mcps/McpsSection.hook.ts"
+  },
+  "contract": {
+    "endpoint": "GET /api/project/claude/mcps",
+    "request_type": "{ projectPath: string (query param) }",
+    "response_type": "@nori/shared:ClaudeMcpListResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-mcps-list",
+    "on_error": "show error state"
+  },
+  "success_handling": {
+    "criteria": "API returns MCP server list",
+    "transition": "02-show-mcps-list"
+  },
+  "error_handling": [
+    {
+      "scenario": "API request fails",
+      "criteria": "Network error or non-2xx response",
+      "action": "Show error message",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

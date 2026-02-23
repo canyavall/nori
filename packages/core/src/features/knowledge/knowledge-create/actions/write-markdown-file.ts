@@ -47,11 +47,13 @@ export function writeMarkdownFile(
     mkdirSync(categoryDir, { recursive: true });
 
     const now = new Date().toISOString();
-    const fullFrontmatter = {
-      ...frontmatter,
-      created: frontmatter.created ?? now,
-      updated: now,
-    };
+    const fullFrontmatter = Object.fromEntries(
+      Object.entries({
+        ...frontmatter,
+        created: frontmatter.created ?? now,
+        updated: now,
+      }).filter(([, v]) => v !== undefined)
+    );
 
     const fileContent = matter.stringify(content, fullFrontmatter);
     writeFileSync(filePath, fileContent, 'utf-8');

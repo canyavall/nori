@@ -1,7 +1,7 @@
-import type { Project } from '@nori/shared';
+import type { DiscoveredProject } from '@nori/shared';
 
 export interface ProjectCardProps {
-  project: Project;
+  project: DiscoveredProject;
   onSelect: () => void;
   isSelected: boolean;
 }

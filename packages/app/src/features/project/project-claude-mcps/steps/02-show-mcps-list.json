@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render MCP server cards with name, type badge (http/stdio/sse), URL or command",
+  "why": "Users see all configured MCP servers at a glance",
+  "where": {
+    "component": "features/project/project-claude-mcps/McpsSection.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": ["name", "type", "url", "command"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "03-show-mcp-editor",
+    "on_back": "navigate_back"
+  },
+  "success_handling": {
+    "criteria": "MCP servers displayed in card grid",
+    "transition": "03-show-mcp-editor on card click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

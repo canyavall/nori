@@ -7,3 +7,4 @@ Verifies Claude Code CLI access and git credentials. Guides user through setup i
 1. **Check Claude Code access** — Verify CLI is installed and accessible → [steps/01-check-claude-code-access.json](steps/01-check-claude-code-access.json)
 2. **Check git credentials** — Verify git authentication (SSH keys or token) → [steps/02-check-git-credentials.json](steps/02-check-git-credentials.json)
 3. **Self-heal** — Attempt to fix authentication issues automatically → [steps/03-self-heal.json](steps/03-self-heal.json)
+4. **Check Anthropic access** — Verify the user has valid Anthropic access (CLI subscription or API key) → [steps/04-check-anthropic-access.json](steps/04-check-anthropic-access.json)

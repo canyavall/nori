@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@solidjs/testing-library';
-import type { Project, Vault } from '@nori/shared';
+import type { DiscoveredProject, Vault } from '@nori/shared';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -20,14 +20,14 @@ const { getSidebarContext, setSidebarContextMock, getContextName, setContextName
   vi.hoisted(() => {
     let _context: 'project' | 'vault' | null = null;
     let _name: string | null = null;
-    let _project: Project | null = null;
+    let _project: DiscoveredProject | null = null;
     return {
       getSidebarContext: () => _context,
       setSidebarContextMock: (v: 'project' | 'vault' | null) => { _context = v; },
       getContextName: () => _name,
       setContextNameMock: (v: string | null) => { _name = v; },
       getActiveProject: () => _project,
-      setActiveProjectMock: (v: Project | null) => { _project = v; },
+      setActiveProjectMock: (v: DiscoveredProject | null) => { _project = v; },
     };
   });
 
@@ -111,7 +111,7 @@ describe('ContextualSidebar', () => {
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
-  function makeProject(overrides: Partial<Project> = {}): Project {
+  function makeProject(overrides: Partial<DiscoveredProject> = {}): DiscoveredProject {
     return {
       id: 'proj-1',
       name: 'my-project',
@@ -119,6 +119,8 @@ describe('ContextualSidebar', () => {
       is_git: false,
       connected_vaults: [],
       created_at: '2026-01-01T00:00:00Z',
+      source: 'nori',
+      has_nori: true,
       ...overrides,
     };
   }

@@ -1,7 +1,7 @@
 {
   "type": "action",
-  "what": "Validate frontmatter fields (tags, description, auto_load) against schema",
-  "why": "Ensure knowledge metadata is complete and valid before writing file",
+  "what": "Validate frontmatter fields (title, category, tags, description, required_knowledge, rules) against schema",
+  "why": "Ensure knowledge metadata is complete and valid before writing file — tags must be 3-12 kebab-case, description required (max 300 chars)",
   "where": {
     "entry_point": "features/knowledge/knowledge-create/steps/01-validate-frontmatter.json",
     "implementation": "features/knowledge/knowledge-create/actions/validate-frontmatter.ts"
@@ -11,7 +11,7 @@
     "file": null
   },
   "success_handling": {
-    "criteria": "All required frontmatter fields (tags, description, auto_load) are present and conform to schema types and constraints",
+    "criteria": "All required frontmatter fields (title, category, tags[3-12 kebab], description[1-300], required_knowledge, rules) are present and conform to schema types and constraints",
     "event": {
       "action": "knowledge_create_validate_frontmatter",
       "status": "success",
@@ -19,7 +19,8 @@
       "data_fields": [
         "tags",
         "description",
-        "auto_load",
+        "required_knowledge",
+        "rules",
         "validated_fields_count"
       ]
     }

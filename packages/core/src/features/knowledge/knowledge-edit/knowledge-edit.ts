@@ -14,6 +14,10 @@ export interface KnowledgeEditInput {
   title: string;
   category: string;
   tags: string[];
+  description: string;
+  required_knowledge: string[];
+  rules: string[];
+  optional_knowledge?: string[];
   content: string;
   db: Database;
 }
@@ -41,7 +45,7 @@ export async function runKnowledgeEdit(
 
   // Step 02: Validate changes
   emit.emit('knowledge:edit:validating-changes', { file_path: input.file_path });
-  const validateResult = validateChanges(input.title, input.category, input.tags, input.content);
+  const validateResult = validateChanges(input.title, input.category, input.tags, input.description, input.required_knowledge, input.rules, input.optional_knowledge, input.content);
   if (!validateResult.success) return validateResult;
 
   // Step 03: Write changes (atomic)
@@ -72,6 +76,9 @@ export async function runKnowledgeEdit(
     input.title,
     input.category,
     input.tags,
+    input.description,
+    input.required_knowledge,
+    input.rules,
     input.content,
     input.db
   );

@@ -1,0 +1,41 @@
+{
+  "type": "action",
+  "what": "Check each discovered project path for existence, .nori/ directory, and .git/ directory",
+  "why": "Determines which Claude Code projects already have Nori configured vs need setup",
+  "where": {
+    "entry_point": "features/project/project-discover-claude-code/project-discover-claude-code.ts",
+    "implementation": "features/project/project-discover-claude-code/actions/check-nori-status.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All existing paths checked and annotated with has_nori and is_git flags",
+    "event": {
+      "action": "project_discover_claude_code_check_nori_status",
+      "status": "success",
+      "message": "Nori status checked for all discovered projects",
+      "data_fields": ["total", "with_nori", "without_nori"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Path no longer exists on disk",
+      "criteria": "existsSync returns false for project path",
+      "action": "Skip the project (filter out non-existent paths)",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Deterministic SHA-256 ID from path",
+      "rationale": "Same path always produces same ID; allows stable merge with Nori-registered projects by path comparison"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Filter non-existent paths (same as project-list)",
+      "rationale": "Users may delete project directories; stale entries should not appear in the UI"
+    }
+  ],
+  "calls": ["features/project/project-discover-claude-code/actions/check-nori-status.ts"]
+}

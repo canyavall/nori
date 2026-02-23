@@ -45,6 +45,23 @@ export const useKnowledgeDetailSection = () => {
           entry.tags = [];
         }
       }
+      if (typeof (entry as unknown as Record<string, unknown>).required_knowledge === 'string') {
+        try {
+          entry.required_knowledge = JSON.parse((entry as unknown as Record<string, unknown>).required_knowledge as string);
+        } catch {
+          entry.required_knowledge = [];
+        }
+      }
+      if (typeof (entry as unknown as Record<string, unknown>).rules === 'string') {
+        try {
+          entry.rules = JSON.parse((entry as unknown as Record<string, unknown>).rules as string);
+        } catch {
+          entry.rules = [];
+        }
+      }
+      entry.description = entry.description ?? '';
+      entry.required_knowledge = entry.required_knowledge ?? [];
+      entry.rules = entry.rules ?? [];
 
       const contentRes = await apiGet<{ data: { content: string; frontmatter: KnowledgeFrontmatter } }>(
         `/api/knowledge/${params.id}/content`
@@ -72,7 +89,16 @@ export const useKnowledgeDetailSection = () => {
     setStep('view');
   }
 
-  function handleSave(data: { title: string; category: string; tags: string[]; content: string }) {
+  function handleSave(data: {
+    title: string;
+    category: string;
+    tags: string[];
+    description: string;
+    required_knowledge: string[];
+    rules: string[];
+    optional_knowledge?: string[];
+    content: string;
+  }) {
     setStep('saving');
     setProgressMessage('Starting update...');
     setSaveError('');
@@ -82,6 +108,10 @@ export const useKnowledgeDetailSection = () => {
       title: data.title,
       category: data.category,
       tags: data.tags,
+      description: data.description,
+      required_knowledge: data.required_knowledge,
+      rules: data.rules,
+      optional_knowledge: data.optional_knowledge,
       content: data.content,
     };
 
@@ -132,6 +162,9 @@ export const useKnowledgeDetailSection = () => {
               title: body.title,
               category: body.category,
               tags: body.tags,
+              description: body.description,
+              required_knowledge: body.required_knowledge,
+              rules: body.rules,
               updated_at: new Date().toISOString(),
             };
             setEntryData({
@@ -142,6 +175,10 @@ export const useKnowledgeDetailSection = () => {
                 title: body.title,
                 category: body.category,
                 tags: body.tags,
+                description: body.description,
+                required_knowledge: body.required_knowledge,
+                rules: body.rules,
+                optional_knowledge: body.optional_knowledge,
                 updated: new Date().toISOString(),
               },
             });
@@ -149,6 +186,9 @@ export const useKnowledgeDetailSection = () => {
               title: body.title,
               category: body.category,
               tags: body.tags,
+              description: body.description,
+              required_knowledge: body.required_knowledge,
+              rules: body.rules,
               updated_at: new Date().toISOString(),
             });
           }

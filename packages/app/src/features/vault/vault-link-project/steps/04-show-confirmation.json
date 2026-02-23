@@ -3,8 +3,8 @@
   "what": "Display confirmation that vault-project link was created successfully",
   "why": "Confirm to the user that the vault has been linked to the project and knowledge is now available",
   "where": {
-    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
-    "step_component": "features/vault/vault-link-project/LinkConfirmation.tsx"
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/LinkConfirmation/LinkConfirmation.tsx"
   },
   "ui": {
     "renders": "display",

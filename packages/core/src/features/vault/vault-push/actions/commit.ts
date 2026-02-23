@@ -1,4 +1,4 @@
-import { commit as gitCommit } from 'isomorphic-git';
+import git from 'isomorphic-git';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
 
@@ -16,7 +16,7 @@ export async function commit(
   try {
     const message = commitMessage ?? `nori: update ${filesCount} knowledge file${filesCount !== 1 ? 's' : ''}`;
 
-    const sha = await gitCommit({
+    const sha = await git.commit({
       fs,
       dir,
       message,

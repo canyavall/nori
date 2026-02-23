@@ -1,18 +1,21 @@
 {
   "type": "ui_action",
   "what": "Display frontmatter form for entering knowledge entry metadata",
-  "why": "Collect metadata (tags, description, category, auto_load) that defines how the knowledge entry is classified and loaded",
+  "why": "Collect metadata (title, category, description, tags, rules, required_knowledge, optional_knowledge) that defines how the knowledge entry is classified and loaded",
   "where": {
-    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog.tsx",
-    "step_component": "features/knowledge/knowledge-create/FrontmatterForm.tsx"
+    "component": "features/knowledge/knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog.tsx",
+    "step_component": "features/knowledge/knowledge-create/FrontmatterForm/FrontmatterForm.tsx"
   },
   "ui": {
     "renders": "form",
     "fields": [
-      "tags",
-      "description",
+      "title",
       "category",
-      "auto_load"
+      "description",
+      "tags",
+      "rules",
+      "required_knowledge",
+      "optional_knowledge"
     ],
     "validation_schema": "@nori/shared:knowledgeFrontmatterSchema"
   },

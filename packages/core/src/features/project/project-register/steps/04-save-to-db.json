@@ -1,0 +1,58 @@
+{
+  "type": "action",
+  "what": "Persist the project record to the SQLite database using INSERT OR REPLACE",
+  "why": "Store the project metadata (id, name, path, git status, connected vaults) so it can be listed and managed across app sessions",
+  "where": {
+    "entry_point": "features/project/project-register/project-register.ts",
+    "implementation": "features/project/project-register/actions/save-to-db.ts"
+  },
+  "output": {
+    "console": "Confirmation that the project was saved to the database",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "INSERT OR REPLACE into the projects table completes without throwing",
+    "event": {
+      "action": "project_register_save_to_db",
+      "status": "success",
+      "message": "Project saved to database",
+      "data_fields": [
+        "project_id",
+        "project_name",
+        "path",
+        "is_git"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database write fails",
+      "criteria": "db.run throws an error during INSERT OR REPLACE (e.g., database locked, schema mismatch, disk full)",
+      "action": "Return DB_WRITE_FAILED error with the underlying error message",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "project_register_save_to_db",
+        "status": "error",
+        "message": "Failed to save project to database: {error_message}",
+        "data_fields": [
+          "project_id",
+          "error_message"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Database write succeeds",
+      "outcome": "Return the complete project record — registration flow is complete"
+    },
+    {
+      "condition": "Database write fails",
+      "outcome": "Abort registration, return DB_WRITE_FAILED error to user"
+    }
+  ],
+  "calls": [
+    "features/project/project-register/actions/save-to-db.ts"
+  ]
+}

@@ -144,8 +144,8 @@ describe('runProjectList', () => {
     const result = await runProjectList({ db });
     expect(result.success).toBe(true);
     if (result.success) {
-      const p1 = result.data.projects.find((p) => p.id === 'p1');
-      const p2 = result.data.projects.find((p) => p.id === 'p2');
+      const p1 = result.data.projects.find((p: { id: string }) => p.id === 'p1');
+      const p2 = result.data.projects.find((p: { id: string }) => p.id === 'p2');
       expect(p1?.connected_vaults).toEqual([vaultA]);
       expect(p2?.connected_vaults).toEqual([vaultB]);
     }

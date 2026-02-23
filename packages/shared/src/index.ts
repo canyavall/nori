@@ -3,7 +3,16 @@ export type { FlowEmitter, StepResult, FlowError, FlowResult } from './types/flo
 export type { Vault, VaultLink, VaultSyncStatus } from './types/vault.js';
 export type { KnowledgeEntry, KnowledgeFrontmatter, KnowledgeProposal } from './types/knowledge.js';
 export type { Session, Message } from './types/session.js';
-export type { Project, ProjectSettings } from './types/project.js';
+export type { Project, ProjectSettings, ProjectSource, DiscoveredProject } from './types/project.js';
+export type {
+  ClaudeSkill,
+  ClaudeRuleType,
+  ClaudeRule,
+  ClaudeHookEvent,
+  ClaudeHookEntry,
+  ClaudeHookConfig,
+  ClaudeMcpServer,
+} from './types/claude-config.js';
 export type { SSEEventMap, SSEEventName } from './types/events.js';
 export type { ApiError, ApiResponse } from './types/api.js';
 
@@ -141,6 +150,8 @@ export {
   APP_INTEGRITY_CHECK_API,
   APP_AUTHENTICATION_CHECK_API,
   APP_AUTOUPDATE_API,
+  APP_INFO_API,
+  type AppInfoResponse,
 } from './contracts/app.contract.js';
 
 // Schemas — Project
@@ -153,9 +164,48 @@ export {
 export {
   type ProjectRegisterResponse,
   type ProjectListResponse,
+  type ProjectDiscoverResponse,
   PROJECT_LIST_API,
   PROJECT_REGISTER_API,
+  PROJECT_DISCOVER_API,
 } from './contracts/project.contract.js';
+
+// Contracts — Claude Config
+export {
+  type ClaudeSkillListResponse,
+  type ClaudeSkillReadResponse,
+  type ClaudeSkillWriteResponse,
+  type ClaudeRuleListResponse,
+  type ClaudeRuleReadResponse,
+  type ClaudeRuleWriteResponse,
+  type ClaudeHooksResponse,
+  type ClaudeHooksWriteResponse,
+  type ClaudeMcpListResponse,
+  type ClaudeMcpWriteResponse,
+  CLAUDE_SKILLS_LIST_API,
+  CLAUDE_SKILLS_READ_API,
+  CLAUDE_SKILLS_WRITE_API,
+  CLAUDE_RULES_LIST_API,
+  CLAUDE_RULES_READ_API,
+  CLAUDE_RULES_WRITE_API,
+  CLAUDE_HOOKS_READ_API,
+  CLAUDE_HOOKS_WRITE_API,
+  CLAUDE_MCPS_READ_API,
+  CLAUDE_MCPS_WRITE_API,
+} from './contracts/claude-config.contract.js';
+
+// Contracts — Repo Knowledge Extract
+export {
+  repoKnowledgeExtractStartSchema,
+  type RepoKnowledgeExtractStartInput,
+  repoKnowledgeExtractReplySchema,
+  type RepoKnowledgeExtractReplyInput,
+  type RepoKnowledgeExtractStartResponse,
+  type RepoKnowledgeExtractReplyResponse,
+  type RepoKnowledgeExtractEvents,
+  REPO_KNOWLEDGE_EXTRACT_START_API,
+  REPO_KNOWLEDGE_EXTRACT_REPLY_API,
+} from './contracts/repo-knowledge-extract.contract.js';
 
 // Constants
 export {

@@ -1,4 +1,4 @@
-import { push as gitPush } from 'isomorphic-git';
+import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import * as fs from 'node:fs';
 import type { StepResult, FlowError } from '@nori/shared';
@@ -16,7 +16,7 @@ export async function push(
   const start = Date.now();
 
   try {
-    await gitPush({
+    await git.push({
       fs,
       http,
       dir,

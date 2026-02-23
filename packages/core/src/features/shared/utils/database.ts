@@ -127,6 +127,19 @@ export function runMigrations(db: Database): void {
     )
   `);
 
+  // Migration: add description, required_knowledge, rules columns to knowledge_entries
+  const keCols = queryAll(db, 'PRAGMA table_info(knowledge_entries)');
+  const keColNames = new Set(keCols.map((c) => c.name as string));
+  if (!keColNames.has('description')) {
+    db.run(`ALTER TABLE knowledge_entries ADD COLUMN description TEXT NOT NULL DEFAULT ''`);
+  }
+  if (!keColNames.has('required_knowledge')) {
+    db.run(`ALTER TABLE knowledge_entries ADD COLUMN required_knowledge TEXT NOT NULL DEFAULT '[]'`);
+  }
+  if (!keColNames.has('rules')) {
+    db.run(`ALTER TABLE knowledge_entries ADD COLUMN rules TEXT NOT NULL DEFAULT '[]'`);
+  }
+
   db.run(`
     CREATE TABLE IF NOT EXISTS vault_links (
       id TEXT PRIMARY KEY,

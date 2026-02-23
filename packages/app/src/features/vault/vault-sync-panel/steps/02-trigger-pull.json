@@ -3,7 +3,7 @@
   "what": "Trigger a vault pull to fetch and merge upstream changes",
   "why": "Synchronize the local vault with the remote repository to get the latest knowledge updates",
   "where": {
-    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx"
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel/VaultSyncPanel.tsx"
   },
   "contract": {
     "endpoint": "POST /api/vault/:id/pull",

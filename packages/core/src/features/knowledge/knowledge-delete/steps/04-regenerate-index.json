@@ -1,42 +1,40 @@
 {
-  "type": "flow_call",
-  "flow_id": "knowledge-index-build",
-  "what": "Rebuild index without deleted entry",
+  "type": "action",
+  "what": "Remove deleted entry from knowledge database",
   "why": "Index must no longer reference the deleted entry",
   "where": {
-    "entry_point": "features/knowledge/knowledge-delete/steps/04-regenerate-index.json",
-    "implementation": "features/knowledge/knowledge-index-build/steps/"
+    "entry_point": "features/knowledge/knowledge-delete/knowledge-delete.ts",
+    "implementation": "features/knowledge/knowledge-delete/actions/regenerate-index.ts"
   },
   "output": {
-    "console": "Index rebuild result with updated entry count and duration",
-    "file": "Updated knowledge.json index file without the deleted entry"
+    "console": "Index update result confirming entry removal",
+    "file": null
   },
   "success_handling": {
-    "criteria": "Index build flow completes and the deleted entry no longer appears in the rebuilt index",
+    "criteria": "DELETE from knowledge_entries succeeds",
     "event": {
       "action": "knowledge_delete_regenerate_index",
       "status": "success",
-      "message": "Knowledge index rebuilt after deletion of entry {entry_id}",
+      "message": "Knowledge entry removed from database",
       "data_fields": [
-        "total_entries",
-        "deleted_entry_id",
+        "deleted_file_path",
         "build_duration_ms"
       ]
     }
   },
   "error_handling": [
     {
-      "scenario": "Index build fails",
-      "criteria": "The knowledge-index-build flow returns an error or does not complete",
-      "action": "Log index build failure as warning, the entry is deleted but may still appear in stale index until next rebuild",
+      "scenario": "Database delete fails",
+      "criteria": "SQL DELETE throws an exception",
+      "action": "Log as warning, the file is deleted but may still appear in stale index until next full rebuild",
       "severity": "warning",
       "recoverable": true,
       "event": {
         "action": "knowledge_delete_regenerate_index",
         "status": "warning",
-        "message": "Index rebuild failed after deleting entry {entry_id}",
+        "message": "Index update failed after deleting entry",
         "data_fields": [
-          "entry_id",
+          "file_path",
           "build_error"
         ]
       }
@@ -44,15 +42,12 @@
   ],
   "decisions": [
     {
-      "condition": "Index rebuilt successfully",
-      "outcome": "Knowledge delete flow complete"
-    },
-    {
-      "condition": "Index rebuild fails",
-      "outcome": "Log warning, deletion still considered successful — index will rebuild on next trigger"
+      "date": "2025-01-01",
+      "reason": "Direct DB DELETE instead of full index rebuild",
+      "rationale": "Running the full knowledge-index-build flow after every delete is too slow. A targeted DELETE is sufficient and fast."
     }
   ],
   "calls": [
-    "features/knowledge/knowledge-index-build/steps/"
+    "features/knowledge/knowledge-delete/actions/regenerate-index.ts"
   ]
 }

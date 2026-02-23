@@ -1,0 +1,25 @@
+{
+  "type": "ui_action",
+  "what": "Display conversation thread with LLM questions and user reply input",
+  "why": "The LLM may need clarification before generating proposals — this enables multi-turn dialogue",
+  "where": {
+    "component": "features/knowledge/repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields": ["userReply"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_reply": "03-reply-to-llm",
+    "on_skip": "03-reply-to-llm"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Skip option",
+      "rationale": "Users may not want to answer questions — allow skipping to get best-effort proposals"
+    }
+  ]
+}

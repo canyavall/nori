@@ -1,0 +1,60 @@
+{
+  "type": "action",
+  "what": "Scan .claude/skills/ for subdirectories containing SKILL.md, parse frontmatter",
+  "why": "Builds the skill inventory for display — users need to see all project skills at a glance",
+  "where": {
+    "entry_point": "features/project/project-claude-skills/project-claude-skills.ts",
+    "implementation": "features/project/project-claude-skills/actions/list-skills.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Skills directory scanned and all SKILL.md files parsed",
+    "event": {
+      "action": "project_claude_skills_list",
+      "status": "success",
+      "message": "Skills listed successfully",
+      "data_fields": ["skill_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": ".claude/skills/ directory does not exist",
+      "criteria": "Directory not found at project_path/.claude/skills/",
+      "action": "Return empty array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "SKILL.md has invalid frontmatter",
+      "criteria": "gray-matter throws parse error",
+      "action": "Include skill with parseError flag, skip broken fields",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "Permission denied on directory read",
+      "criteria": "EACCES error from readdir/readFile",
+      "action": "Return error with code PERMISSION_DENIED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Parse frontmatter with gray-matter",
+      "rationale": "Already a core dependency; consistent with other frontmatter parsing in the codebase"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Return full markdown body alongside metadata",
+      "rationale": "UI can display skill content without a second read call"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Path is relative to project root, resolved at runtime",
+      "rationale": "Avoids storing absolute paths that break across machines"
+    }
+  ],
+  "calls": ["features/project/project-claude-skills/actions/list-skills.ts"]
+}

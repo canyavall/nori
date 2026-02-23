@@ -3,8 +3,8 @@
   "what": "Display session detail including messages, loaded knowledge, and timeline",
   "why": "Allow the user to review a session's full history and decide whether to resume it",
   "where": {
-    "component": "features/session/session-browser/SessionBrowserPage.tsx",
-    "step_component": "features/session/session-browser/SessionDetail.tsx"
+    "component": "features/session/session-browser/SessionBrowserPage/SessionBrowserPage.tsx",
+    "step_component": "features/session/session-browser/SessionDetail/SessionDetail.tsx"
   },
   "ui": {
     "renders": "display",

@@ -33,6 +33,19 @@ export async function runVaultPush(
 
   const vault = configResult.data;
 
+  if (!vault.git_url || !vault.branch) {
+    return {
+      success: false,
+      error: {
+        code: 'NOT_GIT_VAULT',
+        message: 'Push is only supported for git-backed vaults',
+        step: '01-validate-config',
+        severity: 'error',
+        recoverable: false,
+      },
+    };
+  }
+
   // Step 02: Check changes
   emit.emit('vault:push:checking-changes', { vault_id: input.vault_id });
   const changesResult = await checkChanges(vault.local_path);

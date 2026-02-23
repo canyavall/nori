@@ -3,8 +3,8 @@
   "what": "Display conflict resolver with file diffs and resolution options per conflict",
   "why": "Enable the user to view each conflict side by side and choose how to resolve it (accept theirs, accept ours, manual edit)",
   "where": {
-    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx",
-    "step_component": "features/vault/vault-sync-panel/ConflictResolver.tsx"
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel/VaultSyncPanel.tsx",
+    "step_component": "features/vault/vault-sync-panel/ConflictResolver/ConflictResolver.tsx"
   },
   "ui": {
     "renders": "editor",

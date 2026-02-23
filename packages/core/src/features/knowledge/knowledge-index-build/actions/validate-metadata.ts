@@ -6,6 +6,9 @@ export interface ValidatedEntry extends ParsedEntry {
   title: string;
   category: string;
   tags: string[];
+  description: string;
+  required_knowledge: string[];
+  rules: string[];
 }
 
 export interface ValidateResult {
@@ -27,7 +30,10 @@ export function validateMetadata(entries: ParsedEntry[]): StepResult<ValidateRes
         ...entry,
         title: result.data.title,
         category: result.data.category,
-        tags: result.data.tags ?? [],
+        tags: result.data.tags,
+        description: result.data.description,
+        required_knowledge: result.data.required_knowledge,
+        rules: result.data.rules,
       });
     } else {
       invalidCount++;

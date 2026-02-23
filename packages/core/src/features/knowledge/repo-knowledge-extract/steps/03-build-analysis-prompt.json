@@ -1,0 +1,33 @@
+{
+  "type": "action",
+  "what": "Build the system prompt and user message for LLM analysis",
+  "why": "The LLM needs structured instructions and file contents to generate knowledge proposals or ask clarifying questions",
+  "where": {
+    "entry_point": "features/knowledge/repo-knowledge-extract/repo-knowledge-extract.ts",
+    "implementation": "features/knowledge/repo-knowledge-extract/actions/build-analysis-prompt.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "System prompt and messages array built successfully",
+    "event": {
+      "action": "repo_knowledge_extract_prompt_built",
+      "status": "success",
+      "message": "Analysis prompt prepared",
+      "data_fields": []
+    }
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Multi-turn support",
+      "rationale": "Accepts optional conversation history so follow-up replies can reuse the same prompt structure"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Vault context inclusion",
+      "rationale": "Includes existing categories and sample titles so the LLM generates consistent entries"
+    }
+  ],
+  "calls": ["features/knowledge/repo-knowledge-extract/actions/build-analysis-prompt.ts"]
+}

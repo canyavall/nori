@@ -38,7 +38,10 @@ function makeEntry(overrides: Partial<KnowledgeEntry> = {}): KnowledgeEntry {
     file_path: 'docs/test.md',
     title: 'Test Entry',
     category: 'General',
-    tags: ['tag1'],
+    tags: ['tag-one', 'tag-two', 'tag-three'],
+    description: 'Test description',
+    required_knowledge: [],
+    rules: [],
     content_hash: 'abc123',
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
@@ -50,7 +53,10 @@ function makeFrontmatter(): KnowledgeFrontmatter {
   return {
     title: 'Test Entry',
     category: 'General',
-    tags: ['tag1'],
+    tags: ['tag-one', 'tag-two', 'tag-three'],
+    description: 'Test description',
+    required_knowledge: [],
+    rules: [],
     created: '2026-01-01T00:00:00Z',
     updated: '2026-01-01T00:00:00Z',
   };

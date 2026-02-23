@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Read .mcp.json from project root, extract mcpServers object",
+  "why": "Users need to see which MCP servers are configured for the project",
+  "where": {
+    "entry_point": "features/project/project-claude-mcps/project-claude-mcps.ts",
+    "implementation": "features/project/project-claude-mcps/actions/read-mcps.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": ".mcp.json read and mcpServers extracted",
+    "event": {
+      "action": "project_claude_mcps_read",
+      "status": "success",
+      "message": "MCP configuration read successfully",
+      "data_fields": ["server_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": ".mcp.json doesn't exist",
+      "criteria": "File not found at project root",
+      "action": "Return empty servers array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    },
+    {
+      "scenario": "Malformed JSON",
+      "criteria": "JSON.parse throws SyntaxError",
+      "action": "Return error with code INVALID_JSON",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "No mcpServers key",
+      "criteria": "Parsed JSON has no 'mcpServers' property",
+      "action": "Return empty array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Only read project-level .mcp.json",
+      "rationale": "User-level MCP config in ~/.claude.json is out of scope for project management"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Return both parsed server list and raw JSON content",
+      "rationale": "Parsed list for display cards, raw JSON for the editor view"
+    }
+  ],
+  "calls": ["features/project/project-claude-mcps/actions/read-mcps.ts"]
+}

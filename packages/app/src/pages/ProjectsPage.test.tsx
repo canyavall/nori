@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@solidjs/testing-library';
-import type { Project } from '@nori/shared';
+import type { DiscoveredProject } from '@nori/shared';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -10,12 +10,12 @@ vi.mock('../lib/api', () => ({
 
 const { getProjects, setMockProjects, setProjectsMock, getRegisterOpen, setRegisterOpenMock } =
   vi.hoisted(() => {
-    let _projects: Project[] = [];
+    let _projects: DiscoveredProject[] = [];
     let _open = false;
     return {
       getProjects: () => _projects,
-      setMockProjects: (v: Project[]) => { _projects = v; },
-      setProjectsMock: vi.fn((v: Project[]) => { _projects = v; }),
+      setMockProjects: (v: DiscoveredProject[]) => { _projects = v; },
+      setProjectsMock: vi.fn((v: DiscoveredProject[]) => { _projects = v; }),
       getRegisterOpen: () => _open,
       setRegisterOpenMock: vi.fn((v: boolean) => { _open = v; }),
     };
@@ -26,14 +26,15 @@ vi.mock('../stores/project.store', () => ({
   setProjects: setProjectsMock,
   registerOpen: getRegisterOpen,
   setRegisterOpen: setRegisterOpenMock,
+  setRegisterPrefilledPath: vi.fn(),
 }));
 
 const { getActiveProject, setMockActiveProject, selectProjectMock } = vi.hoisted(() => {
-  let _active: Project | null = null;
+  let _active: DiscoveredProject | null = null;
   return {
     getActiveProject: () => _active,
-    setMockActiveProject: (v: Project | null) => { _active = v; },
-    selectProjectMock: vi.fn((p: Project) => { _active = p; }),
+    setMockActiveProject: (v: DiscoveredProject | null) => { _active = v; },
+    selectProjectMock: vi.fn((p: DiscoveredProject) => { _active = p; }),
   };
 });
 
@@ -55,7 +56,7 @@ const mockApiGet = vi.mocked(apiGet);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function makeProject(overrides: Partial<Project> = {}): Project {
+function makeProject(overrides: Partial<DiscoveredProject> = {}): DiscoveredProject {
   return {
     id: 'proj-1',
     name: 'my-project',
@@ -63,6 +64,8 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     is_git: false,
     connected_vaults: [],
     created_at: '2026-01-01T00:00:00Z',
+    source: 'nori',
+    has_nori: true,
     ...overrides,
   };
 }
@@ -87,7 +90,7 @@ describe('ProjectsPage', () => {
   it('shows empty state after load with no projects', async () => {
     mockApiGet.mockResolvedValue({ data: [] });
     render(() => <ProjectsPage />);
-    await waitFor(() => expect(screen.getByText('No projects registered')).toBeDefined());
+    await waitFor(() => expect(screen.getByText('No projects found')).toBeDefined());
   });
 
   it('renders a card for each project', async () => {
@@ -131,14 +134,14 @@ describe('ProjectsPage', () => {
   it('shows "Add Project" button', async () => {
     mockApiGet.mockResolvedValue({ data: [] });
     render(() => <ProjectsPage />);
-    await waitFor(() => screen.getByText('No projects registered'));
+    await waitFor(() => screen.getByText('No projects found'));
     expect(screen.getAllByRole('button', { name: /add project/i }).length).toBeGreaterThan(0);
   });
 
   it('clicking "Add Project" calls setRegisterOpen(true)', async () => {
     mockApiGet.mockResolvedValue({ data: [] });
     render(() => <ProjectsPage />);
-    await waitFor(() => screen.getByText('No projects registered'));
+    await waitFor(() => screen.getByText('No projects found'));
 
     fireEvent.click(screen.getAllByRole('button', { name: /add project/i })[0]);
     expect(setRegisterOpenMock).toHaveBeenCalledWith(true);

@@ -4,9 +4,21 @@ import { knowledgeFrontmatterSchema } from '@nori/shared';
 export function validateFrontmatter(
   title: string,
   category: string,
-  tags: string[]
+  tags: string[],
+  description: string,
+  required_knowledge: string[],
+  rules: string[],
+  optional_knowledge?: string[]
 ): StepResult<KnowledgeFrontmatter> | FlowError {
-  const result = knowledgeFrontmatterSchema.safeParse({ title, category, tags });
+  const result = knowledgeFrontmatterSchema.safeParse({
+    title,
+    category,
+    tags,
+    description,
+    required_knowledge,
+    rules,
+    optional_knowledge,
+  });
 
   if (!result.success) {
     const issues = result.error.issues;
@@ -24,7 +36,7 @@ export function validateFrontmatter(
         recoverable: true,
         details: {
           missing_fields: missingFields,
-          provided_fields: { title, category, tags },
+          provided_fields: { title, category, tags, description, required_knowledge, rules },
           validation_errors: issues.map((i) => ({
             path: i.path.join('.'),
             message: i.message,

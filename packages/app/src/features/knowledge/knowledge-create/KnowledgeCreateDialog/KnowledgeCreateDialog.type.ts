@@ -9,4 +9,7 @@ export interface KnowledgeCreateDialogProps {
 export interface EditableProposal extends KnowledgeProposal {
   included: boolean;
   tagsInput: string;
+  requiredKnowledgeInput: string;
+  rulesInput: string;
+  optionalKnowledgeInput: string;
 }

@@ -1,0 +1,25 @@
+{
+  "type": "ui_action",
+  "what": "Display editable proposal grid for user review and selection",
+  "why": "Users need to review, edit, include/exclude proposals before saving them as knowledge entries",
+  "where": {
+    "component": "features/knowledge/repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog.tsx"
+  },
+  "ui": {
+    "renders": "form",
+    "fields": ["title", "category", "description", "tags", "rules", "required_knowledge", "optional_knowledge", "content", "included"],
+    "validation_schema": "@nori/shared:knowledgeFrontmatterSchema"
+  },
+  "transitions": {
+    "on_save": "05-save-proposals",
+    "on_cancel": "close_dialog"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Reuse KnowledgeCreateDialog review pattern",
+      "rationale": "Consistent UX for proposal editing across create and extract flows"
+    }
+  ]
+}

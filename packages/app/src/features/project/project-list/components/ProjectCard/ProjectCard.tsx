@@ -22,6 +22,11 @@ export const ProjectCard: Component<ProjectCardProps> = (props) => {
             <Show when={p.is_git}>
               <GitBadge />
             </Show>
+            <Show when={p.source === 'both'}>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">
+                Claude Code
+              </span>
+            </Show>
           </div>
           <p class="text-sm text-[var(--color-text-muted)] font-mono truncate">{p.path}</p>
           <div class="mt-2 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">

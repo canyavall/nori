@@ -111,10 +111,77 @@ declare module 'isomorphic-git' {
     symrefs?: boolean;
   }): Promise<ServerRef[]>;
 
+  export function statusMatrix(args: {
+    fs: typeof import('node:fs');
+    dir: string;
+    ref?: string;
+  }): Promise<[string, number, number, number][]>;
+
+  export function fetch(args: {
+    fs: typeof import('node:fs');
+    http: HttpClient;
+    dir: string;
+    url?: string;
+    ref?: string;
+    singleBranch?: boolean;
+  }): Promise<{ defaultBranch: string | null; fetchHead: string | null }>;
+
+  export function fastForward(args: {
+    fs: typeof import('node:fs');
+    http?: HttpClient;
+    dir: string;
+    ref?: string;
+    singleBranch?: boolean;
+  }): Promise<void>;
+
+  export function merge(args: {
+    fs: typeof import('node:fs');
+    dir: string;
+    ours?: string;
+    theirs: string;
+    author?: { name: string; email: string };
+  }): Promise<{ oid: string; alreadyMerged?: boolean; fastForward?: boolean }>;
+
+  export function commit(args: {
+    fs: typeof import('node:fs');
+    dir: string;
+    message: string;
+    author?: { name: string; email: string };
+  }): Promise<string>;
+
+  export function push(args: {
+    fs: typeof import('node:fs');
+    http: HttpClient;
+    dir: string;
+    url?: string;
+    remote?: string;
+    ref?: string;
+  }): Promise<void>;
+
+  export function add(args: {
+    fs: typeof import('node:fs');
+    dir: string;
+    filepath: string;
+  }): Promise<void>;
+
+  export function remove(args: {
+    fs: typeof import('node:fs');
+    dir: string;
+    filepath: string;
+  }): Promise<void>;
+
   export default {
     clone,
     log,
     listServerRefs,
+    statusMatrix,
+    fetch,
+    fastForward,
+    merge,
+    commit,
+    push,
+    add,
+    remove,
   };
 }
 

@@ -3,7 +3,7 @@
   "what": "Submit vault-project link request to the backend",
   "why": "Create the association between the selected vault and the project directory so knowledge is available in that project context",
   "where": {
-    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx"
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog/VaultLinkProjectDialog.tsx"
   },
   "contract": {
     "endpoint": "POST /api/vault/:id/link",

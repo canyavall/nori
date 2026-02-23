@@ -28,6 +28,9 @@ function queryRows(db: Database, sql: string, params: unknown[] = []): Record<st
   return rows;
 }
 
+const VALID_TAGS = ['my-tag', 'another-tag', 'third-tag'];
+const VALID_DESC = 'A valid description for testing purposes.';
+
 // ─── regenerateIndex unit tests ───────────────────────────────────────────────
 
 describe('regenerateIndex (create)', () => {
@@ -48,7 +51,10 @@ describe('regenerateIndex (create)', () => {
       '/vaults/v1/auth/jwt.md',
       'JWT Auth',
       'auth',
-      ['jwt', 'security'],
+      ['jwt-auth', 'security', 'tokens'],
+      'JWT authentication guide',
+      ['http-basics'],
+      ['Always validate token expiry'],
       '# JWT\n\nContent here.',
       db
     );
@@ -61,31 +67,35 @@ describe('regenerateIndex (create)', () => {
     expect(rows[0].category).toBe('auth');
     expect(rows[0].vault_id).toBe('vault-id-1');
     expect(rows[0].file_path).toBe('/vaults/v1/auth/jwt.md');
+    expect(rows[0].description).toBe('JWT authentication guide');
+    expect(rows[0].required_knowledge).toBe('["http-basics"]');
+    expect(rows[0].rules).toBe('["Always validate token expiry"]');
   });
 
   it('stores tags as JSON string', () => {
-    regenerateIndex('e1', 'v1', '/f.md', 'T', 'cat', ['a', 'b'], 'content', db);
+    regenerateIndex('e1', 'v1', '/f.md', 'T', 'cat', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'content', db);
     const rows = queryRows(db, 'SELECT tags FROM knowledge_entries WHERE id = ?', ['e1']);
-    expect(rows[0].tags).toBe('["a","b"]');
+    expect(rows[0].tags).toBe('["tag-a","tag-b","tag-c"]');
   });
 
   it('stores a non-empty content_hash', () => {
-    regenerateIndex('e2', 'v1', '/f.md', 'T', 'cat', [], 'some content', db);
+    regenerateIndex('e2', 'v1', '/f.md', 'T', 'cat', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'some content', db);
     const rows = queryRows(db, 'SELECT content_hash FROM knowledge_entries WHERE id = ?', ['e2']);
     expect(typeof rows[0].content_hash).toBe('string');
     expect((rows[0].content_hash as string).length).toBeGreaterThan(0);
   });
 
   it('replaces an existing row when entry_id collides (INSERT OR REPLACE)', () => {
-    regenerateIndex('e3', 'v1', '/f.md', 'Old Title', 'cat', [], 'old', db);
-    regenerateIndex('e3', 'v1', '/f.md', 'New Title', 'cat', [], 'new', db);
+    regenerateIndex('e3', 'v1', '/f.md', 'Old Title', 'cat', ['tag-a', 'tag-b', 'tag-c'], 'old desc', [], [], 'old', db);
+    regenerateIndex('e3', 'v1', '/f.md', 'New Title', 'cat', ['tag-a', 'tag-b', 'tag-c'], 'new desc', [], [], 'new', db);
     const rows = queryRows(db, 'SELECT * FROM knowledge_entries WHERE id = ?', ['e3']);
     expect(rows).toHaveLength(1);
     expect(rows[0].title).toBe('New Title');
+    expect(rows[0].description).toBe('new desc');
   });
 
   it('returns success: true with total_entries = 1', () => {
-    const result = regenerateIndex('e4', 'v1', '/f.md', 'T', 'cat', [], 'content', db);
+    const result = regenerateIndex('e4', 'v1', '/f.md', 'T', 'cat', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'content', db);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.total_entries).toBe(1);
@@ -119,11 +129,14 @@ describe('runKnowledgeCreate', () => {
         vault_path: vaultPath,
         title: 'My Entry',
         category: 'general',
-        tags: ['foo'],
+        tags: VALID_TAGS,
+        description: VALID_DESC,
+        required_knowledge: [],
+        rules: [],
         content: '# My Entry\n\nHello.',
         db,
       },
-      { emit: (e, d) => events.push({ event: e, data: d ?? {} }) }
+      { emit: (e: string, d: Record<string, unknown>) => events.push({ event: e, data: d ?? {} }) }
     );
 
     expect(result.success).toBe(true);
@@ -138,7 +151,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'DB Entry Test',
       category: 'testing',
-      tags: ['test'],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: ['prerequisite'],
+      rules: ['Always test first'],
       content: '# DB Entry Test\n\nContent.',
       db,
     });
@@ -151,6 +167,9 @@ describe('runKnowledgeCreate', () => {
     expect(rows[0].title).toBe('DB Entry Test');
     expect(rows[0].category).toBe('testing');
     expect(rows[0].vault_id).toBe('vault-abc');
+    expect(rows[0].description).toBe(VALID_DESC);
+    expect(rows[0].required_knowledge).toBe('["prerequisite"]');
+    expect(rows[0].rules).toBe('["Always test first"]');
   });
 
   it('returns entry_id, file_path, and title on success', async () => {
@@ -159,7 +178,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'Return Fields',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '# Content\n\nSome details here.',
       db,
     });
@@ -179,11 +201,14 @@ describe('runKnowledgeCreate', () => {
         vault_path: vaultPath,
         title: 'Events Test',
         category: 'cat',
-        tags: [],
+        tags: VALID_TAGS,
+        description: VALID_DESC,
+        required_knowledge: [],
+        rules: [],
         content: '# Events\n\nSome details here.',
         db,
       },
-      { emit: (e, d) => events.push({ event: e, data: d ?? {} }) }
+      { emit: (e: string, d: Record<string, unknown>) => events.push({ event: e, data: d ?? {} }) }
     );
 
     const emitted = events.map((e) => e.event);
@@ -198,7 +223,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: '',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '# Content here',
       db,
     });
@@ -214,7 +242,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'Title',
       category: '',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '# Content here',
       db,
     });
@@ -230,7 +261,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'Title',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '',
       db,
     });
@@ -247,7 +281,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'Duplicate',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '# Dup\n\nDuplicate content.',
       db,
     });
@@ -258,7 +295,10 @@ describe('runKnowledgeCreate', () => {
       vault_path: vaultPath,
       title: 'Duplicate',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: '# Dup\n\nDuplicate content.',
       db,
     });
@@ -270,5 +310,81 @@ describe('runKnowledgeCreate', () => {
     // DB should have exactly one entry for this title
     const rows = queryRows(db, 'SELECT * FROM knowledge_entries WHERE title = ?', ['Duplicate']);
     expect(rows).toHaveLength(1);
+  });
+
+  it('fails with INVALID_FRONTMATTER when tags < 3', async () => {
+    const result = await runKnowledgeCreate({
+      vault_id: 'v1',
+      vault_path: vaultPath,
+      title: 'Too Few Tags',
+      category: 'cat',
+      tags: ['one', 'two'],
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
+      content: '# Content',
+      db,
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.code).toBe('INVALID_FRONTMATTER');
+  });
+
+  it('fails with INVALID_FRONTMATTER when tags are not kebab-case', async () => {
+    const result = await runKnowledgeCreate({
+      vault_id: 'v1',
+      vault_path: vaultPath,
+      title: 'Bad Tags',
+      category: 'cat',
+      tags: ['CamelCase', 'with spaces', 'under_score'],
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
+      content: '# Content',
+      db,
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.code).toBe('INVALID_FRONTMATTER');
+  });
+
+  it('fails with INVALID_FRONTMATTER when description is missing', async () => {
+    const result = await runKnowledgeCreate({
+      vault_id: 'v1',
+      vault_path: vaultPath,
+      title: 'No Description',
+      category: 'cat',
+      tags: VALID_TAGS,
+      description: '',
+      required_knowledge: [],
+      rules: [],
+      content: '# Content',
+      db,
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.code).toBe('INVALID_FRONTMATTER');
+  });
+
+  it('fails with CONTENT_TOO_LONG when content exceeds 10K chars', async () => {
+    const result = await runKnowledgeCreate({
+      vault_id: 'v1',
+      vault_path: vaultPath,
+      title: 'Long Content',
+      category: 'cat',
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
+      content: 'x'.repeat(10_001),
+      db,
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.code).toBe('CONTENT_TOO_LONG');
   });
 });

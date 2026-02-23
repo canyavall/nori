@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "PUT /api/project/claude/skills/:name with updated content",
+  "why": "Persists the edited skill back to disk",
+  "where": {
+    "component": "features/project/project-claude-skills/SkillsSection.hook.ts#handleSave"
+  },
+  "contract": {
+    "endpoint": "PUT /api/project/claude/skills/:name",
+    "request_type": "{ content: string }",
+    "response_type": "@nori/shared:ClaudeSkillWriteResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-skills-list",
+    "on_error": "03-show-skill-editor"
+  },
+  "success_handling": {
+    "criteria": "Skill saved to disk",
+    "transition": "02-show-skills-list with success toast"
+  },
+  "error_handling": [
+    {
+      "scenario": "Save fails",
+      "criteria": "API returns error",
+      "action": "Show error message in editor, keep editor open",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

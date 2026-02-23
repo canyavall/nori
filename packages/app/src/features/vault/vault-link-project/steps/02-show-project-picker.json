@@ -3,8 +3,8 @@
   "what": "Display project directory picker for selecting a project to link",
   "why": "Allow the user to choose which local project directory should be linked to the selected vault",
   "where": {
-    "component": "features/vault/vault-link-project/VaultLinkProjectDialog.tsx",
-    "step_component": "features/vault/vault-link-project/ProjectPicker.tsx"
+    "component": "features/vault/vault-link-project/VaultLinkProjectDialog/VaultLinkProjectDialog.tsx",
+    "step_component": "features/vault/vault-link-project/ProjectPicker/ProjectPicker.tsx"
   },
   "ui": {
     "renders": "form",

@@ -1,40 +1,38 @@
 {
-  "type": "flow_call",
-  "flow_id": "knowledge-index-build",
-  "what": "Rebuild index with updated entry",
+  "type": "action",
+  "what": "Update entry in knowledge database",
   "why": "Index must reflect the latest content after edits",
   "where": {
-    "entry_point": "features/knowledge/knowledge-edit/steps/05-regenerate-index.json",
-    "implementation": "features/knowledge/knowledge-index-build/steps/"
+    "entry_point": "features/knowledge/knowledge-edit/knowledge-edit.ts",
+    "implementation": "features/knowledge/knowledge-edit/actions/regenerate-index.ts"
   },
   "output": {
-    "console": "Index rebuild result with entry count and duration",
-    "file": "Updated knowledge.json index file"
+    "console": "Index update result with entry count and duration",
+    "file": null
   },
   "success_handling": {
-    "criteria": "Index build flow completes and the updated entry metadata is reflected in the rebuilt index",
+    "criteria": "UPDATE on knowledge_entries succeeds",
     "event": {
       "action": "knowledge_edit_regenerate_index",
       "status": "success",
-      "message": "Knowledge index rebuilt with updated entry",
+      "message": "Knowledge entry updated in database",
       "data_fields": [
         "total_entries",
-        "updated_entry_id",
         "build_duration_ms"
       ]
     }
   },
   "error_handling": [
     {
-      "scenario": "Index build fails",
-      "criteria": "The knowledge-index-build flow returns an error or does not complete",
-      "action": "Log index build failure as warning, the edit is persisted but search may return stale metadata until next rebuild",
+      "scenario": "Database update fails",
+      "criteria": "SQL UPDATE throws an exception",
+      "action": "Log as warning, the edit is persisted to file but search may return stale metadata until next full index rebuild",
       "severity": "warning",
       "recoverable": true,
       "event": {
         "action": "knowledge_edit_regenerate_index",
         "status": "warning",
-        "message": "Index rebuild failed after editing entry {entry_id}",
+        "message": "Index update failed after editing entry {entry_id}",
         "data_fields": [
           "entry_id",
           "build_error"
@@ -44,15 +42,12 @@
   ],
   "decisions": [
     {
-      "condition": "Index rebuilt successfully",
-      "outcome": "Knowledge edit flow complete"
-    },
-    {
-      "condition": "Index rebuild fails",
-      "outcome": "Log warning, edit still considered successful — index will rebuild on next trigger"
+      "date": "2025-01-01",
+      "reason": "Direct DB UPDATE instead of full index rebuild",
+      "rationale": "Running the full knowledge-index-build flow after every edit is too slow. A targeted UPDATE is sufficient and fast."
     }
   ],
   "calls": [
-    "features/knowledge/knowledge-index-build/steps/"
+    "features/knowledge/knowledge-edit/actions/regenerate-index.ts"
   ]
 }

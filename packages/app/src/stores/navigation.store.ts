@@ -1,9 +1,9 @@
 import { createSignal, createMemo } from 'solid-js';
-import type { Project, Vault } from '@nori/shared';
+import type { DiscoveredProject, Vault } from '@nori/shared';
 
 export type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated';
 
-export const [activeProject, setActiveProject] = createSignal<Project | null>(null);
+export const [activeProject, setActiveProject] = createSignal<DiscoveredProject | null>(null);
 export const [activeVault, setActiveVault] = createSignal<Vault | null>(null);
 export const [authStatus, setAuthStatus] = createSignal<AuthStatus>('unknown');
 
@@ -21,7 +21,7 @@ export const activeContextName = createMemo<string | null>(() => {
   return null;
 });
 
-export function selectProject(project: Project) {
+export function selectProject(project: DiscoveredProject) {
   setActiveProject(project);
   setActiveVault(null);
 }

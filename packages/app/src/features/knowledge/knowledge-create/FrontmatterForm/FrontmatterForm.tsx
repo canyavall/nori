@@ -3,7 +3,12 @@ import type { FrontmatterFormProps } from './FrontmatterForm.type';
 import { useFrontmatterForm } from './FrontmatterForm.hook';
 
 export const FrontmatterForm = (props: FrontmatterFormProps) => {
-  const { title, setTitle, category, setCategory, tagsInput, setTagsInput, errors, tags, handleSubmit } = useFrontmatterForm(props);
+  const {
+    title, setTitle, category, setCategory, tagsInput, setTagsInput,
+    description, setDescription, requiredKnowledgeInput, setRequiredKnowledgeInput,
+    rulesInput, setRulesInput, optionalKnowledgeInput, setOptionalKnowledgeInput,
+    errors, tags, handleSubmit,
+  } = useFrontmatterForm(props);
 
   return (
     <form onSubmit={handleSubmit} class="space-y-4">
@@ -42,15 +47,32 @@ export const FrontmatterForm = (props: FrontmatterFormProps) => {
       </div>
 
       <div>
+        <label class="block text-sm font-medium mb-1" for="kc-description">
+          Description
+        </label>
+        <textarea
+          id="kc-description"
+          rows={2}
+          value={description()}
+          onInput={(e) => setDescription(e.currentTarget.value)}
+          placeholder="Brief description of this knowledge entry (max 300 chars)"
+          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] resize-none"
+        />
+        <Show when={errors().description}>
+          <p class="mt-1 text-xs text-[var(--color-error)]">{errors().description}</p>
+        </Show>
+      </div>
+
+      <div>
         <label class="block text-sm font-medium mb-1" for="kc-tags">
-          Tags
+          Tags (3-12, kebab-case, comma separated)
         </label>
         <input
           id="kc-tags"
           type="text"
           value={tagsInput()}
           onInput={(e) => setTagsInput(e.currentTarget.value)}
-          placeholder="comma, separated, tags"
+          placeholder="my-tag, another-tag, third-tag"
           class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
         />
         <Show when={tags().length > 0}>
@@ -64,6 +86,57 @@ export const FrontmatterForm = (props: FrontmatterFormProps) => {
             </For>
           </div>
         </Show>
+        <Show when={errors().tags}>
+          <p class="mt-1 text-xs text-[var(--color-error)]">{errors().tags}</p>
+        </Show>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1" for="kc-rules">
+          Rules (one per line)
+        </label>
+        <textarea
+          id="kc-rules"
+          rows={3}
+          value={rulesInput()}
+          onInput={(e) => setRulesInput(e.currentTarget.value)}
+          placeholder="Each line becomes a rule this entry teaches"
+          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] resize-y"
+        />
+        <Show when={errors().rules}>
+          <p class="mt-1 text-xs text-[var(--color-error)]">{errors().rules}</p>
+        </Show>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1" for="kc-required-knowledge">
+          Required Knowledge (comma separated)
+        </label>
+        <input
+          id="kc-required-knowledge"
+          type="text"
+          value={requiredKnowledgeInput()}
+          onInput={(e) => setRequiredKnowledgeInput(e.currentTarget.value)}
+          placeholder="prerequisite-topic-1, prerequisite-topic-2"
+          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
+        />
+        <Show when={errors().required_knowledge}>
+          <p class="mt-1 text-xs text-[var(--color-error)]">{errors().required_knowledge}</p>
+        </Show>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1" for="kc-optional-knowledge">
+          Optional Knowledge (comma separated)
+        </label>
+        <input
+          id="kc-optional-knowledge"
+          type="text"
+          value={optionalKnowledgeInput()}
+          onInput={(e) => setOptionalKnowledgeInput(e.currentTarget.value)}
+          placeholder="optional-topic-1, optional-topic-2"
+          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
+        />
       </div>
 
       <Show when={props.error}>

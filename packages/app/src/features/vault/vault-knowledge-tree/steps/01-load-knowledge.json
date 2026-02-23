@@ -3,7 +3,7 @@
   "what": "Fetch all knowledge entries for the selected vault grouped by category",
   "why": "Need vault's knowledge to build the category tree display",
   "where": {
-    "component": "features/vault/vault-knowledge-tree/VaultKnowledgeTree.tsx"
+    "component": "features/vault/vault-knowledge-tree/VaultKnowledgeTree/VaultKnowledgeTree.tsx"
   },
   "contract": {
     "endpoint": "GET /api/knowledge",

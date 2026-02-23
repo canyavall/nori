@@ -23,6 +23,10 @@ vi.mock('../knowledge-edit/KnowledgeEditDialog/KnowledgeEditDialog', () => ({
   KnowledgeEditDialog: () => <div data-testid="edit-dialog" />,
 }));
 
+vi.mock('../repo-knowledge-extract/RepoExtractDialog/RepoExtractDialog', () => ({
+  RepoExtractDialog: () => <div data-testid="extract-dialog" />,
+}));
+
 vi.mock('../knowledge-search/SearchForm/SearchForm', () => ({
   SearchForm: () => <div data-testid="search-form" />,
 }));
@@ -60,6 +64,8 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     activeProject: () => null,
     handleSearch: vi.fn(),
     handleClearSearch: vi.fn(),
+    extractOpen: () => false,
+    setExtractOpen: vi.fn(),
     ...overrides,
   };
 }
@@ -71,7 +77,10 @@ function makeEntry(overrides: Partial<KnowledgeEntry> = {}): KnowledgeEntry {
     file_path: 'docs/test.md',
     title: 'Test Entry',
     category: 'General',
-    tags: [],
+    tags: ['tag-one', 'tag-two', 'tag-three'],
+    description: 'Test description',
+    required_knowledge: [],
+    rules: [],
     content_hash: 'abc123',
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',

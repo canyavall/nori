@@ -28,6 +28,9 @@ function queryRows(db: Database, sql: string, params: unknown[] = []): Record<st
   return rows;
 }
 
+const VALID_TAGS = ['my-tag', 'another-tag', 'third-tag'];
+const VALID_DESC = 'A valid description for testing purposes.';
+
 /** Seeds a knowledge_entries row and writes its markdown file. */
 function seedEntry(
   db: Database,
@@ -39,20 +42,26 @@ function seedEntry(
     title: string;
     tags: string[];
     content: string;
+    description?: string;
+    required_knowledge?: string[];
+    rules?: string[];
   }
 ): string {
   const dir = join(vaultPath, opts.category);
   mkdirSync(dir, { recursive: true });
   const slug = opts.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const filePath = join(dir, `${slug}.md`);
-  const frontmatter = `---\ntitle: ${opts.title}\ncategory: ${opts.category}\ntags: [${opts.tags.join(', ')}]\n---\n`;
+  const desc = opts.description ?? VALID_DESC;
+  const reqKnowledge = opts.required_knowledge ?? [];
+  const rules = opts.rules ?? [];
+  const frontmatter = `---\ntitle: ${opts.title}\ncategory: ${opts.category}\ntags: [${opts.tags.join(', ')}]\ndescription: "${desc}"\nrequired_knowledge: [${reqKnowledge.join(', ')}]\nrules: [${rules.join(', ')}]\n---\n`;
   writeFileSync(filePath, frontmatter + opts.content, 'utf-8');
 
   const now = new Date().toISOString();
   db.run(
-    `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, content_hash, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [opts.id, opts.vault_id, filePath, opts.title, opts.category, JSON.stringify(opts.tags), 'abc123', now, now]
+    `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, description, required_knowledge, rules, content_hash, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [opts.id, opts.vault_id, filePath, opts.title, opts.category, JSON.stringify(opts.tags), desc, JSON.stringify(reqKnowledge), JSON.stringify(rules), 'abc123', now, now]
   );
 
   return filePath;
@@ -68,9 +77,9 @@ describe('regenerateIndex (edit)', () => {
     // seed an existing row to update
     const now = new Date().toISOString();
     db.run(
-      `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, content_hash, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ['e1', 'v1', '/vault/cat/entry.md', 'Old Title', 'old-cat', '["old-tag"]', 'hash0', now, now]
+      `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, description, required_knowledge, rules, content_hash, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['e1', 'v1', '/vault/cat/entry.md', 'Old Title', 'old-cat', '["old-tag"]', 'old desc', '[]', '[]', 'hash0', now, now]
     );
   });
 
@@ -78,12 +87,15 @@ describe('regenerateIndex (edit)', () => {
     db.close();
   });
 
-  it('updates title, category, and tags in the DB', () => {
+  it('updates title, category, tags, description, required_knowledge, and rules in the DB', () => {
     const result = regenerateIndex(
       '/vault/cat/entry.md',
       'New Title',
       'new-cat',
-      ['new-tag'],
+      ['new-tag', 'tag-b', 'tag-c'],
+      'new description',
+      ['prereq'],
+      ['rule one'],
       'Updated content.',
       db
     );
@@ -94,11 +106,14 @@ describe('regenerateIndex (edit)', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].title).toBe('New Title');
     expect(rows[0].category).toBe('new-cat');
-    expect(rows[0].tags).toBe('["new-tag"]');
+    expect(rows[0].tags).toBe('["new-tag","tag-b","tag-c"]');
+    expect(rows[0].description).toBe('new description');
+    expect(rows[0].required_knowledge).toBe('["prereq"]');
+    expect(rows[0].rules).toBe('["rule one"]');
   });
 
   it('updates the content_hash', () => {
-    regenerateIndex('/vault/cat/entry.md', 'T', 'c', [], 'new content', db);
+    regenerateIndex('/vault/cat/entry.md', 'T', 'c', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'new content', db);
     const rows = queryRows(db, 'SELECT content_hash FROM knowledge_entries WHERE file_path = ?', ['/vault/cat/entry.md']);
     expect(rows[0].content_hash).not.toBe('hash0');
   });
@@ -106,13 +121,13 @@ describe('regenerateIndex (edit)', () => {
   it('updates the updated_at timestamp', async () => {
     const before = queryRows(db, 'SELECT updated_at FROM knowledge_entries WHERE file_path = ?', ['/vault/cat/entry.md'])[0].updated_at as string;
     await new Promise((r) => setTimeout(r, 5));
-    regenerateIndex('/vault/cat/entry.md', 'T', 'c', [], 'content', db);
+    regenerateIndex('/vault/cat/entry.md', 'T', 'c', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'content', db);
     const after = queryRows(db, 'SELECT updated_at FROM knowledge_entries WHERE file_path = ?', ['/vault/cat/entry.md'])[0].updated_at as string;
     expect(after >= before).toBe(true);
   });
 
   it('does nothing if file_path does not match any row', () => {
-    const result = regenerateIndex('/nonexistent/path.md', 'T', 'c', [], 'content', db);
+    const result = regenerateIndex('/nonexistent/path.md', 'T', 'c', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'content', db);
     expect(result.success).toBe(true);
     // The original row is untouched
     const rows = queryRows(db, 'SELECT title FROM knowledge_entries WHERE id = ?', ['e1']);
@@ -120,7 +135,7 @@ describe('regenerateIndex (edit)', () => {
   });
 
   it('returns success: true with total_entries = 1', () => {
-    const result = regenerateIndex('/vault/cat/entry.md', 'T', 'c', [], 'content', db);
+    const result = regenerateIndex('/vault/cat/entry.md', 'T', 'c', ['tag-a', 'tag-b', 'tag-c'], 'desc', [], [], 'content', db);
     expect(result.success).toBe(true);
     if (result.success) expect(result.data.total_entries).toBe(1);
   });
@@ -151,7 +166,7 @@ describe('runKnowledgeEdit', () => {
       vault_id: 'v1',
       category: 'auth',
       title: 'JWT Auth',
-      tags: ['jwt'],
+      tags: VALID_TAGS,
       content: 'Original content.',
     });
 
@@ -162,24 +177,27 @@ describe('runKnowledgeEdit', () => {
         file_path: filePath,
         title: 'JWT Auth Updated',
         category: 'auth',
-        tags: ['jwt', 'security'],
+        tags: ['jwt-auth', 'security', 'tokens'],
+        description: VALID_DESC,
+        required_knowledge: [],
+        rules: [],
         content: 'Updated content.',
         db,
       },
-      { emit: (e, d) => events.push({ event: e, data: d ?? {} }) }
+      { emit: (e: string, d: Record<string, unknown>) => events.push({ event: e, data: d ?? {} }) }
     );
 
     expect(result.success).toBe(true);
     expect(existsSync(filePath)).toBe(true);
   });
 
-  it('updates the DB record with new title, category, and tags', async () => {
+  it('updates the DB record with new title, category, tags, and new fields', async () => {
     const filePath = seedEntry(db, vaultPath, {
       id: 'e2',
       vault_id: 'v1',
       category: 'auth',
       title: 'Old Title',
-      tags: ['old'],
+      tags: VALID_TAGS,
       content: 'Old content.',
     });
 
@@ -189,7 +207,10 @@ describe('runKnowledgeEdit', () => {
       file_path: filePath,
       title: 'New Title',
       category: 'new-cat',
-      tags: ['new'],
+      tags: ['new-tag', 'tag-b', 'tag-c'],
+      description: 'Updated description',
+      required_knowledge: ['prereq-one'],
+      rules: ['Must follow this rule'],
       content: 'New content.',
       db,
     });
@@ -198,7 +219,10 @@ describe('runKnowledgeEdit', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].title).toBe('New Title');
     expect(rows[0].category).toBe('new-cat');
-    expect(rows[0].tags).toBe('["new"]');
+    expect(rows[0].tags).toBe('["new-tag","tag-b","tag-c"]');
+    expect(rows[0].description).toBe('Updated description');
+    expect(rows[0].required_knowledge).toBe('["prereq-one"]');
+    expect(rows[0].rules).toBe('["Must follow this rule"]');
   });
 
   it('returns entry_id, file_path, and title on success', async () => {
@@ -207,7 +231,7 @@ describe('runKnowledgeEdit', () => {
       vault_id: 'v1',
       category: 'cat',
       title: 'Entry',
-      tags: [],
+      tags: VALID_TAGS,
       content: 'Content.',
     });
 
@@ -217,7 +241,10 @@ describe('runKnowledgeEdit', () => {
       file_path: filePath,
       title: 'Entry',
       category: 'cat',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: 'Content.',
       db,
     });
@@ -235,7 +262,7 @@ describe('runKnowledgeEdit', () => {
       vault_id: 'v1',
       category: 'cat',
       title: 'Event Entry',
-      tags: [],
+      tags: VALID_TAGS,
       content: 'Content.',
     });
 
@@ -246,11 +273,14 @@ describe('runKnowledgeEdit', () => {
         file_path: filePath,
         title: 'Event Entry',
         category: 'cat',
-        tags: [],
+        tags: VALID_TAGS,
+        description: VALID_DESC,
+        required_knowledge: [],
+        rules: [],
         content: 'Content.',
         db,
       },
-      { emit: (e, d) => events.push({ event: e, data: d ?? {} }) }
+      { emit: (e: string, d: Record<string, unknown>) => events.push({ event: e, data: d ?? {} }) }
     );
 
     const emitted = events.map((e) => e.event);
@@ -266,7 +296,10 @@ describe('runKnowledgeEdit', () => {
       file_path: join(vaultPath, 'nonexistent.md'),
       title: 'T',
       category: 'c',
-      tags: [],
+      tags: VALID_TAGS,
+      description: VALID_DESC,
+      required_knowledge: [],
+      rules: [],
       content: 'content',
       db,
     });

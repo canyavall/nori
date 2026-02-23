@@ -1,0 +1,29 @@
+{
+  "type": "ui_action",
+  "what": "Render a JSON editor showing the hooks configuration with two tabs: Shared and Local",
+  "why": "Hooks are JSON config, not individual files — a structured JSON editor is the natural view",
+  "where": {
+    "component": "features/project/project-claude-hooks/HooksSection.tsx"
+  },
+  "ui": {
+    "renders": "editor",
+    "fields": ["shared hooks JSON", "local hooks JSON"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "03-save-hooks",
+    "on_cancel": "navigate_back"
+  },
+  "success_handling": {
+    "criteria": "User edits hooks JSON",
+    "transition": "03-save-hooks on save button click"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Two-tab layout for shared vs local",
+      "rationale": "Shared hooks are committed to git while local hooks are personal"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "what": "Submit knowledge entry update to the backend",
   "why": "Persist the edited knowledge entry by re-validating, writing changes to the vault, re-auditing, and re-indexing",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx"
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage/KnowledgeEditPage.tsx"
   },
   "contract": {
     "endpoint": "PUT /api/knowledge/:id",

@@ -1,0 +1,92 @@
+{
+  "type": "action",
+  "what": "Initialize the .nori data directory inside the project with settings.json and .gitignore",
+  "why": "Every registered project needs a local .nori directory to store project settings (ID, connected vaults) and keep logs out of version control",
+  "where": {
+    "entry_point": "features/project/project-register/project-register.ts",
+    "implementation": "features/project/project-register/actions/init-nori-dir.ts"
+  },
+  "output": {
+    "console": "Path to the created .nori directory and its settings",
+    "file": "Creates .nori/settings.json and .nori/.gitignore inside the project directory"
+  },
+  "success_handling": {
+    "criteria": ".nori directory exists (created or already present), settings.json is written or read successfully, and .gitignore is in place",
+    "event": {
+      "action": "project_register_init_nori_dir",
+      "status": "success",
+      "message": "Nori data directory initialized",
+      "data_fields": [
+        "nori_path",
+        "project_id",
+        "connected_vaults"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Directory creation fails",
+      "criteria": "fs.mkdirSync throws due to permissions or disk errors",
+      "action": "Return error indicating the .nori directory could not be created",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "project_register_init_nori_dir",
+        "status": "error",
+        "message": "Failed to create .nori directory at {path}",
+        "data_fields": [
+          "path",
+          "error_message"
+        ]
+      }
+    },
+    {
+      "scenario": "Settings file write fails",
+      "criteria": "fs.writeFileSync throws when writing settings.json or .gitignore",
+      "action": "Return error indicating settings could not be written to disk",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "project_register_init_nori_dir",
+        "status": "error",
+        "message": "Failed to write settings.json at {path}",
+        "data_fields": [
+          "path",
+          "error_message"
+        ]
+      }
+    },
+    {
+      "scenario": "Existing settings.json is corrupted",
+      "criteria": "JSON.parse fails on an existing settings.json during re-registration",
+      "action": "Silently overwrite the corrupted file with fresh settings",
+      "severity": "warning",
+      "recoverable": true,
+      "event": {
+        "action": "project_register_init_nori_dir",
+        "status": "warning",
+        "message": "Corrupted settings.json overwritten with fresh settings",
+        "data_fields": [
+          "nori_path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": ".nori directory and settings.json created or read successfully",
+      "outcome": "Proceed to save-to-db step with project settings"
+    },
+    {
+      "condition": "Existing settings.json found (re-registering project)",
+      "outcome": "Read existing settings and reuse them, proceed to save-to-db step"
+    },
+    {
+      "condition": "Directory or file creation fails",
+      "outcome": "Abort registration, return error to user"
+    }
+  ],
+  "calls": [
+    "features/project/project-register/actions/init-nori-dir.ts"
+  ]
+}

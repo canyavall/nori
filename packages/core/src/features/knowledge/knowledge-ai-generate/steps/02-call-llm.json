@@ -1,0 +1,89 @@
+{
+  "type": "action",
+  "what": "Call the Anthropic LLM API with vault context and user prompt to generate 1-3 knowledge entry proposals",
+  "why": "Use AI to produce structured, ready-to-review knowledge proposals (title, category, tags, description, content) that match the vault's existing style and fill the user's requested knowledge gap",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-ai-generate/knowledge-ai-generate.ts",
+    "implementation": "features/knowledge/knowledge-ai-generate/actions/call-llm.ts"
+  },
+  "output": {
+    "console": "Array of 1-3 KnowledgeProposal objects parsed from LLM response",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "LLM returns a valid JSON array with 1-3 proposals, each containing required fields (title, category, tags, description, required_knowledge, rules, content), and the array is successfully parsed and normalized",
+    "event": {
+      "action": "knowledge_ai_generate_call_llm",
+      "status": "success",
+      "message": "LLM generated knowledge proposals",
+      "data_fields": [
+        "proposals_count",
+        "proposal_titles"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No API key configured",
+      "criteria": "resolveAuth returns type 'none' — no Anthropic API key is available in environment or config",
+      "action": "Return NO_AUTH error informing the user to configure an API key",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_ai_generate_call_llm",
+        "status": "error",
+        "message": "No LLM API key configured",
+        "data_fields": []
+      }
+    },
+    {
+      "scenario": "LLM returns invalid or empty response",
+      "criteria": "Response text does not contain a valid JSON array, or the parsed array is empty",
+      "action": "Return INVALID_LLM_RESPONSE error — the model did not follow the expected output format",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_ai_generate_call_llm",
+        "status": "error",
+        "message": "LLM returned empty or non-array response",
+        "data_fields": []
+      }
+    },
+    {
+      "scenario": "LLM API call fails",
+      "criteria": "Network error, rate limit, timeout, or other exception during the Anthropic API call",
+      "action": "Return LLM_ERROR with the underlying error message",
+      "severity": "error",
+      "recoverable": false,
+      "event": {
+        "action": "knowledge_ai_generate_call_llm",
+        "status": "error",
+        "message": "LLM call failed: {error_message}",
+        "data_fields": [
+          "error_message"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "LLM returns valid proposals array",
+      "outcome": "Return normalized proposals — AI generation flow is complete"
+    },
+    {
+      "condition": "No API key available",
+      "outcome": "Abort generation, return authentication error"
+    },
+    {
+      "condition": "LLM response is unparseable or empty",
+      "outcome": "Abort generation, return INVALID_LLM_RESPONSE error"
+    },
+    {
+      "condition": "API call throws an exception",
+      "outcome": "Abort generation, return LLM_ERROR with details"
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-ai-generate/actions/call-llm.ts"
+  ]
+}

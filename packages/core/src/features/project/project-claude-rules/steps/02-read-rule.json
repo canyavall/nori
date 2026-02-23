@@ -1,0 +1,48 @@
+{
+  "type": "action",
+  "what": "Read full content of a single rule file by its relative path",
+  "why": "Returns raw markdown for the editor",
+  "where": {
+    "entry_point": "features/project/project-claude-rules/project-claude-rules.ts",
+    "implementation": "features/project/project-claude-rules/actions/read-rule.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Rule file read successfully with path validation",
+    "event": {
+      "action": "project_claude_rules_read",
+      "status": "success",
+      "message": "Rule read successfully",
+      "data_fields": ["relativePath", "type"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "File not found",
+      "criteria": "File does not exist at resolved path",
+      "action": "Return error with code RULE_NOT_FOUND",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Path traversal attempt",
+      "criteria": "Resolved path escapes project root (e.g., ../../etc/passwd)",
+      "action": "Return error with code INVALID_PATH",
+      "severity": "error",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Validate resolved path stays within project root",
+      "rationale": "Security: prevent path traversal attacks through relative path manipulation"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Return raw content for editor",
+      "rationale": "Editor needs full text including optional frontmatter"
+    }
+  ],
+  "calls": ["features/project/project-claude-rules/actions/read-rule.ts"]
+}

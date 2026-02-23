@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render a text editor with the raw SKILL.md content (YAML frontmatter + markdown)",
+  "why": "Users can read and edit skill content directly",
+  "where": {
+    "component": "features/project/project-claude-skills/SkillEditor.tsx"
+  },
+  "ui": {
+    "renders": "editor",
+    "fields": ["content (raw SKILL.md text)"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "04-save-skill",
+    "on_cancel": "02-show-skills-list"
+  },
+  "success_handling": {
+    "criteria": "User edits content in the editor",
+    "transition": "04-save-skill on save button click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

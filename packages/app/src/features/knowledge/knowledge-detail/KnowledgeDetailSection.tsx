@@ -92,6 +92,10 @@ export const KnowledgeDetailSection: Component = () => {
                 </span>
               </div>
 
+              <Show when={entryData()?.entry.description}>
+                <p class="text-sm text-[var(--color-text-muted)]">{entryData()?.entry.description}</p>
+              </Show>
+
               <Show when={(entryData()?.entry.tags.length ?? 0) > 0}>
                 <div class="flex flex-wrap gap-1.5">
                   <For each={entryData()?.entry.tags ?? []}>
@@ -101,6 +105,32 @@ export const KnowledgeDetailSection: Component = () => {
                       </span>
                     )}
                   </For>
+                </div>
+              </Show>
+
+              <Show when={(entryData()?.entry.rules?.length ?? 0) > 0}>
+                <div>
+                  <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Rules</p>
+                  <ul class="text-xs text-[var(--color-text-muted)] list-disc list-inside">
+                    <For each={entryData()?.entry.rules ?? []}>
+                      {(rule) => <li>{rule}</li>}
+                    </For>
+                  </ul>
+                </div>
+              </Show>
+
+              <Show when={(entryData()?.entry.required_knowledge?.length ?? 0) > 0}>
+                <div>
+                  <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Required Knowledge</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <For each={entryData()?.entry.required_knowledge ?? []}>
+                      {(item) => (
+                        <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                          {item}
+                        </span>
+                      )}
+                    </For>
+                  </div>
                 </div>
               </Show>
 
@@ -125,6 +155,10 @@ export const KnowledgeDetailSection: Component = () => {
               initialTitle={entryData()?.entry.title ?? ''}
               initialCategory={entryData()?.entry.category ?? ''}
               initialTags={entryData()?.entry.tags ?? []}
+              initialDescription={entryData()?.entry.description ?? ''}
+              initialRequiredKnowledge={entryData()?.entry.required_knowledge ?? []}
+              initialRules={entryData()?.entry.rules ?? []}
+              initialOptionalKnowledge={entryData()?.frontmatter.optional_knowledge}
               initialContent={entryData()?.content ?? ''}
               error={saveError()}
               onSave={handleSave}

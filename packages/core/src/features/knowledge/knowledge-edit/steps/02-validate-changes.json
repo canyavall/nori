@@ -1,7 +1,7 @@
 {
   "type": "action",
-  "what": "Validate modified frontmatter and content",
-  "why": "Ensure edits maintain knowledge quality standards",
+  "what": "Validate modified frontmatter (title, category, tags, description, required_knowledge, rules) and content",
+  "why": "Ensure edits maintain knowledge quality standards — tags must be 3-12 kebab-case, description required (max 300 chars)",
   "where": {
     "entry_point": "features/knowledge/knowledge-edit/steps/02-validate-changes.json",
     "implementation": "features/knowledge/knowledge-edit/actions/validate-changes.ts"

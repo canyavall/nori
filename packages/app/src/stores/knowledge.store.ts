@@ -5,6 +5,7 @@ export const [knowledgeEntries, setKnowledgeEntries] = createSignal<KnowledgeEnt
 export const [searchResults, setSearchResults] = createSignal<KnowledgeEntry[]>([]);
 export const [searchQuery, setSearchQuery] = createSignal('');
 export const [createOpen, setCreateOpen] = createSignal(false);
+export const [extractOpen, setExtractOpen] = createSignal(false);
 
 export function addKnowledgeEntry(entry: KnowledgeEntry) {
   setKnowledgeEntries((prev) => [entry, ...prev]);

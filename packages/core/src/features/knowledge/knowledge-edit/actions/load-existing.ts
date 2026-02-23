@@ -31,7 +31,11 @@ export function loadExisting(filePath: string): StepResult<LoadedEntry> | FlowEr
     const frontmatter: KnowledgeFrontmatter = {
       title: parsed.data.title ?? '',
       category: parsed.data.category ?? '',
-      tags: parsed.data.tags ?? [],
+      tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [],
+      description: parsed.data.description ?? '',
+      required_knowledge: Array.isArray(parsed.data.required_knowledge) ? parsed.data.required_knowledge : [],
+      rules: Array.isArray(parsed.data.rules) ? parsed.data.rules : [],
+      optional_knowledge: Array.isArray(parsed.data.optional_knowledge) ? parsed.data.optional_knowledge : undefined,
       created: parsed.data.created,
       updated: parsed.data.updated,
     };

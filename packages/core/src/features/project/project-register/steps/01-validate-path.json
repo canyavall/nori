@@ -1,0 +1,69 @@
+{
+  "type": "action",
+  "what": "Validate that the given project path exists and is a directory",
+  "why": "Ensure the path points to a real, accessible directory before attempting any project registration operations",
+  "where": {
+    "entry_point": "features/project/project-register/project-register.ts",
+    "implementation": "features/project/project-register/actions/validate-path.ts"
+  },
+  "output": {
+    "console": "Validation result confirming path exists and is a directory",
+    "file": null
+  },
+  "success_handling": {
+    "criteria": "Path exists on the filesystem and fs.statSync confirms it is a directory",
+    "event": {
+      "action": "project_register_validate_path",
+      "status": "success",
+      "message": "Project path validated successfully",
+      "data_fields": [
+        "path"
+      ]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Path does not exist",
+      "criteria": "fs.existsSync returns false for the given path",
+      "action": "Return PATH_NOT_FOUND error with the invalid path in the message",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "project_register_validate_path",
+        "status": "error",
+        "message": "Path does not exist: {path}",
+        "data_fields": [
+          "path"
+        ]
+      }
+    },
+    {
+      "scenario": "Path is not a directory",
+      "criteria": "Path exists but fs.statSync().isDirectory() returns false (e.g., it is a file)",
+      "action": "Return NOT_A_DIRECTORY error indicating the path must point to a directory",
+      "severity": "error",
+      "recoverable": true,
+      "event": {
+        "action": "project_register_validate_path",
+        "status": "error",
+        "message": "Path is not a directory: {path}",
+        "data_fields": [
+          "path"
+        ]
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "condition": "Path exists and is a directory",
+      "outcome": "Proceed to detect-git step"
+    },
+    {
+      "condition": "Path does not exist or is not a directory",
+      "outcome": "Abort registration, return error to user"
+    }
+  ],
+  "calls": [
+    "features/project/project-register/actions/validate-path.ts"
+  ]
+}

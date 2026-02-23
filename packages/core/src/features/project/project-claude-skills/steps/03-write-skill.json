@@ -1,0 +1,55 @@
+{
+  "type": "action",
+  "what": "Write updated content to a SKILL.md file",
+  "why": "Persists user edits from the text editor back to disk",
+  "where": {
+    "entry_point": "features/project/project-claude-skills/project-claude-skills.ts",
+    "implementation": "features/project/project-claude-skills/actions/write-skill.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "File written successfully and frontmatter re-parsed",
+    "event": {
+      "action": "project_claude_skills_write",
+      "status": "success",
+      "message": "Skill saved successfully",
+      "data_fields": ["name", "path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "Skill directory doesn't exist",
+      "criteria": "Directory not found at .claude/skills/<name>/",
+      "action": "Return error with code SKILL_NOT_FOUND",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Permission denied",
+      "criteria": "EACCES error from writeFile",
+      "action": "Return error with code PERMISSION_DENIED",
+      "severity": "error",
+      "recoverable": true
+    },
+    {
+      "scenario": "Write failure",
+      "criteria": "writeFile throws error",
+      "action": "Return error with code FILE_WRITE_FAILED",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Accept raw content string — no structured parsing",
+      "rationale": "The editor sends the full file text back; no need to reconstruct frontmatter"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Re-parse frontmatter after write",
+      "rationale": "Return fresh metadata to the UI so it can update display without a second read"
+    }
+  ],
+  "calls": ["features/project/project-claude-skills/actions/write-skill.ts"]
+}

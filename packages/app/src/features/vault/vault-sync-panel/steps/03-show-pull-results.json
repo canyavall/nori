@@ -3,8 +3,8 @@
   "what": "Display pull results showing files changed and any conflicts",
   "why": "Let the user review what changed during the pull and identify any conflicts that need manual resolution",
   "where": {
-    "component": "features/vault/vault-sync-panel/VaultSyncPanel.tsx",
-    "step_component": "features/vault/vault-sync-panel/PullResults.tsx"
+    "component": "features/vault/vault-sync-panel/VaultSyncPanel/VaultSyncPanel.tsx",
+    "step_component": "features/vault/vault-sync-panel/PullResults/PullResults.tsx"
   },
   "ui": {
     "renders": "display",

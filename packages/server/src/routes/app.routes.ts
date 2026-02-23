@@ -33,4 +33,13 @@ app.post('/authentication-check', async (c) => {
   });
 });
 
+// Auto-update
+app.post('/autoupdate', async (c) => {
+  return withSSE(c, async (emitter) => {
+    const { runAppAutoupdate } = await import('@nori/core');
+    const result = await runAppAutoupdate(emitter);
+    return result;
+  });
+});
+
 export { app as appRoutes };

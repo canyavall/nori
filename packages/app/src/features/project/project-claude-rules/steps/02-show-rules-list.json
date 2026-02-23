@@ -1,0 +1,23 @@
+{
+  "type": "ui_action",
+  "what": "Render rule files grouped by type (root CLAUDE.md, project .claude/CLAUDE.md, modular rules)",
+  "why": "Users need to see all rules organized by their origin location",
+  "where": {
+    "component": "features/project/project-claude-rules/RulesSection.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": ["name", "relativePath", "type", "globs"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_select": "03-show-rule-editor",
+    "on_back": "navigate_back"
+  },
+  "success_handling": {
+    "criteria": "Rules displayed in grouped list",
+    "transition": "03-show-rule-editor on item click"
+  },
+  "error_handling": [],
+  "decisions": []
+}

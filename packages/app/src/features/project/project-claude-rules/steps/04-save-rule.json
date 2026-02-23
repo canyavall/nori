@@ -1,0 +1,32 @@
+{
+  "type": "api_call",
+  "what": "PUT /api/project/claude/rules/:relativePath with updated content",
+  "why": "Persists the edited rule back to disk",
+  "where": {
+    "component": "features/project/project-claude-rules/RulesSection.hook.ts#handleSave"
+  },
+  "contract": {
+    "endpoint": "PUT /api/project/claude/rules/:relativePath",
+    "request_type": "{ content: string }",
+    "response_type": "@nori/shared:ClaudeRuleWriteResponse",
+    "sse_events": []
+  },
+  "transitions": {
+    "on_result": "02-show-rules-list",
+    "on_error": "03-show-rule-editor"
+  },
+  "success_handling": {
+    "criteria": "Rule saved to disk",
+    "transition": "02-show-rules-list with success toast"
+  },
+  "error_handling": [
+    {
+      "scenario": "Save fails",
+      "criteria": "API returns error",
+      "action": "Show error message in editor, keep editor open",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": []
+}

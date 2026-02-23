@@ -33,3 +33,11 @@ export { runSessionResume } from './features/session/session-resume/session-resu
 export { runSessionArchive } from './features/session/session-archive/session-archive.js';
 export { runProjectRegister } from './features/project/project-register/project-register.js';
 export { runProjectList } from './features/project/project-list/project-list.js';
+export { runProjectDiscoverClaudeCode } from './features/project/project-discover-claude-code/project-discover-claude-code.js';
+export { runListClaudeSkills, runReadClaudeSkill, runWriteClaudeSkill } from './features/project/project-claude-skills/project-claude-skills.js';
+export { runListClaudeRules, runReadClaudeRule, runWriteClaudeRule } from './features/project/project-claude-rules/project-claude-rules.js';
+export { runReadClaudeHooks, runWriteClaudeHooks } from './features/project/project-claude-hooks/project-claude-hooks.js';
+export { runReadClaudeMcps, runWriteClaudeMcps } from './features/project/project-claude-mcps/project-claude-mcps.js';
+export { runRepoKnowledgeExtract } from './features/knowledge/repo-knowledge-extract/repo-knowledge-extract.js';
+export type { RepoKnowledgeExtractInput, LlmAnalysisResult, ScannedRepository, CategorizedFiles, VaultContext } from './features/knowledge/repo-knowledge-extract/repo-knowledge-extract.js';
+export type { LlmMessage } from './features/shared/utils/llm-client.js';

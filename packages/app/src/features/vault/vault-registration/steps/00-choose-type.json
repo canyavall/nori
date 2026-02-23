@@ -3,8 +3,8 @@
   "what": "Present vault type selection to the user",
   "why": "Nori supports two vault types: a git-backed vault (cloned from a remote repo) and a local vault (stored in ~/.nori/vaults). The user must choose before filling in type-specific fields.",
   "where": {
-    "component": "features/vault/vault-registration/VaultRegistrationDialog.tsx",
-    "step_component": "features/vault/vault-registration/VaultTypePicker.tsx"
+    "component": "features/vault/vault-registration/VaultRegistrationDialog/VaultRegistrationDialog.tsx",
+    "step_component": "features/vault/vault-registration/VaultTypePicker/VaultTypePicker.tsx"
   },
   "ui": {
     "renders": "form",

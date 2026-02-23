@@ -3,8 +3,8 @@
   "what": "Display pre-filled frontmatter form and content editor for editing",
   "why": "Allow the user to modify both the metadata and content of an existing knowledge entry in a combined view",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage.tsx",
-    "step_component": "features/knowledge/knowledge-edit/EditForm.tsx"
+    "component": "features/knowledge/knowledge-edit/KnowledgeEditPage/KnowledgeEditPage.tsx",
+    "step_component": "features/knowledge/knowledge-edit/EditForm/EditForm.tsx"
   },
   "ui": {
     "renders": "form+editor",

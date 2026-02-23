@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { KnowledgeCreateDialogProps } from './KnowledgeCreateDialog.type';
 import { useKnowledgeCreateDialog } from './KnowledgeCreateDialog.hook';
 
-export function KnowledgeCreateDialog(props: KnowledgeCreateDialogProps) {
+export const KnowledgeCreateDialog = (props: KnowledgeCreateDialogProps) => {
   const {
     step,
     setStep,

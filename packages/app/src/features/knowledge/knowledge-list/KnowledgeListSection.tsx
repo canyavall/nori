@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js';
+import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { A } from '@solidjs/router';
 import { KnowledgeCreateDialog } from '../knowledge-create/KnowledgeCreateDialog/KnowledgeCreateDialog';

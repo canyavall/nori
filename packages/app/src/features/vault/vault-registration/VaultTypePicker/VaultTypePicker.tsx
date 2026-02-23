@@ -1,6 +1,6 @@
 import type { VaultTypePickerProps } from './VaultTypePicker.type';
 
-export function VaultTypePicker(props: VaultTypePickerProps) {
+export const VaultTypePicker = (props: VaultTypePickerProps) => {
   return (
     <div class="space-y-3">
       <p class="text-sm text-[var(--color-text-muted)]">What kind of vault do you want to register?</p>

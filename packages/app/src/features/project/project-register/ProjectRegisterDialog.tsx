@@ -1,43 +1,8 @@
-import { createSignal, Show } from 'solid-js';
-import type { Project } from '@nori/shared';
-import { apiPost } from '../../../lib/api';
-import { addProject, setRegisterOpen } from '../../../stores/project.store';
-import { pickFolder } from '../../../lib/folder-picker';
+import { Show } from 'solid-js';
+import { useProjectRegisterDialog } from './ProjectRegisterDialog.hook';
 
-export function ProjectRegisterDialog() {
-  const [path, setPath] = createSignal('');
-  const [name, setName] = createSignal('');
-  const [loading, setLoading] = createSignal(false);
-  const [picking, setPicking] = createSignal(false);
-  const [error, setError] = createSignal('');
-
-  async function handleBrowse() {
-    setPicking(true);
-    const selected = await pickFolder();
-    if (selected) setPath(selected);
-    setPicking(false);
-  }
-
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
-    if (!path().trim()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await apiPost<{ data: Project }>('/api/project', {
-        path: path().trim(),
-        name: name().trim() || undefined,
-      });
-      addProject(result.data);
-      setRegisterOpen(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register project');
-    } finally {
-      setLoading(false);
-    }
-  }
+export const ProjectRegisterDialog = () => {
+  const { path, name, setName, loading, picking, error, handleBrowse, handleSubmit, handleClose, isSubmitDisabled } = useProjectRegisterDialog();
 
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -46,7 +11,7 @@ export function ProjectRegisterDialog() {
           <h2 class="text-base font-semibold">Register Project</h2>
           <button
             type="button"
-            onClick={() => setRegisterOpen(false)}
+            onClick={handleClose}
             class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             ✕
@@ -96,14 +61,14 @@ export function ProjectRegisterDialog() {
           <div class="flex justify-end gap-2 pt-2">
             <button
               type="button"
-              onClick={() => setRegisterOpen(false)}
+              onClick={handleClose}
               class="px-4 py-2 rounded-md text-sm border border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading() || !path().trim()}
+              disabled={isSubmitDisabled()}
               class="px-4 py-2 rounded-md text-sm bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading() ? 'Registering…' : 'Register'}
@@ -113,4 +78,4 @@ export function ProjectRegisterDialog() {
       </div>
     </div>
   );
-}
+};

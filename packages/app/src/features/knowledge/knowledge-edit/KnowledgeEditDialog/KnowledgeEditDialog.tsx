@@ -3,7 +3,7 @@ import { EditForm } from '../EditForm/EditForm';
 import type { KnowledgeEditDialogProps } from './KnowledgeEditDialog.type';
 import { useKnowledgeEditDialog } from './KnowledgeEditDialog.hook';
 
-export function KnowledgeEditDialog(props: KnowledgeEditDialogProps) {
+export const KnowledgeEditDialog = (props: KnowledgeEditDialogProps) => {
   const {
     step,
     error,

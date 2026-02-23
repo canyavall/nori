@@ -1,8 +1,8 @@
 import { createSignal, onMount } from 'solid-js';
 import type { Project } from '@nori/shared';
 import { apiGet } from '../../../lib/api';
-import { setProjects, setRegisterOpen } from '../../../stores/project.store';
-import { clearContext } from '../../../stores/navigation.store';
+import { projects, setProjects, setRegisterOpen, registerOpen } from '../../../stores/project.store';
+import { clearContext, selectProject, activeProject } from '../../../stores/navigation.store';
 
 export const useProjectListSection = () => {
   const [loading, setLoading] = createSignal(true);
@@ -18,9 +18,13 @@ export const useProjectListSection = () => {
     setLoading(false);
   });
 
-  function handleAddProject() {
+  const handleAddProject = () => {
     setRegisterOpen(true);
-  }
+  };
 
-  return { loading, handleAddProject };
+  const handleSelectProject = (project: Project) => {
+    selectProject(project);
+  };
+
+  return { loading, projects, registerOpen, activeProject, handleAddProject, handleSelectProject };
 };

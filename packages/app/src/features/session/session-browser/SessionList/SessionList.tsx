@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { SessionListProps } from './SessionList.type';
 
 
-export function SessionList(props: SessionListProps) {
+export const SessionList = (props: SessionListProps) => {
   return (
     <div class="space-y-4">
       <div class="flex items-center justify-between">

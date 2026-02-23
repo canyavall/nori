@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { EditAuditResultsProps } from './EditAuditResults.type';
 
 
-export function EditAuditResults(props: EditAuditResultsProps) {
+export const EditAuditResults = (props: EditAuditResultsProps) => {
   return (
     <div class="space-y-4">
       <div class="text-center py-2">

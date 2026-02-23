@@ -2,9 +2,11 @@ import type { ParentProps } from 'solid-js';
 import { Show } from 'solid-js';
 import { TopNav } from './components/layout/TopNav/TopNav';
 import { ContextualSidebar } from './components/layout/ContextualSidebar/ContextualSidebar';
-import { sidebarContext } from './stores/navigation.store';
+import { useApp } from './App.hook';
 
-export function App(props: ParentProps) {
+export const App = (props: ParentProps) => {
+  const { sidebarContext } = useApp();
+
   return (
     <div class="flex flex-col h-screen">
       <TopNav />
@@ -18,4 +20,4 @@ export function App(props: ParentProps) {
       </div>
     </div>
   );
-}
+};

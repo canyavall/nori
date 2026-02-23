@@ -1,19 +1,12 @@
 import { For, Show } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
 import type { AuditResultsProps } from './AuditResults.type';
+import { useAuditResults } from './AuditResults.hook';
 
-
-export function AuditResults(props: AuditResultsProps) {
-  const navigate = useNavigate();
-
-  function handleViewEntry() {
-    props.onContinue();
-    navigate(`/knowledge/${props.entryId}`);
-  }
+export const AuditResults = (props: AuditResultsProps) => {
+  const { handleViewEntry } = useAuditResults(props);
 
   return (
     <div class="space-y-4">
-      {/* Success header */}
       <div class="text-center py-2">
         <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-500/10 text-green-500 mb-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +17,6 @@ export function AuditResults(props: AuditResultsProps) {
         <p class="text-sm text-[var(--color-text-muted)] mt-1">{props.filePath}</p>
       </div>
 
-      {/* Audit results */}
       <Show
         when={props.warnings.length > 0}
         fallback={
@@ -56,4 +48,4 @@ export function AuditResults(props: AuditResultsProps) {
       </div>
     </div>
   );
-}
+};

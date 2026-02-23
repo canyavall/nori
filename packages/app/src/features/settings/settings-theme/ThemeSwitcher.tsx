@@ -1,14 +1,16 @@
 import { For } from 'solid-js';
-import { theme, setTheme } from '../../../stores/settings.store';
 import type { Theme } from '../../../stores/settings.store';
 import { useThemeSwitcherStyle } from './ThemeSwitcher.style';
+import { useThemeSwitcher } from './ThemeSwitcher.hook';
 
 const THEMES: { label: string; value: Theme }[] = [
   { label: 'Dark', value: 'dark' },
   { label: 'Light', value: 'light' },
 ];
 
-export function ThemeSwitcher() {
+export const ThemeSwitcher = () => {
+  const { theme, handleSelectTheme } = useThemeSwitcher();
+
   return (
     <div class="flex gap-2">
       <For each={THEMES}>
@@ -17,7 +19,7 @@ export function ThemeSwitcher() {
           return (
             <button
               type="button"
-              onClick={() => setTheme(value)}
+              onClick={() => handleSelectTheme(value)}
               aria-pressed={theme() === value}
               class={buttonClass()}
             >
@@ -28,4 +30,4 @@ export function ThemeSwitcher() {
       </For>
     </div>
   );
-}
+};

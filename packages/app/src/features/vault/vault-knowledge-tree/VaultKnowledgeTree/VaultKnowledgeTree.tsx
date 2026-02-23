@@ -1,49 +1,11 @@
-import { createSignal, createEffect, Show } from 'solid-js';
-import type { KnowledgeEntry } from '@nori/shared';
-import { apiGet } from '../../../../lib/api';
+import { Show } from 'solid-js';
 import { KnowledgeEditDialog } from '../../../knowledge/knowledge-edit/KnowledgeEditDialog/KnowledgeEditDialog';
 import { CategoryTree } from '../CategoryTree/CategoryTree';
 import type { VaultKnowledgeTreeProps } from './VaultKnowledgeTree.type';
+import { useVaultKnowledgeTree } from './VaultKnowledgeTree.hook';
 
-
-export function VaultKnowledgeTree(props: VaultKnowledgeTreeProps) {
-  const [loading, setLoading] = createSignal(true);
-  const [error, setError] = createSignal('');
-  const [entries, setEntries] = createSignal<KnowledgeEntry[]>([]);
-  const [editEntryId, setEditEntryId] = createSignal<string | null>(null);
-
-  createEffect(() => {
-    loadEntries(props.vault.id);
-  });
-
-  async function loadEntries(vaultId: string) {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await apiGet<{ data: KnowledgeEntry[] }>(`/api/knowledge?vault_id=${vaultId}`);
-      const normalized = res.data.map((e) => {
-        if (typeof e.tags === 'string') {
-          try { return { ...e, tags: JSON.parse(e.tags as unknown as string) }; }
-          catch { return { ...e, tags: [] }; }
-        }
-        return e;
-      });
-      setEntries(normalized);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load knowledge entries');
-    }
-    setLoading(false);
-  }
-
-  const categorized = () => {
-    const map: Record<string, KnowledgeEntry[]> = {};
-    for (const entry of entries()) {
-      const cat = entry.category || 'Uncategorized';
-      if (!map[cat]) map[cat] = [];
-      map[cat].push(entry);
-    }
-    return map;
-  };
+export const VaultKnowledgeTree = (props: VaultKnowledgeTreeProps) => {
+  const { loading, error, entries, editEntryId, setEditEntryId, categorized, handleRefresh, handleEditClose } = useVaultKnowledgeTree(props);
 
   return (
     <div>
@@ -58,7 +20,7 @@ export function VaultKnowledgeTree(props: VaultKnowledgeTreeProps) {
         </div>
         <button
           type="button"
-          onClick={() => loadEntries(props.vault.id)}
+          onClick={handleRefresh}
           disabled={loading()}
           class="px-3 py-1.5 rounded-md text-xs border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -78,7 +40,7 @@ export function VaultKnowledgeTree(props: VaultKnowledgeTreeProps) {
           <p class="text-sm text-[var(--color-error)]">{error()}</p>
           <button
             type="button"
-            onClick={() => loadEntries(props.vault.id)}
+            onClick={handleRefresh}
             class="mt-2 text-xs text-[var(--color-accent)] hover:underline"
           >
             Retry
@@ -101,13 +63,10 @@ export function VaultKnowledgeTree(props: VaultKnowledgeTreeProps) {
         {(entryId) => (
           <KnowledgeEditDialog
             entryId={entryId}
-            onClose={() => {
-              setEditEntryId(null);
-              loadEntries(props.vault.id);
-            }}
+            onClose={handleEditClose}
           />
         )}
       </Show>
     </div>
   );
-}
+};

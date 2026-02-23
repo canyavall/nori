@@ -1,30 +1,18 @@
-import { createSignal, For, Show } from 'solid-js';
+import { For, Show } from 'solid-js';
 import type { CategoryTreeProps } from './CategoryTree.type';
+import { useCategoryTree } from './CategoryTree.hook';
 
-
-export function CategoryTree(props: CategoryTreeProps) {
-  const categoryNames = () => Object.keys(props.categories).sort();
-  const [collapsed, setCollapsed] = createSignal<Set<string>>(new Set());
-
-  function toggleCategory(cat: string) {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
-    });
-  }
+export const CategoryTree = (props: CategoryTreeProps) => {
+  const { categoryNames, toggleCategory, isCategoryCollapsed } = useCategoryTree(props);
 
   return (
     <div class="space-y-2">
       <For each={categoryNames()}>
         {(cat) => {
           const entries = () => props.categories[cat] ?? [];
-          const isCollapsed = () => collapsed().has(cat);
 
           return (
             <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
-              {/* Category header */}
               <button
                 type="button"
                 onClick={() => toggleCategory(cat)}
@@ -32,7 +20,7 @@ export function CategoryTree(props: CategoryTreeProps) {
               >
                 <div class="flex items-center gap-2">
                   <span class="text-[var(--color-text-muted)] text-xs select-none w-3">
-                    {isCollapsed() ? '▶' : '▼'}
+                    {isCategoryCollapsed(cat) ? '▶' : '▼'}
                   </span>
                   <span class="font-medium text-sm">{cat}</span>
                   <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
@@ -41,8 +29,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                 </div>
               </button>
 
-              {/* Entry list */}
-              <Show when={!isCollapsed()}>
+              <Show when={!isCategoryCollapsed(cat)}>
                 <div class="divide-y divide-[var(--color-border)]/50">
                   <For each={entries()}>
                     {(entry) => (
@@ -84,4 +71,4 @@ export function CategoryTree(props: CategoryTreeProps) {
       </For>
     </div>
   );
-}
+};

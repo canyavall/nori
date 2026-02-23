@@ -1,6 +1,6 @@
 import { createMemo, createSignal, createEffect } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { activeProject, activeVault, sidebarContext, clearVaultContext, clearContext } from '../../../stores/navigation.store';
+import { activeProject, activeVault, sidebarContext, activeContextName, clearVaultContext, clearContext } from '../../../stores/navigation.store';
 import { vaults } from '../../../stores/vault.store';
 import type { VaultLink } from '@nori/shared';
 import { apiGet, apiPost, apiDelete } from '../../../lib/api';
@@ -97,5 +97,8 @@ export const useContextualSidebar = () => {
     setExportOpen,
     handleAddProject,
     handleContextBack,
+    sidebarContext,
+    activeContextName,
+    activeVault,
   };
 }

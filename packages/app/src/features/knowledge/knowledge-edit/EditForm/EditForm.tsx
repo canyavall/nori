@@ -1,56 +1,9 @@
-import { createSignal, For, Show } from 'solid-js';
-import { knowledgeFrontmatterSchema } from '@nori/shared';
+import { For, Show } from 'solid-js';
 import type { EditFormProps } from './EditForm.type';
+import { useEditForm } from './EditForm.hook';
 
-
-function parseTags(input: string): string[] {
-  return input
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
-
-export function EditForm(props: EditFormProps) {
-  const [title, setTitle] = createSignal(props.initialTitle);
-  const [category, setCategory] = createSignal(props.initialCategory);
-  const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
-  const [content, setContent] = createSignal(props.initialContent);
-  const [errors, setErrors] = createSignal<Record<string, string>>({});
-
-  const tags = () => parseTags(tagsInput());
-
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-
-    const result = knowledgeFrontmatterSchema.safeParse({
-      title: title(),
-      category: category(),
-      tags: tags(),
-    });
-
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    if (!content().trim()) {
-      setErrors({ content: 'Content is required' });
-      return;
-    }
-
-    setErrors({});
-    props.onSave({
-      title: result.data.title,
-      category: result.data.category,
-      tags: result.data.tags,
-      content: content(),
-    });
-  }
+export const EditForm = (props: EditFormProps) => {
+  const { title, setTitle, category, setCategory, tagsInput, setTagsInput, content, setContent, errors, tags, handleSubmit } = useEditForm(props);
 
   return (
     <form onSubmit={handleSubmit} class="space-y-4">
@@ -140,4 +93,4 @@ export function EditForm(props: EditFormProps) {
       </div>
     </form>
   );
-}
+};

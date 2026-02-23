@@ -1,6 +1,6 @@
 import type { LinkConfirmationProps } from './LinkConfirmation.type';
 
-export function LinkConfirmation(props: LinkConfirmationProps) {
+export const LinkConfirmation = (props: LinkConfirmationProps) => {
   return (
     <div class="space-y-4">
       <div class="flex items-center gap-2 text-[var(--color-success)]">

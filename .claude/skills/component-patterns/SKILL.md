@@ -27,7 +27,7 @@ File structure, organization rules, and implementation patterns for UI component
 ```
 ComponentName/
 ├── ComponentName.tsx              # UI (required)
-├── ComponentName.hook.ts          # Logic (optional; .tsx if hook returns JSX)
+├── ComponentName.hook.ts          # Logic (required if component has any logic; .tsx if hook returns JSX)
 ├── ComponentName.type.ts          # Types (required)
 ├── ComponentName.style.ts         # Styles (optional)
 ├── ComponentName.constant.ts      # Constants (optional)
@@ -180,6 +180,27 @@ export const useComponentName = (props: ComponentNameProps) => {
 
 ## MANDATORY Rules
 
+### Hook File Required for Any Logic
+
+If a component has **any logic** (signals, effects, event handlers, derived values, API calls, store access), it **must** be extracted into a `.hook.ts` file. The component file should only do composition: import the hook and return JSX.
+
+```typescript
+// ✅ CORRECT — Component is pure composition
+export const UserProfile: Component<UserProfileProps> = (props) => {
+  const { handleClick, isActive } = useUserProfile(props);
+  return <div onClick={handleClick}>{props.title}</div>;
+};
+
+// ❌ WRONG — Logic inside the component file
+export const UserProfile: Component<UserProfileProps> = (props) => {
+  const [isActive, setIsActive] = createSignal(false);
+  const handleClick = () => setIsActive(true);
+  return <div onClick={handleClick}>{props.title}</div>;
+};
+```
+
+Only purely presentational components (no signals, no handlers, no effects — just props → JSX) may omit the hook file.
+
 ### Named Exports Only
 
 ```typescript
@@ -232,3 +253,4 @@ export const useComponentName = (props: { onClick: (id: string) => void }) => {}
 - ❌ Plural filenames (`.hooks.ts`, `.constants.ts`)
 - ❌ Default exports
 - ❌ Importing framework namespace directly
+- ❌ Logic (signals, effects, handlers, store access) inside the component file — extract to `.hook.ts`

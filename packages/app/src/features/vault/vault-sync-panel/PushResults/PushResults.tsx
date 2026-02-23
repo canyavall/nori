@@ -2,7 +2,7 @@ import { Show } from 'solid-js';
 import type { PushResultsProps } from './PushResults.type';
 
 
-export function PushResults(props: PushResultsProps) {
+export const PushResults = (props: PushResultsProps) => {
   return (
     <div class="space-y-4">
       <div class="text-center py-2">

@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { PullResultsProps } from './PullResults.type';
 
 
-export function PullResults(props: PullResultsProps) {
+export const PullResults = (props: PullResultsProps) => {
   return (
     <div class="space-y-4">
       <div class="text-center py-2">

@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { VaultPickerProps } from './VaultPicker.type';
 
 
-export function VaultPicker(props: VaultPickerProps) {
+export const VaultPicker = (props: VaultPickerProps) => {
   return (
     <div class="space-y-4">
       <p class="text-sm text-[var(--color-text-muted)]">Select a vault to link:</p>

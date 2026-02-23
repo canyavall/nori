@@ -2,7 +2,7 @@ import { Show } from 'solid-js';
 import type { DeleteConfirmationProps } from './DeleteConfirmation.type';
 
 
-export function DeleteConfirmation(props: DeleteConfirmationProps) {
+export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
   return (
     <div class="space-y-4">
       <div class="p-4 rounded-md bg-[var(--color-error)]/10 border border-[var(--color-error)]/20">

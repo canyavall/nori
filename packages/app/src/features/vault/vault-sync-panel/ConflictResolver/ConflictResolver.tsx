@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { ConflictResolverProps } from './ConflictResolver.type';
 
 
-export function ConflictResolver(props: ConflictResolverProps) {
+export const ConflictResolver = (props: ConflictResolverProps) => {
   return (
     <div class="space-y-4">
       <div class="text-center py-2">

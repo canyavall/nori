@@ -1,83 +1,13 @@
-import { createSignal, Show, Match, Switch } from 'solid-js';
-import { open } from '@tauri-apps/plugin-dialog';
-import { connectSSE } from '../../../lib/sse';
-import type { ImportStep, VaultKnowledgeImportDialogProps } from './VaultKnowledgeImportDialog.type';
+import { Match, Switch } from 'solid-js';
+import type { VaultKnowledgeImportDialogProps } from './VaultKnowledgeImportDialog.type';
+import { useVaultKnowledgeImportDialog } from './VaultKnowledgeImportDialog.hook';
 
-
-export function VaultKnowledgeImportDialog(props: VaultKnowledgeImportDialogProps) {
-  const [step, setStep] = createSignal<ImportStep>('pick');
-  const [progress, setProgress] = createSignal('');
-  const [importedCount, setImportedCount] = createSignal(0);
-  const [skippedCount, setSkippedCount] = createSignal(0);
-  const [errorMsg, setErrorMsg] = createSignal('');
-
-  let sseController: AbortController | undefined;
-
-  function cleanup() {
-    sseController?.abort();
-  }
-
-  async function handlePickFiles() {
-    const selected = await open({
-      multiple: true,
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
-    }).catch(() => null);
-
-    if (!selected || (Array.isArray(selected) && !selected.length)) return;
-    const paths = Array.isArray(selected) ? selected : [selected];
-    startImport(paths);
-  }
-
-  async function handlePickFolder() {
-    const selected = await open({ directory: true }).catch(() => null);
-    if (!selected || typeof selected !== 'string') return;
-    startImport([selected]);
-  }
-
-  function startImport(sourcePaths: string[]) {
-    setStep('importing');
-    setProgress('Starting import...');
-    setImportedCount(0);
-    setSkippedCount(0);
-
-    sseController = connectSSE(
-      `/api/vault/${props.vault.id}/knowledge/import`,
-      { source_paths: sourcePaths },
-      {
-        onEvent: (event, data) => {
-          const messages: Record<string, string> = {
-            'vault:knowledge-import:scanning': 'Scanning files...',
-            'vault:knowledge-import:found': `Found ${(data as { file_count?: number }).file_count ?? 0} file(s)`,
-            'vault:knowledge-import:rebuilding-index': 'Rebuilding index...',
-          };
-          if (event === 'vault:knowledge-import:importing') {
-            setProgress(`Importing: ${(data as { title?: string }).title ?? ''}`);
-          } else if (messages[event]) {
-            setProgress(messages[event]);
-          }
-        },
-        onResult: (result) => {
-          const r = result as { success: boolean; data?: { imported_count: number; skipped_count: number }; error?: { message: string } };
-          if (r.success && r.data) {
-            setImportedCount(r.data.imported_count);
-            setSkippedCount(r.data.skipped_count);
-            setStep('done');
-          } else {
-            setErrorMsg(r.error?.message ?? 'Import failed');
-            setStep('error');
-          }
-        },
-        onError: (msg) => {
-          setErrorMsg(msg);
-          setStep('error');
-        },
-      }
-    );
-  }
+export const VaultKnowledgeImportDialog = (props: VaultKnowledgeImportDialogProps) => {
+  const { step, progress, importedCount, skippedCount, errorMsg, handlePickFiles, handlePickFolder, handleClose, handleRetry } = useVaultKnowledgeImportDialog(props);
 
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/50" onClick={() => { cleanup(); props.onClose(); }} />
+      <div class="absolute inset-0 bg-black/50" onClick={handleClose} />
 
       <div class="relative w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl">
         <div class="p-4 border-b border-[var(--color-border)]">
@@ -151,7 +81,7 @@ export function VaultKnowledgeImportDialog(props: VaultKnowledgeImportDialogProp
                 <div class="flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => setStep('pick')}
+                    onClick={handleRetry}
                     class="px-4 py-2 rounded-md text-sm border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
                   >
                     Try again
@@ -171,4 +101,4 @@ export function VaultKnowledgeImportDialog(props: VaultKnowledgeImportDialogProp
       </div>
     </div>
   );
-}
+};

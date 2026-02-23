@@ -1,31 +1,12 @@
-import { onMount, onCleanup } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
-import { authStatus } from '../../stores/navigation.store';
-import { runAuthCheck } from '../../lib/auth-check';
+import { useAvatar } from './Avatar.hook';
 
-export function Avatar() {
-  const navigate = useNavigate();
-  let controller: AbortController | undefined;
-
-  onMount(() => {
-    controller = runAuthCheck();
-  });
-
-  onCleanup(() => {
-    controller?.abort();
-  });
-
-  const dotClass = () => {
-    const s = authStatus();
-    if (s === 'authenticated') return 'bg-green-500';
-    if (s === 'unauthenticated') return 'bg-red-500';
-    return 'bg-gray-400 animate-pulse';
-  };
+export const Avatar = () => {
+  const { dotClass, handleNavigateToSettings } = useAvatar();
 
   return (
     <button
       type="button"
-      onClick={() => navigate('/settings')}
+      onClick={handleNavigateToSettings}
       class="relative flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors"
       title="Settings / Auth status"
     >
@@ -42,4 +23,4 @@ export function Avatar() {
       />
     </button>
   );
-}
+};

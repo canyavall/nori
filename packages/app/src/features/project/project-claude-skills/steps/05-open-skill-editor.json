@@ -1,0 +1,25 @@
+{
+  "type": "ui_action",
+  "what": "Open the SkillEditDialog modal for the selected skill",
+  "why": "Provides a consistent single-modal editing experience from both the skills page and the dashboard accordion",
+  "where": {
+    "component": "features/project/project-claude-skills/SkillEditDialog/SkillEditDialog.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": ["skill", "allSkills", "projectPath"],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_save": "close_dialog",
+    "on_cancel": "close_dialog"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Replace page-within-page editor with modal dialog",
+      "rationale": "Consistent UX across the dashboard accordion and the dedicated skills page. Modal avoids navigation confusion."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { join, normalize } from 'node:path';
 import type { StepResult } from '@nori/shared';
 
 export interface ClaudeCodeProject {
@@ -37,16 +37,21 @@ export function readClaudeConfig(
     return { success: true, data: { projects: [] } };
   }
 
-  const projects: ClaudeCodeProject[] = Object.entries(
-    projectsObj as Record<string, unknown>,
-  ).map(([absolutePath, meta]) => {
+  const seen = new Set<string>();
+  const projects: ClaudeCodeProject[] = [];
+
+  for (const [absolutePath, meta] of Object.entries(projectsObj as Record<string, unknown>)) {
+    const normalizedPath = normalize(absolutePath);
+    if (seen.has(normalizedPath)) continue;
+    seen.add(normalizedPath);
+
     const metaObj = typeof meta === 'object' && meta !== null ? (meta as Record<string, unknown>) : {};
-    return {
-      path: absolutePath,
+    projects.push({
+      path: normalizedPath,
       lastSessionId: typeof metaObj.lastSessionId === 'string' ? metaObj.lastSessionId : undefined,
       hasTrustDialogAccepted: typeof metaObj.hasTrustDialogAccepted === 'boolean' ? metaObj.hasTrustDialogAccepted : undefined,
-    };
-  });
+    });
+  }
 
   return { success: true, data: { projects } };
 }

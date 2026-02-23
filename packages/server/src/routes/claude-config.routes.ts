@@ -10,7 +10,11 @@ import {
   runWriteClaudeHooks,
   runReadClaudeMcps,
   runWriteClaudeMcps,
+  runListClaudeMds,
+  runSkillChat,
 } from '@nori/core';
+import { skillChatSchema } from '@nori/shared';
+import { withSSE } from '../sse/emitter.js';
 import type { AppEnv } from '../types.js';
 
 const claudeConfig = new Hono<AppEnv>();
@@ -47,6 +51,19 @@ claudeConfig.get('/skills/:name', async (c) => {
     return c.json({ error: result.error }, status);
   }
   return c.json({ data: result.data });
+});
+
+claudeConfig.post('/skills/:name/chat', async (c) => {
+  const projectPath = decodeProjectPath(c);
+  if (!projectPath) return c.json({ error: { code: 'MISSING_PROJECT_PATH', message: 'projectPath query param required' } }, 400);
+
+  const name = c.req.param('name');
+  const body = skillChatSchema.parse(await c.req.json());
+
+  return withSSE(c, async (emitter) => {
+    const result = await runSkillChat({ projectPath, skillName: name, ...body }, emitter);
+    return result;
+  });
 });
 
 claudeConfig.put('/skills/:name', async (c) => {
@@ -147,6 +164,17 @@ claudeConfig.put('/mcps', async (c) => {
     return c.json({ error: result.error }, status);
   }
   return c.json({ data: result.data });
+});
+
+// ── CLAUDE.md files ──────────────────────────────────────────────────
+
+claudeConfig.get('/claude-mds', async (c) => {
+  const projectPath = decodeProjectPath(c);
+  if (!projectPath) return c.json({ error: { code: 'MISSING_PROJECT_PATH', message: 'projectPath query param required' } }, 400);
+
+  const result = await runListClaudeMds({ projectPath });
+  if (!result.success) return c.json({ error: result.error }, 500);
+  return c.json({ data: result.data.files });
 });
 
 export { claudeConfig as claudeConfigRoutes };

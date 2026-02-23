@@ -49,6 +49,11 @@
       "date": "2026-02-23",
       "reason": "Always returns success with empty array on errors",
       "rationale": "Discovery is best-effort — failure to read config should not block project listing"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Normalize and deduplicate paths before returning",
+      "rationale": "Claude Code stores paths with inconsistent separators (C:\\... vs C:/...) on Windows, causing the same project to appear multiple times. path.normalize() canonicalises separators; a Set tracks seen paths to drop duplicates."
     }
   ],
   "calls": ["features/project/project-discover-claude-code/actions/read-claude-config.ts"]

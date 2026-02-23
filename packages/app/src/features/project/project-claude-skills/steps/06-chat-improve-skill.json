@@ -1,0 +1,42 @@
+{
+  "type": "api_call",
+  "what": "Stream an AI chat response about the skill from the backend",
+  "why": "Allows the user to describe what they want to improve and receive a streaming LLM response with suggested revisions",
+  "where": {
+    "component": "features/project/project-claude-skills/SkillEditDialog/components/ChatPane/ChatPane.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/project/claude/skills/:name/chat",
+    "request_type": "skillChatSchema",
+    "response_type": "SkillChatSSEEvents",
+    "sse_events": [
+      "skill:chat:started",
+      "skill:chat:token",
+      "skill:chat:completed"
+    ]
+  },
+  "transitions": {
+    "on_code_block_detected": "show_diff_view",
+    "on_apply": "update_editor_content",
+    "on_dismiss": "hide_diff_view"
+  },
+  "error_handling": [
+    {
+      "scenario": "No auth credentials",
+      "criteria": "SSE error event with NO_AUTH code",
+      "action": "Display error message in chat pane"
+    },
+    {
+      "scenario": "LLM API failure",
+      "criteria": "SSE error event with LLM_ERROR code",
+      "action": "Display error message in chat pane, allow retry"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Use existing connectSSE utility from lib/sse.ts",
+      "rationale": "Consistent with other SSE-based flows. Token-by-token emission provides real-time feedback during generation."
+    }
+  ]
+}

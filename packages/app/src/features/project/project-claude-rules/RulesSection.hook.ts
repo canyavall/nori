@@ -17,9 +17,6 @@ export const useRulesSection = () => {
     return p ? btoa(p.path) : '';
   });
 
-  const rootRules = createMemo(() => rules().filter((r) => r.type === 'root'));
-  const projectRules = createMemo(() => rules().filter((r) => r.type === 'project'));
-  const modularRules = createMemo(() => rules().filter((r) => r.type === 'modular'));
 
   onMount(async () => {
     if (!projectPath()) {
@@ -77,9 +74,6 @@ export const useRulesSection = () => {
 
   return {
     rules,
-    rootRules,
-    projectRules,
-    modularRules,
     loading,
     error,
     selectedRule,

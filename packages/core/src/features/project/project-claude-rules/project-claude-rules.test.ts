@@ -29,20 +29,18 @@ describe('runListClaudeRules', () => {
     }
   });
 
-  it('discovers root CLAUDE.md', async () => {
+  it('does NOT include root CLAUDE.md (moved to claude-mds feature)', async () => {
     const dir = makeTempDir();
     writeFileSync(join(dir, 'CLAUDE.md'), '# Root rules', 'utf-8');
 
     const result = await runListClaudeRules({ projectPath: dir });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.rules).toHaveLength(1);
-      expect(result.data.rules[0].type).toBe('root');
-      expect(result.data.rules[0].relativePath).toBe('CLAUDE.md');
+      expect(result.data.rules).toHaveLength(0);
     }
   });
 
-  it('discovers .claude/CLAUDE.md', async () => {
+  it('does NOT include .claude/CLAUDE.md (moved to claude-mds feature)', async () => {
     const dir = makeTempDir();
     mkdirSync(join(dir, '.claude'), { recursive: true });
     writeFileSync(join(dir, '.claude', 'CLAUDE.md'), '# Project rules', 'utf-8');
@@ -50,8 +48,7 @@ describe('runListClaudeRules', () => {
     const result = await runListClaudeRules({ projectPath: dir });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.rules).toHaveLength(1);
-      expect(result.data.rules[0].type).toBe('project');
+      expect(result.data.rules).toHaveLength(0);
     }
   });
 
@@ -83,7 +80,7 @@ describe('runListClaudeRules', () => {
     }
   });
 
-  it('discovers all rule types together', async () => {
+  it('only returns modular rules even when CLAUDE.md files are present', async () => {
     const dir = makeTempDir();
     writeFileSync(join(dir, 'CLAUDE.md'), '# Root', 'utf-8');
     mkdirSync(join(dir, '.claude', 'rules'), { recursive: true });
@@ -93,11 +90,8 @@ describe('runListClaudeRules', () => {
     const result = await runListClaudeRules({ projectPath: dir });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.rules).toHaveLength(3);
-      const types = result.data.rules.map((r: { type: string }) => r.type);
-      expect(types).toContain('root');
-      expect(types).toContain('project');
-      expect(types).toContain('modular');
+      expect(result.data.rules).toHaveLength(1);
+      expect(result.data.rules[0].type).toBe('modular');
     }
   });
 
@@ -119,15 +113,16 @@ describe('runListClaudeRules', () => {
 });
 
 describe('runReadClaudeRule', () => {
-  it('reads a rule file', async () => {
+  it('reads a modular rule file', async () => {
     const dir = makeTempDir();
-    writeFileSync(join(dir, 'CLAUDE.md'), '# Root rules content', 'utf-8');
+    mkdirSync(join(dir, '.claude', 'rules'), { recursive: true });
+    writeFileSync(join(dir, '.claude', 'rules', 'api.md'), '# API rules content', 'utf-8');
 
-    const result = await runReadClaudeRule({ projectPath: dir, relativePath: 'CLAUDE.md' });
+    const result = await runReadClaudeRule({ projectPath: dir, relativePath: '.claude/rules/api.md' });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.content).toBe('# Root rules content');
-      expect(result.data.type).toBe('root');
+      expect(result.data.content).toBe('# API rules content');
+      expect(result.data.type).toBe('modular');
     }
   });
 
@@ -145,7 +140,7 @@ describe('runReadClaudeRule', () => {
 
   it('returns error for missing file', async () => {
     const dir = makeTempDir();
-    const result = await runReadClaudeRule({ projectPath: dir, relativePath: 'CLAUDE.md' });
+    const result = await runReadClaudeRule({ projectPath: dir, relativePath: '.claude/rules/missing.md' });
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.code).toBe('RULE_NOT_FOUND');
@@ -154,18 +149,19 @@ describe('runReadClaudeRule', () => {
 });
 
 describe('runWriteClaudeRule', () => {
-  it('writes content to a rule file', async () => {
+  it('writes content to a modular rule file', async () => {
     const dir = makeTempDir();
-    writeFileSync(join(dir, 'CLAUDE.md'), '# Old content', 'utf-8');
+    mkdirSync(join(dir, '.claude', 'rules'), { recursive: true });
+    writeFileSync(join(dir, '.claude', 'rules', 'api.md'), '# Old content', 'utf-8');
 
     const result = await runWriteClaudeRule({
       projectPath: dir,
-      relativePath: 'CLAUDE.md',
+      relativePath: '.claude/rules/api.md',
       content: '# New content',
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.rule.type).toBe('root');
+      expect(result.data.rule.type).toBe('modular');
     }
   });
 

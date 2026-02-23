@@ -38,6 +38,9 @@ export { runListClaudeSkills, runReadClaudeSkill, runWriteClaudeSkill } from './
 export { runListClaudeRules, runReadClaudeRule, runWriteClaudeRule } from './features/project/project-claude-rules/project-claude-rules.js';
 export { runReadClaudeHooks, runWriteClaudeHooks } from './features/project/project-claude-hooks/project-claude-hooks.js';
 export { runReadClaudeMcps, runWriteClaudeMcps } from './features/project/project-claude-mcps/project-claude-mcps.js';
+export { runListClaudeMds } from './features/project/project-claude-mds/project-claude-mds.js';
+export { runSkillChat } from './features/project/project-skill-chat/project-skill-chat.js';
+export type { SkillChatInput } from './features/project/project-skill-chat/project-skill-chat.js';
 export { runRepoKnowledgeExtract } from './features/knowledge/repo-knowledge-extract/repo-knowledge-extract.js';
 export type { RepoKnowledgeExtractInput, LlmAnalysisResult, ScannedRepository, CategorizedFiles, VaultContext } from './features/knowledge/repo-knowledge-extract/repo-knowledge-extract.js';
 export type { LlmMessage } from './features/shared/utils/llm-client.js';

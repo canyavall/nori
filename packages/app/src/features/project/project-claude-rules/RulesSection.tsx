@@ -6,9 +6,7 @@ import { RuleEditor } from './RuleEditor';
 
 export const RulesSection: Component = () => {
   const {
-    rootRules,
-    projectRules,
-    modularRules,
+    rules,
     loading,
     error,
     selectedRule,
@@ -20,9 +18,6 @@ export const RulesSection: Component = () => {
     handleBack,
     handleSave,
   } = useRulesSection();
-
-  const hasRules = () =>
-    rootRules().length > 0 || projectRules().length > 0 || modularRules().length > 0;
 
   return (
     <div class="p-6">
@@ -44,7 +39,7 @@ export const RulesSection: Component = () => {
           <div>
             <h2 class="text-xl font-semibold">Rules</h2>
             <p class="text-sm text-[var(--color-text-muted)] mt-0.5">
-              Claude Code rules from <code class="font-mono">CLAUDE.md</code> and <code class="font-mono">.claude/rules/</code>
+              Claude Code rules from <code class="font-mono">.claude/rules/</code>
             </p>
           </div>
         </div>
@@ -52,45 +47,20 @@ export const RulesSection: Component = () => {
         <Show when={!loading()} fallback={<p class="text-sm text-[var(--color-text-muted)]">Loading rules...</p>}>
           <Show when={!error()} fallback={<p class="text-sm text-[var(--color-text-error)]">{error()}</p>}>
             <Show
-              when={hasRules()}
+              when={rules().length > 0}
               fallback={
                 <p class="text-sm text-[var(--color-text-muted)] italic">
-                  No rules found. Create rules by adding a <code class="font-mono">CLAUDE.md</code> or <code class="font-mono">.claude/rules/*.md</code> files.
+                  No rules found. Create rules by adding <code class="font-mono">.claude/rules/*.md</code> files.
                 </p>
               }
             >
-              <Show when={rootRules().length > 0}>
-                <div class="mb-6">
-                  <h3 class="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide mb-3">Root</h3>
-                  <div class="space-y-2">
-                    <For each={rootRules()}>
-                      {(rule) => <RuleCard rule={rule} onSelect={() => handleSelect(rule)} />}
-                    </For>
-                  </div>
-                </div>
-              </Show>
-
-              <Show when={projectRules().length > 0}>
-                <div class="mb-6">
-                  <h3 class="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide mb-3">Project</h3>
-                  <div class="space-y-2">
-                    <For each={projectRules()}>
-                      {(rule) => <RuleCard rule={rule} onSelect={() => handleSelect(rule)} />}
-                    </For>
-                  </div>
-                </div>
-              </Show>
-
-              <Show when={modularRules().length > 0}>
-                <div class="mb-6">
-                  <h3 class="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide mb-3">Modular Rules</h3>
-                  <div class="space-y-2">
-                    <For each={modularRules()}>
-                      {(rule) => <RuleCard rule={rule} onSelect={() => handleSelect(rule)} />}
-                    </For>
-                  </div>
-                </div>
-              </Show>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <For each={rules()}>
+                  {(rule) => (
+                    <RuleCard rule={rule} onSelect={() => handleSelect(rule)} />
+                  )}
+                </For>
+              </div>
             </Show>
           </Show>
         </Show>

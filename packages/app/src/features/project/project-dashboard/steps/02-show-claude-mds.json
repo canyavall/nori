@@ -1,0 +1,25 @@
+{
+  "type": "ui_action",
+  "what": "Display all CLAUDE.md files found in the project tree as a 2-column grid with max 5 visible items",
+  "why": "CLAUDE.md files are project/package instructions distinct from .claude/rules/*.md scoped rules; showing them grouped by folder helps users navigate the project's instruction hierarchy",
+  "where": { "component": "features/project/project-dashboard/ProjectDashboardSection/components/ClaudeMdsAccordion/ClaudeMdsAccordion.tsx" },
+  "ui": {
+    "renders": "display",
+    "fields": ["relativePath", "dir"],
+    "grid": "2-column",
+    "max_visible": 5
+  },
+  "transitions": { "on_edit": "opens inline dialog with RuleEditor" },
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Reuse GET/PUT /api/project/claude/rules/:relativePath for reading and writing CLAUDE.md files",
+      "rationale": "CLAUDE.md files are markdown files within the project; the existing rules read/write endpoint already handles arbitrary paths with security guards"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Show folder path as primary label, CLAUDE.md as subtitle",
+      "rationale": "Users identify these files by their location (root, packages/app, etc.) not by filename since all are named CLAUDE.md"
+    }
+  ]
+}

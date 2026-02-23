@@ -1,8 +1,10 @@
+import { z } from 'zod';
 import type {
   ClaudeSkill,
   ClaudeRule,
   ClaudeHookConfig,
   ClaudeMcpServer,
+  ClaudeMdFile,
 } from '../types/claude-config.js';
 
 // --- Skills ---
@@ -58,6 +60,12 @@ export interface ClaudeMcpWriteResponse {
   data: { servers: ClaudeMcpServer[] };
 }
 
+// --- CLAUDE.md files ---
+
+export interface ClaudeMdListResponse {
+  data: ClaudeMdFile[];
+}
+
 // --- API route constants ---
 
 export const CLAUDE_SKILLS_LIST_API = {
@@ -110,4 +118,34 @@ export const CLAUDE_MCPS_READ_API = {
 export const CLAUDE_MCPS_WRITE_API = {
   method: 'PUT' as const,
   path: '/api/project/claude/mcps',
+} as const;
+
+export const CLAUDE_MDS_LIST_API = {
+  method: 'GET' as const,
+  path: '/api/project/claude/claude-mds',
+} as const;
+
+// --- Skill Chat ---
+
+export const skillChatMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+});
+
+export const skillChatSchema = z.object({
+  messages: z.array(skillChatMessageSchema),
+  allSkills: z.array(z.any()),
+});
+
+export type SkillChatMessage = z.infer<typeof skillChatMessageSchema>;
+
+export interface SkillChatSSEEvents {
+  'skill:chat:started': { skillName: string };
+  'skill:chat:token': { token: string };
+  'skill:chat:completed': { response: string };
+}
+
+export const SKILL_CHAT_API = {
+  method: 'POST' as const,
+  path: '/api/project/claude/skills/:name/chat',
 } as const;

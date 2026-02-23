@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { normalize } from 'node:path';
 import { projectRegisterSchema } from '@nori/shared';
 import type { DiscoveredProject, Project } from '@nori/shared';
 import { runProjectRegister, runProjectList, runProjectDiscoverClaudeCode } from '@nori/core';
@@ -23,12 +24,12 @@ project.get('/', async (c) => {
   const noriProjects = listResult.data.projects;
   const discovered = discoverResult.success ? discoverResult.data.discovered : [];
 
-  // Build a set of registered paths for fast lookup
-  const registeredPaths = new Set(noriProjects.map((p: Project) => p.path));
+  // Build a set of normalized registered paths for fast lookup
+  const registeredPaths = new Set(noriProjects.map((p: Project) => normalize(p.path)));
 
   // Start with Nori-registered projects
   const merged: DiscoveredProject[] = noriProjects.map((p: Project) => {
-    const claudeMatch = discovered.find((d: DiscoveredProject) => d.path === p.path);
+    const claudeMatch = discovered.find((d: DiscoveredProject) => normalize(d.path) === normalize(p.path));
     return {
       ...p,
       source: claudeMatch ? 'both' as const : 'nori' as const,
@@ -39,7 +40,7 @@ project.get('/', async (c) => {
 
   // Append Claude Code-only discoveries (not registered in Nori)
   for (const d of discovered) {
-    if (!registeredPaths.has(d.path)) {
+    if (!registeredPaths.has(normalize(d.path))) {
       merged.push(d);
     }
   }

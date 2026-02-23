@@ -21,7 +21,7 @@ function scanRulesDir(dir: string, projectPath: string): ClaudeRule[] {
     if (stat.isDirectory()) {
       rules.push(...scanRulesDir(fullPath, projectPath));
     } else if (entry.endsWith('.md')) {
-      const relativePath = relative(projectPath, fullPath);
+      const relativePath = relative(projectPath, fullPath).replace(/\\/g, '/');
       rules.push(parseRuleFile(fullPath, relativePath, 'modular'));
     }
   }
@@ -57,19 +57,7 @@ export function listRules(
 ): FlowResult<{ rules: ClaudeRule[] }> {
   const rules: ClaudeRule[] = [];
 
-  // Root CLAUDE.md
-  const rootClaude = join(projectPath, 'CLAUDE.md');
-  if (existsSync(rootClaude)) {
-    rules.push(parseRuleFile(rootClaude, 'CLAUDE.md', 'root'));
-  }
-
-  // .claude/CLAUDE.md
-  const projectClaude = join(projectPath, '.claude', 'CLAUDE.md');
-  if (existsSync(projectClaude)) {
-    rules.push(parseRuleFile(projectClaude, '.claude/CLAUDE.md', 'project'));
-  }
-
-  // .claude/rules/**/*.md
+  // .claude/rules/**/*.md only — CLAUDE.md files are handled by the project-claude-mds feature
   const rulesDir = join(projectPath, '.claude', 'rules');
   if (existsSync(rulesDir)) {
     try {

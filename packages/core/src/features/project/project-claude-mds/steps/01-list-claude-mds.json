@@ -1,0 +1,46 @@
+{
+  "type": "action",
+  "what": "Recursively discover all CLAUDE.md files in the project tree",
+  "why": "Users need a unified view of all CLAUDE.md files across the project (root, .claude/, packages/*, etc.) separate from .claude/rules/*.md which are scoped rules",
+  "where": {
+    "entry_point": "features/project/project-claude-mds/project-claude-mds.ts",
+    "implementation": "features/project/project-claude-mds/actions/list-claude-mds.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All CLAUDE.md files discovered across the project tree",
+    "event": {
+      "action": "project_claude_mds_list",
+      "status": "success",
+      "message": "CLAUDE.md files listed successfully",
+      "data_fields": ["file_count"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No CLAUDE.md files found anywhere",
+      "criteria": "Empty project or none created yet",
+      "action": "Return empty array (graceful degradation)",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Separate CLAUDE.md files from .claude/rules/*.md rules",
+      "rationale": "Claude Code rules are defined inside .claude/rules/ folder. CLAUDE.md files are project/package instructions, a distinct concept."
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Ignore node_modules, .git, dist, build and similar directories",
+      "rationale": "These directories contain third-party or generated code, not project CLAUDE.md files"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Sort by depth (shallowest first) then alphabetically",
+      "rationale": "Root CLAUDE.md is most important; shallower files represent broader scope"
+    }
+  ],
+  "calls": ["features/project/project-claude-mds/actions/list-claude-mds.ts"]
+}

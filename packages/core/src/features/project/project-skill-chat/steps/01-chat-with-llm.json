@@ -1,0 +1,43 @@
+{
+  "type": "action",
+  "what": "Stream a conversational LLM response about a skill",
+  "why": "Allows the user to improve skill definitions via AI chat with streaming feedback",
+  "where": {
+    "entry_point": "features/project/project-skill-chat/project-skill-chat.ts",
+    "implementation": "features/project/project-skill-chat/actions/chat-with-llm.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "LLM returns a complete streamed response",
+    "event": {
+      "action": "project_skill_chat_completed",
+      "status": "success",
+      "message": "Chat response streamed successfully",
+      "data_fields": ["response"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No Anthropic credentials configured",
+      "criteria": "resolveAuth() returns { type: 'none' }",
+      "action": "Return FlowError with code NO_AUTH",
+      "severity": "fatal",
+      "recoverable": false
+    },
+    {
+      "scenario": "LLM API call fails",
+      "criteria": "streamText throws an error",
+      "action": "Return FlowError with code LLM_ERROR",
+      "severity": "fatal",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Use streamText from Vercel AI SDK for token-by-token emission",
+      "rationale": "Enables real-time streaming UX. For OAuth auth, uses custom fetch override to inject bearer token while keeping the same Vercel AI SDK API."
+    }
+  ],
+  "calls": ["features/project/project-skill-chat/actions/chat-with-llm.ts"]
+}

@@ -12,6 +12,7 @@ export type {
   ClaudeHookEntry,
   ClaudeHookConfig,
   ClaudeMcpServer,
+  ClaudeMdFile,
 } from './types/claude-config.js';
 export type { SSEEventMap, SSEEventName } from './types/events.js';
 export type { ApiError, ApiResponse } from './types/api.js';
@@ -192,6 +193,13 @@ export {
   CLAUDE_HOOKS_WRITE_API,
   CLAUDE_MCPS_READ_API,
   CLAUDE_MCPS_WRITE_API,
+  type ClaudeMdListResponse,
+  CLAUDE_MDS_LIST_API,
+  skillChatMessageSchema,
+  type SkillChatMessage,
+  skillChatSchema,
+  type SkillChatSSEEvents,
+  SKILL_CHAT_API,
 } from './contracts/claude-config.contract.js';
 
 // Contracts — Repo Knowledge Extract

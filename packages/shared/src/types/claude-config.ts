@@ -45,3 +45,8 @@ export interface ClaudeMcpServer {
   args?: string[];
   env?: Record<string, string>;
 }
+
+export interface ClaudeMdFile {
+  relativePath: string;
+  dir: string;
+}

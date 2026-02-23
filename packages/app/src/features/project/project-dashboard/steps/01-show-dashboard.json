@@ -1,0 +1,32 @@
+{
+  "type": "ui_action",
+  "what": "Display the project dashboard with collapsible sections for skills, rules, hooks and MCPs",
+  "why": "Give users a single-page overview of a project's Claude Code configuration with inline editing via dialogs",
+  "where": { "component": "features/project/project-dashboard/ProjectDashboardSection/ProjectDashboardSection.tsx" },
+  "ui": {
+    "renders": "display",
+    "fields": ["skills[]", "rules[]", "hooks.shared", "hooks.local", "mcps.servers[]"]
+  },
+  "transitions": { "on_cancel": "navigate_back" },
+  "error_handling": [
+    {
+      "scenario": "Any resource fetch fails",
+      "criteria": "API returns error",
+      "action": "Show error message in that accordion section",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-23",
+      "reason": "Parallel fetch all 4 resources on mount",
+      "rationale": "All 4 lists are needed for counts immediately; parallel fetch minimises perceived latency"
+    },
+    {
+      "date": "2026-02-23",
+      "reason": "Edit dialogs inside accordion components (not separate route)",
+      "rationale": "Keeps related state co-located; user stays on dashboard context"
+    }
+  ]
+}

@@ -1,8 +1,9 @@
-import { A, useNavigate } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import { Avatar } from '../../ui/Avatar';
+import { useTopNav } from './TopNav.hook';
 
-export function TopNav() {
-  const navigate = useNavigate();
+export const TopNav = () => {
+  const { handleNavigateToSettings } = useTopNav();
 
   return (
     <nav class="h-12 flex items-center px-4 gap-1 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)] flex-shrink-0">
@@ -27,7 +28,7 @@ export function TopNav() {
 
       <button
         type="button"
-        onClick={() => navigate('/settings')}
+        onClick={handleNavigateToSettings}
         class="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
         title="Settings"
       >
@@ -42,4 +43,4 @@ export function TopNav() {
       </div>
     </nav>
   );
-}
+};

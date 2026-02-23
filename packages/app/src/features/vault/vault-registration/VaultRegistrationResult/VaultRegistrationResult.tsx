@@ -1,10 +1,9 @@
 import { Show } from 'solid-js';
-import type { VaultRegistrationResponse } from '@nori/shared';
 import type { VaultRegistrationResultProps } from './VaultRegistrationResult.type';
+import { useVaultRegistrationResult } from './VaultRegistrationResult.hook';
 
-
-export function VaultRegistrationResult(props: VaultRegistrationResultProps) {
-  const isLocal = () => props.result.vault.vault_type === 'local';
+export const VaultRegistrationResult = (props: VaultRegistrationResultProps) => {
+  const { isLocal } = useVaultRegistrationResult(props);
 
   return (
     <div class="space-y-4">
@@ -52,4 +51,4 @@ export function VaultRegistrationResult(props: VaultRegistrationResultProps) {
       </div>
     </div>
   );
-}
+};

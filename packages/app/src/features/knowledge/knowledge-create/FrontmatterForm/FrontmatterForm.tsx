@@ -1,45 +1,9 @@
-import { createSignal, For, Show } from 'solid-js';
+import { For, Show } from 'solid-js';
 import type { FrontmatterFormProps } from './FrontmatterForm.type';
-import { knowledgeFrontmatterSchema } from '@nori/shared';
+import { useFrontmatterForm } from './FrontmatterForm.hook';
 
-
-function parseTags(input: string): string[] {
-  return input
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
-
-export function FrontmatterForm(props: FrontmatterFormProps) {
-  const [title, setTitle] = createSignal(props.initialTitle);
-  const [category, setCategory] = createSignal(props.initialCategory);
-  const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
-  const [errors, setErrors] = createSignal<Record<string, string>>({});
-
-  const tags = () => parseTags(tagsInput());
-
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-
-    const result = knowledgeFrontmatterSchema.safeParse({
-      title: title(),
-      category: category(),
-      tags: tags(),
-    });
-
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-    props.onNext({ title: result.data.title, category: result.data.category, tags: result.data.tags });
-  }
+export const FrontmatterForm = (props: FrontmatterFormProps) => {
+  const { title, setTitle, category, setCategory, tagsInput, setTagsInput, errors, tags, handleSubmit } = useFrontmatterForm(props);
 
   return (
     <form onSubmit={handleSubmit} class="space-y-4">
@@ -125,4 +89,4 @@ export function FrontmatterForm(props: FrontmatterFormProps) {
       </div>
     </form>
   );
-}
+};

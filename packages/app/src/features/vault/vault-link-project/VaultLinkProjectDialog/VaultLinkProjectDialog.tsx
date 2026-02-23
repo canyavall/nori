@@ -1,44 +1,12 @@
-import { createSignal, Match, Switch } from 'solid-js';
-import type { Vault, VaultLinkProjectResponse } from '@nori/shared';
-import { vaults } from '../../../../stores/vault.store';
-import { apiPost } from '../../../../lib/api';
+import { Match, Switch } from 'solid-js';
 import { VaultPicker } from '../VaultPicker/VaultPicker';
 import { ProjectPicker } from '../ProjectPicker/ProjectPicker';
 import { LinkConfirmation } from '../LinkConfirmation/LinkConfirmation';
-import type { WizardStep, VaultLinkProjectDialogProps } from './VaultLinkProjectDialog.type';
+import type { VaultLinkProjectDialogProps } from './VaultLinkProjectDialog.type';
+import { useVaultLinkProjectDialog } from './VaultLinkProjectDialog.hook';
 
-
-export function VaultLinkProjectDialog(props: VaultLinkProjectDialogProps) {
-  const [step, setStep] = createSignal<WizardStep>('vault-picker');
-  const [selectedVault, setSelectedVault] = createSignal<Vault | null>(null);
-  const [result, setResult] = createSignal<VaultLinkProjectResponse | null>(null);
-  const [error, setError] = createSignal('');
-
-  function handleVaultSelect(vaultId: string) {
-    const vault = vaults().find((v) => v.id === vaultId);
-    if (vault) {
-      setSelectedVault(vault);
-      setStep('project-picker');
-    }
-  }
-
-  async function handleProjectSelect(projectPath: string) {
-    const vault = selectedVault();
-    if (!vault) return;
-
-    setStep('progress');
-    try {
-      const res = await apiPost<{ data: VaultLinkProjectResponse }>(
-        `/api/vault/${vault.id}/link`,
-        { project_path: projectPath }
-      );
-      setResult(res.data);
-      setStep('confirmation');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Link failed');
-      setStep('project-picker');
-    }
-  }
+export const VaultLinkProjectDialog = (props: VaultLinkProjectDialogProps) => {
+  const { step, selectedVault, result, error, vaults, handleVaultSelect, handleProjectSelect, handleBackToVaultPicker } = useVaultLinkProjectDialog(props);
 
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center">
@@ -63,7 +31,7 @@ export function VaultLinkProjectDialog(props: VaultLinkProjectDialogProps) {
               <ProjectPicker
                 vaultName={selectedVault()?.name ?? ''}
                 onSelect={handleProjectSelect}
-                onBack={() => setStep('vault-picker')}
+                onBack={handleBackToVaultPicker}
               />
               {error() && (
                 <div class="mt-3 p-3 rounded-md bg-[var(--color-error)]/10 border border-[var(--color-error)]/20">
@@ -91,4 +59,4 @@ export function VaultLinkProjectDialog(props: VaultLinkProjectDialogProps) {
       </div>
     </div>
   );
-}
+};

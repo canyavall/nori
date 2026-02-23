@@ -1,12 +1,11 @@
 import { Show, For } from 'solid-js';
 import { A } from '@solidjs/router';
-import { sidebarContext, activeContextName, activeVault } from '../../../stores/navigation.store';
 import { VaultKnowledgeImportDialog } from '../../../features/vault/vault-knowledge-import/VaultKnowledgeImportDialog';
 import { VaultKnowledgeExportDialog } from '../../../features/vault/vault-knowledge-export/VaultKnowledgeExportDialog';
 import { ProjectPicker } from '../../../features/vault/vault-link-project/ProjectPicker/ProjectPicker';
 import { useContextualSidebar } from './ContextualSidebar.hook';
 
-export function ContextualSidebar() {
+export const ContextualSidebar = () => {
   const {
     linkedVaults,
     links,
@@ -23,6 +22,9 @@ export function ContextualSidebar() {
     setExportOpen,
     handleAddProject,
     handleContextBack,
+    sidebarContext,
+    activeContextName,
+    activeVault,
   } = useContextualSidebar();
 
   return (
@@ -45,7 +47,6 @@ export function ContextualSidebar() {
         <Show
           when={sidebarContext() === 'project'}
           fallback={
-            /* ── Vault context ── */
             <>
               <A
                 href="/knowledge"
@@ -55,7 +56,6 @@ export function ContextualSidebar() {
                 Knowledge
               </A>
 
-              {/* Linked Projects */}
               <div class="px-3 pt-2 pb-1">
                 <div class="flex items-center justify-between mb-1.5">
                   <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Linked Projects</p>
@@ -98,7 +98,6 @@ export function ContextualSidebar() {
                   </Show>
                 </Show>
 
-                {/* Inline add-project form */}
                 <Show when={addProjectOpen()}>
                   <div class="mt-2 border-t border-[var(--color-border)] pt-2">
                     <ProjectPicker
@@ -116,7 +115,6 @@ export function ContextualSidebar() {
                 </Show>
               </div>
 
-              {/* Import Knowledge */}
               <button
                 type="button"
                 onClick={() => setImportOpen(true)}
@@ -125,7 +123,6 @@ export function ContextualSidebar() {
                 Import Knowledge
               </button>
 
-              {/* Export Knowledge */}
               <button
                 type="button"
                 onClick={() => setExportOpen(true)}
@@ -136,7 +133,6 @@ export function ContextualSidebar() {
             </>
           }
         >
-          {/* ── Project context ── */}
           <div class="px-3 pt-1 pb-2">
             <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5">Linked Vaults</p>
             <Show
@@ -163,7 +159,6 @@ export function ContextualSidebar() {
         </Show>
       </nav>
 
-      {/* Dialogs */}
       <Show when={activeVault()} keyed>
         {(vault) => (
           <>
@@ -178,4 +173,4 @@ export function ContextualSidebar() {
       </Show>
     </aside>
   );
-}
+};

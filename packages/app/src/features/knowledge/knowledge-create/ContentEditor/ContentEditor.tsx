@@ -1,9 +1,8 @@
-import { createSignal } from 'solid-js';
 import type { ContentEditorProps } from './ContentEditor.type';
+import { useContentEditor } from './ContentEditor.hook';
 
-
-export function ContentEditor(props: ContentEditorProps) {
-  const [content, setContent] = createSignal(props.initialContent);
+export const ContentEditor = (props: ContentEditorProps) => {
+  const { content, setContent, handleSave, isContentEmpty } = useContentEditor(props);
 
   return (
     <div class="space-y-4">
@@ -31,8 +30,8 @@ export function ContentEditor(props: ContentEditorProps) {
         </button>
         <button
           type="button"
-          disabled={!content().trim()}
-          onClick={() => props.onSave(content())}
+          disabled={isContentEmpty()}
+          onClick={handleSave}
           class="px-4 py-2 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Preview
@@ -40,4 +39,4 @@ export function ContentEditor(props: ContentEditorProps) {
       </div>
     </div>
   );
-}
+};

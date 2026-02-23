@@ -1,35 +1,10 @@
-import { createSignal, Match, Switch } from 'solid-js';
-import { apiGet } from '../../../../lib/api';
+import { Match, Switch } from 'solid-js';
 import { SearchForm } from '../SearchForm/SearchForm';
 import { SearchResults } from '../SearchResults/SearchResults';
-import type { SearchResultItem } from '../SearchResults/SearchResults.type';
+import { useKnowledgeSearchPage } from './KnowledgeSearchPage.hook';
 
-type PageStep = 'form' | 'searching' | 'results';
-
-export function KnowledgeSearchPage() {
-  const [step, setStep] = createSignal<PageStep>('form');
-  const [query, setQuery] = createSignal('');
-  const [results, setResults] = createSignal<SearchResultItem[]>([]);
-  const [totalCount, setTotalCount] = createSignal(0);
-  const [error, setError] = createSignal('');
-
-  async function handleSearch(q: string) {
-    setQuery(q);
-    setStep('searching');
-    setError('');
-
-    try {
-      const res = await apiGet<{ data: { results: SearchResultItem[]; total_count: number } }>(
-        `/api/knowledge/search?q=${encodeURIComponent(q)}`
-      );
-      setResults(res.data.results);
-      setTotalCount(res.data.total_count);
-      setStep('results');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed');
-      setStep('form');
-    }
-  }
+export const KnowledgeSearchPage = () => {
+  const { step, query, results, totalCount, error, handleSearch } = useKnowledgeSearchPage();
 
   return (
     <div class="max-w-2xl mx-auto space-y-6">
@@ -64,4 +39,4 @@ export function KnowledgeSearchPage() {
       </Switch>
     </div>
   );
-}
+};

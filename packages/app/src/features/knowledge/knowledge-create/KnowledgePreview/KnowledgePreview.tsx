@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import type { KnowledgePreviewProps } from './KnowledgePreview.type';
 
 
-export function KnowledgePreview(props: KnowledgePreviewProps) {
+export const KnowledgePreview = (props: KnowledgePreviewProps) => {
   return (
     <div class="space-y-4">
       {/* Frontmatter summary */}

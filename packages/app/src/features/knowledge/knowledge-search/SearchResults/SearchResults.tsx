@@ -3,7 +3,7 @@ import { A } from '@solidjs/router';
 import type { SearchResultItem, SearchResultsProps } from './SearchResults.type';
 
 
-export function SearchResults(props: SearchResultsProps) {
+export const SearchResults = (props: SearchResultsProps) => {
   return (
     <div class="space-y-3">
       <div class="flex items-center justify-between">

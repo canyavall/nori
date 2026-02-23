@@ -2,7 +2,7 @@ import { Show } from 'solid-js';
 import type { SessionDetailProps } from './SessionDetail.type';
 
 
-export function SessionDetail(props: SessionDetailProps) {
+export const SessionDetail = (props: SessionDetailProps) => {
   return (
     <div class="space-y-6">
       <button

@@ -1,21 +1,8 @@
-import { createSignal } from 'solid-js';
 import type { ProjectPickerProps } from './ProjectPicker.type';
+import { useProjectPicker } from './ProjectPicker.hook';
 
-
-export function ProjectPicker(props: ProjectPickerProps) {
-  const [projectPath, setProjectPath] = createSignal('');
-  const [error, setError] = createSignal('');
-
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    const path = projectPath().trim();
-    if (!path) {
-      setError('Project path is required');
-      return;
-    }
-    setError('');
-    props.onSelect(path);
-  }
+export const ProjectPicker = (props: ProjectPickerProps) => {
+  const { projectPath, setProjectPath, error, handleSubmit } = useProjectPicker(props);
 
   return (
     <form onSubmit={handleSubmit} class="space-y-4">
@@ -55,4 +42,4 @@ export function ProjectPicker(props: ProjectPickerProps) {
       </div>
     </form>
   );
-}
+};

@@ -1,23 +1,8 @@
-import { createSignal } from 'solid-js';
 import type { SearchFormProps } from './SearchForm.type';
+import { useSearchForm } from './SearchForm.hook';
 
-
-export function SearchForm(props: SearchFormProps) {
-  const [query, setQuery] = createSignal(props.initialQuery);
-
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    const q = query().trim();
-    if (q) {
-      props.onSearch(q);
-    }
-  }
-
-  function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
-  }
+export const SearchForm = (props: SearchFormProps) => {
+  const { query, setQuery, handleSubmit, handleKeyDown, isQueryEmpty } = useSearchForm(props);
 
   return (
     <div class="flex gap-2">
@@ -32,11 +17,11 @@ export function SearchForm(props: SearchFormProps) {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={!query().trim()}
+        disabled={isQueryEmpty()}
         class="px-4 py-2 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Search
       </button>
     </div>
   );
-}
+};

@@ -1,12 +1,8 @@
-import { Show } from 'solid-js';
 import type { SyncStatusProps } from './SyncStatus.type';
+import { useSyncStatus } from './SyncStatus.hook';
 
-
-export function SyncStatus(props: SyncStatusProps) {
-  const lastSynced = () => {
-    if (!props.vault.last_synced_at) return 'Never';
-    return new Date(props.vault.last_synced_at).toLocaleString();
-  };
+export const SyncStatus = (props: SyncStatusProps) => {
+  const { lastSynced } = useSyncStatus(props);
 
   return (
     <div class="space-y-4">
@@ -50,4 +46,4 @@ export function SyncStatus(props: SyncStatusProps) {
       </div>
     </div>
   );
-}
+};

@@ -1,72 +1,13 @@
-import { createSignal, Show, Match, Switch } from 'solid-js';
-import { open } from '@tauri-apps/plugin-dialog';
-import { connectSSE } from '../../../lib/sse';
-import type { ExportStep, VaultKnowledgeExportDialogProps } from './VaultKnowledgeExportDialog.type';
+import { Match, Switch } from 'solid-js';
+import type { VaultKnowledgeExportDialogProps } from './VaultKnowledgeExportDialog.type';
+import { useVaultKnowledgeExportDialog } from './VaultKnowledgeExportDialog.hook';
 
-
-export function VaultKnowledgeExportDialog(props: VaultKnowledgeExportDialogProps) {
-  const [step, setStep] = createSignal<ExportStep>('pick');
-  const [progress, setProgress] = createSignal('');
-  const [exportedCount, setExportedCount] = createSignal(0);
-  const [destPath, setDestPath] = createSignal('');
-  const [errorMsg, setErrorMsg] = createSignal('');
-
-  let sseController: AbortController | undefined;
-
-  function cleanup() {
-    sseController?.abort();
-  }
-
-  async function handlePickFolder() {
-    const selected = await open({ directory: true }).catch(() => null);
-    if (!selected || typeof selected !== 'string') return;
-    startExport(selected);
-  }
-
-  function startExport(destinationPath: string) {
-    setStep('exporting');
-    setProgress('Starting export...');
-    setExportedCount(0);
-    setDestPath(destinationPath);
-
-    sseController = connectSSE(
-      `/api/vault/${props.vault.id}/knowledge/export`,
-      { destination_path: destinationPath },
-      {
-        onEvent: (event, data) => {
-          const messages: Record<string, string> = {
-            'vault:knowledge-export:loading-entries': 'Loading knowledge entries...',
-          };
-          if (event === 'vault:knowledge-export:exporting') {
-            setProgress(`Exporting ${(data as { entry_count?: number }).entry_count ?? 0} entries...`);
-          } else if (event === 'vault:knowledge-export:entry-exported') {
-            setProgress(`Exporting: ${(data as { title?: string }).title ?? ''}`);
-          } else if (messages[event]) {
-            setProgress(messages[event]);
-          }
-        },
-        onResult: (result) => {
-          const r = result as { success: boolean; data?: { exported_count: number; destination_path: string }; error?: { message: string } };
-          if (r.success && r.data) {
-            setExportedCount(r.data.exported_count);
-            setDestPath(r.data.destination_path);
-            setStep('done');
-          } else {
-            setErrorMsg(r.error?.message ?? 'Export failed');
-            setStep('error');
-          }
-        },
-        onError: (msg) => {
-          setErrorMsg(msg);
-          setStep('error');
-        },
-      }
-    );
-  }
+export const VaultKnowledgeExportDialog = (props: VaultKnowledgeExportDialogProps) => {
+  const { step, progress, exportedCount, destPath, errorMsg, handlePickFolder, handleClose, handleRetry } = useVaultKnowledgeExportDialog(props);
 
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/50" onClick={() => { cleanup(); props.onClose(); }} />
+      <div class="absolute inset-0 bg-black/50" onClick={handleClose} />
 
       <div class="relative w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] shadow-xl">
         <div class="p-4 border-b border-[var(--color-border)]">
@@ -132,7 +73,7 @@ export function VaultKnowledgeExportDialog(props: VaultKnowledgeExportDialogProp
                 <div class="flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => setStep('pick')}
+                    onClick={handleRetry}
                     class="px-4 py-2 rounded-md text-sm border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
                   >
                     Try again
@@ -152,4 +93,4 @@ export function VaultKnowledgeExportDialog(props: VaultKnowledgeExportDialogProp
       </div>
     </div>
   );
-}
+};

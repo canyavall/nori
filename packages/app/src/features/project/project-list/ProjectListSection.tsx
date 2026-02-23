@@ -1,13 +1,11 @@
 import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
-import { projects, registerOpen } from '../../../stores/project.store';
-import { selectProject, activeProject } from '../../../stores/navigation.store';
 import { ProjectRegisterDialog } from '../project-register/ProjectRegisterDialog';
 import { ProjectCard } from './components/ProjectCard/ProjectCard';
 import { useProjectListSection } from './ProjectListSection.hook';
 
 export const ProjectListSection: Component = () => {
-  const { loading, handleAddProject } = useProjectListSection();
+  const { loading, projects, registerOpen, activeProject, handleAddProject, handleSelectProject } = useProjectListSection();
 
   return (
     <div class="p-6">
@@ -54,7 +52,7 @@ export const ProjectListSection: Component = () => {
               {(project) => (
                 <ProjectCard
                   project={project}
-                  onSelect={() => selectProject(project)}
+                  onSelect={() => handleSelectProject(project)}
                   isSelected={activeProject()?.id === project.id}
                 />
               )}

@@ -1,6 +1,6 @@
 import type { DeleteResultProps } from './DeleteResult.type';
 
-export function DeleteResult(props: DeleteResultProps) {
+export const DeleteResult = (props: DeleteResultProps) => {
   return (
     <div class="space-y-4">
       <div class="text-center py-2">

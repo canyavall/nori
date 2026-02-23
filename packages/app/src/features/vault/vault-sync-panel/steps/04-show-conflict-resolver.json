@@ -19,6 +19,10 @@
   "transitions": {
     "on_resolved": "03-show-pull-results"
   },
+  "success_handling": {
+    "criteria": "All conflicts are resolved and the user confirms",
+    "transition": "03-show-pull-results"
+  },
   "error_handling": [
     {
       "type": "resolution_failed",

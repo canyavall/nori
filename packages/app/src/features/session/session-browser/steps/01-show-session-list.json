@@ -20,6 +20,10 @@
     "on_select": "02-show-session-detail",
     "on_create_new": "03-call-create-session"
   },
+  "success_handling": {
+    "criteria": "User selects an existing session or requests a new one",
+    "transition": "02-show-session-detail (select) or 03-call-create-session (new)"
+  },
   "error_handling": [
     {
       "type": "load_failed",

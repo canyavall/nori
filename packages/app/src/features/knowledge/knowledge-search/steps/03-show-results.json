@@ -18,6 +18,10 @@
     "on_select": "navigate:/knowledge/{entry_id}",
     "on_search_again": "01-show-search-form"
   },
+  "success_handling": {
+    "criteria": "User selects an entry from the results list",
+    "transition": "navigate:/knowledge/{entry_id}"
+  },
   "error_handling": [
     {
       "type": "no_results",

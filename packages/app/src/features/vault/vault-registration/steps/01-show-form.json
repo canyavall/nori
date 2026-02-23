@@ -9,14 +9,24 @@
   },
   "ui": {
     "renders": "form",
-    "fields_git": ["vault_name", "git_url", "branch"],
-    "fields_local": ["vault_name"],
+    "fields_git": [
+      "vault_name",
+      "git_url",
+      "branch"
+    ],
+    "fields_local": [
+      "vault_name"
+    ],
     "validation_schema_git": "@nori/shared:vaultRegistrationSchema",
     "validation_schema_local": "@nori/shared:vaultLocalRegistrationSchema"
   },
   "transitions": {
     "on_valid": "02-validate-input",
     "on_cancel": "close_dialog"
+  },
+  "success_handling": {
+    "criteria": "User fills in all required fields for the selected vault type",
+    "transition": "02-validate-input"
   },
   "error_handling": [
     {

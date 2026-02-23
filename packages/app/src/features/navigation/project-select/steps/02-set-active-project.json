@@ -1,11 +1,17 @@
 {
   "type": "validation",
   "what": "Set the active project in the navigation store",
-  "why": "Updates global navigation context so ContextualSidebar renders with project-specific links (Knowledge + Sessions)",
+  "why": "Updates global navigation context so ContextualSidebar renders with project-specific info (linked vaults list) and navigation (Sessions)",
   "where": {
     "implementation": "stores/navigation.store#selectProject"
   },
-  "transitions": {},
+  "transitions": {
+    "on_deselect": "03-clear-project-context"
+  },
+  "success_handling": {
+    "criteria": "Selected project is stored as the active project in the navigation store",
+    "transition": "active project reflected in sidebar context"
+  },
   "error_handling": [],
   "decisions": [
     {
@@ -14,9 +20,9 @@
       "rationale": "Only one context type active at a time. Sidebar appears reactively — no further step or dialog needed."
     },
     {
-      "date": "2026-02-21",
-      "reason": "Project sidebar shows Vaults + Sessions, not Knowledge",
-      "rationale": "Knowledge is vault-scoped, not project-scoped. When a project is selected the user needs to see which vaults are linked (Vaults link → /vaults filtered by connected_vaults) and navigate to AI sessions (Sessions link). Knowledge is shown when a vault context is active instead."
+      "date": "2026-02-22",
+      "reason": "Project sidebar shows linked vault names (informational) + Sessions nav, not a Vaults link",
+      "rationale": "Top-nav /vaults is global vault management and must never be filtered by project. Project-linked vaults are displayed as text in the sidebar (names only, derived from connected_vaults IDs resolved against the vault store). Sessions is the only navigable link in the project sidebar. Knowledge is vault-scoped and shown in the vault sidebar instead."
     }
   ]
 }

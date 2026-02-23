@@ -7,11 +7,22 @@
   },
   "ui": {
     "renders": "display",
-    "fields": ["authStatus", "has_anthropic_access", "anthropic_access_type", "subscription_type", "anthropic_email", "cli_installed"],
+    "fields": [
+      "authStatus",
+      "has_anthropic_access",
+      "anthropic_access_type",
+      "subscription_type",
+      "anthropic_email",
+      "cli_installed"
+    ],
     "validation_schema": null
   },
   "transitions": {
     "on_click": "navigate:/settings"
+  },
+  "success_handling": {
+    "criteria": "Auth status indicator is rendered in the navigation bar",
+    "transition": "navigate:/settings (on user click)"
   },
   "error_handling": [],
   "decisions": [

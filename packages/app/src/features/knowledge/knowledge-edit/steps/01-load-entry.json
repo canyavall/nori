@@ -17,6 +17,10 @@
     "on_success": "02-show-edit-form",
     "on_error": "navigate_back"
   },
+  "success_handling": {
+    "criteria": "Backend returns the full entry data including frontmatter and content",
+    "transition": "02-show-edit-form"
+  },
   "error_handling": [
     {
       "type": "not_found",

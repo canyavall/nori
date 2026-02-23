@@ -9,6 +9,10 @@
     "on_valid": "03-call-backend",
     "on_invalid": "01-show-form"
   },
+  "success_handling": {
+    "criteria": "All fields pass the Zod schema for the chosen vault type (git or local)",
+    "transition": "03-call-backend"
+  },
   "error_handling": [
     {
       "type": "invalid_git_url",

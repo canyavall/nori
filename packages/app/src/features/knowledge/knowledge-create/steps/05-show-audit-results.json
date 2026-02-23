@@ -17,6 +17,10 @@
   "transitions": {
     "on_continue": "navigate:/knowledge/{entry_id}"
   },
+  "success_handling": {
+    "criteria": "User acknowledges the audit report and continues",
+    "transition": "navigate:/knowledge/{entry_id}"
+  },
   "error_handling": [
     {
       "type": "data_missing",

@@ -17,6 +17,10 @@
   "transitions": {
     "on_conflicts": "04-show-conflict-resolver"
   },
+  "success_handling": {
+    "criteria": "Pull results are displayed; no conflicts requiring resolution",
+    "transition": "panel returns to 01-show-sync-status"
+  },
   "error_handling": [
     {
       "type": "data_missing",

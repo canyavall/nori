@@ -15,6 +15,10 @@
     "on_result": "close_dialog",
     "on_error": "01-show-register-form"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the project is registered",
+    "transition": "close_dialog"
+  },
   "error_handling": [
     {
       "scenario": "Path does not exist or is not a directory",

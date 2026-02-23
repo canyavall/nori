@@ -23,6 +23,10 @@
     "on_success": "04-show-audit-results",
     "on_error": "02-show-edit-form"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the changes are written, audited, and indexed — SSE completed event received",
+    "transition": "04-show-audit-results"
+  },
   "error_handling": [
     {
       "type": "validation_failed",

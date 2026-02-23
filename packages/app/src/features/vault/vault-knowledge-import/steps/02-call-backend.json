@@ -1,0 +1,44 @@
+{
+  "type": "api_call",
+  "what": "Call backend import flow and stream progress via SSE",
+  "why": "The backend handles filesystem scanning, frontmatter parsing, and DB registration",
+  "where": {
+    "component": "features/vault/vault-knowledge-import/VaultKnowledgeImportDialog.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/vault/:id/knowledge/import",
+    "request_type": "VaultKnowledgeImportInput",
+    "response_type": "VaultKnowledgeImportResponse",
+    "sse_events": [
+      "vault:knowledge-import:scanning",
+      "vault:knowledge-import:found",
+      "vault:knowledge-import:parsing",
+      "vault:knowledge-import:importing",
+      "vault:knowledge-import:entry-imported",
+      "vault:knowledge-import:entry-skipped",
+      "vault:knowledge-import:rebuilding-index",
+      "vault:knowledge-import:completed"
+    ]
+  },
+  "transitions": {
+    "on_success": "show done state with counts",
+    "on_error": "show error state with retry option"
+  },
+  "success_handling": {
+    "criteria": "Backend processes all selected files and the SSE completed event is received with imported and skipped counts",
+    "transition": "show done state with imported and skipped counts"
+  },
+  "error_handling": [
+    {
+      "type": "import_failed",
+      "display": "toast_error",
+      "description": "Backend encountered errors processing files — show failed count and allow retry"
+    },
+    {
+      "type": "network_error",
+      "display": "toast_error",
+      "description": "Backend is unreachable — show generic network error with retry option"
+    }
+  ],
+  "decisions": []
+}

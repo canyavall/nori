@@ -24,6 +24,10 @@
     "on_success": "03-show-pull-results",
     "on_error": "01-show-sync-status"
   },
+  "success_handling": {
+    "criteria": "Backend completes the pull without conflicts — SSE completed event received",
+    "transition": "03-show-pull-results"
+  },
   "error_handling": [
     {
       "type": "pull_failed",

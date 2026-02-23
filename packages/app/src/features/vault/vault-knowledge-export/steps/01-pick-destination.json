@@ -1,0 +1,45 @@
+{
+  "type": "ui_action",
+  "what": "Present a folder picker for the user to choose the export destination",
+  "why": "The user must choose where exported .md files will be written",
+  "where": {
+    "component": "features/vault/vault-knowledge-export/VaultKnowledgeExportDialog.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": [],
+    "actions": [
+      {
+        "label": "Choose destination folder",
+        "triggers": "Tauri open() with directory=true"
+      }
+    ]
+  },
+  "transitions": {
+    "on_folder_selected": "02-call-backend",
+    "on_cancel": "close_dialog"
+  },
+  "success_handling": {
+    "criteria": "User selects a valid writable destination folder",
+    "transition": "02-call-backend"
+  },
+  "error_handling": [
+    {
+      "type": "picker_cancelled",
+      "display": "none",
+      "description": "User dismissed the folder dialog without selecting — stay on current step"
+    },
+    {
+      "type": "invalid_destination",
+      "display": "toast_error",
+      "description": "Selected path is not writable or no longer exists on the filesystem"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "Single folder picker, category subdirs created by backend",
+      "rationale": "Backend preserves category structure as subfolders — user only picks the root destination"
+    }
+  ]
+}

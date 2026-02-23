@@ -21,6 +21,10 @@
     "on_save": "03-call-backend",
     "on_cancel": "navigate_back"
   },
+  "success_handling": {
+    "criteria": "User submits edits and the form passes client-side validation",
+    "transition": "03-call-backend"
+  },
   "error_handling": [
     {
       "type": "validation_error",

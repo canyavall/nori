@@ -16,6 +16,10 @@
   "transitions": {
     "on_continue": "navigate:/knowledge"
   },
+  "success_handling": {
+    "criteria": "User dismisses the success screen",
+    "transition": "navigate:/knowledge"
+  },
   "error_handling": [
     {
       "type": "data_missing",

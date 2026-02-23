@@ -1,0 +1,34 @@
+{
+  "type": "api_call",
+  "what": "Fetch all knowledge entries for the selected vault grouped by category",
+  "why": "Need vault's knowledge to build the category tree display",
+  "where": {
+    "component": "features/vault/vault-knowledge-tree/VaultKnowledgeTree.tsx"
+  },
+  "contract": {
+    "endpoint": "GET /api/knowledge",
+    "request_type": "{ vault_id: string } (query param)",
+    "response_type": "{ data: KnowledgeEntry[] }",
+    "sse_events": []
+  },
+  "success_handling": {
+    "criteria": "Backend returns the full list of knowledge entries for the active vault",
+    "transition": "02-show-tree"
+  },
+  "error_handling": [
+    {
+      "scenario": "Network error or server down",
+      "criteria": "fetch throws",
+      "action": "Show error state with retry option",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "Reuse existing GET /api/knowledge endpoint",
+      "rationale": "The endpoint already supports vault_id filter — no new backend flow needed"
+    }
+  ]
+}

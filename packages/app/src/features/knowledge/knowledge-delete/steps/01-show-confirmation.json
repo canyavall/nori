@@ -18,6 +18,10 @@
     "on_confirm": "02-call-backend",
     "on_cancel": "close_dialog"
   },
+  "success_handling": {
+    "criteria": "User explicitly confirms the deletion",
+    "transition": "02-call-backend"
+  },
   "error_handling": [
     {
       "type": "entry_not_found",

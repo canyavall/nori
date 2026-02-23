@@ -1,0 +1,47 @@
+{
+  "type": "ui_action",
+  "what": "Display knowledge entries grouped by category as a collapsible tree",
+  "why": "Gives the user a clear structural overview of vault content organized by category",
+  "where": {
+    "component": "features/vault/vault-knowledge-tree/CategoryTree.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [],
+    "actions": [
+      {
+        "label": "Expand/collapse category",
+        "triggers": "toggles category open/closed inline"
+      },
+      {
+        "label": "Click entry title",
+        "triggers": "03-edit-entry"
+      },
+      {
+        "label": "Refresh",
+        "triggers": "re-runs 01-load-knowledge"
+      }
+    ]
+  },
+  "transitions": {
+    "on_entry_click": "03-edit-entry",
+    "on_refresh": "01-load-knowledge"
+  },
+  "success_handling": {
+    "criteria": "Knowledge tree is rendered with entries grouped by category",
+    "transition": "03-edit-entry (on entry click) or 01-load-knowledge (on refresh)"
+  },
+  "error_handling": [],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "Group by category field on KnowledgeEntry",
+      "rationale": "Category is the primary organizational axis; grouping creates a meaningful hierarchy without extra backend logic"
+    },
+    {
+      "date": "2026-02-22",
+      "reason": "Edit button only visible on hover",
+      "rationale": "Keeps the tree uncluttered; power users find it on hover"
+    }
+  ]
+}

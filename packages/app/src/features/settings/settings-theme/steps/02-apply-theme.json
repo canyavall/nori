@@ -17,6 +17,10 @@
     "console": false,
     "file": false
   },
+  "success_handling": {
+    "criteria": "Selected theme is applied to the CSS custom properties and persisted to localStorage",
+    "transition": "theme updated in UI (no navigation)"
+  },
   "error_handling": [
     {
       "scenario": "localStorage write fails (e.g. private browsing quota)",

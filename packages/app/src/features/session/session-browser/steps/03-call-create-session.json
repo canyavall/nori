@@ -17,6 +17,10 @@
     "on_success": "navigate:/chat/{session_id}",
     "on_error": "01-show-session-list"
   },
+  "success_handling": {
+    "criteria": "Backend creates a new session and returns its ID",
+    "transition": "navigate:/chat/{session_id}"
+  },
   "error_handling": [
     {
       "type": "creation_failed",

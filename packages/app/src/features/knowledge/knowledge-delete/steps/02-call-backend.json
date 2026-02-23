@@ -23,6 +23,10 @@
     "on_success": "03-show-result",
     "on_error": "01-show-confirmation"
   },
+  "success_handling": {
+    "criteria": "Backend confirms the entry file is removed and the index is updated — SSE completed event received",
+    "transition": "03-show-result"
+  },
   "error_handling": [
     {
       "type": "not_found",

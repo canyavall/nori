@@ -17,6 +17,10 @@
   "transitions": {
     "on_dismiss": "close_dialog"
   },
+  "success_handling": {
+    "criteria": "User dismisses the confirmation screen",
+    "transition": "close_dialog"
+  },
   "error_handling": [
     {
       "type": "data_missing",

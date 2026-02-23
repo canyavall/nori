@@ -1,0 +1,49 @@
+{
+  "type": "ui_action",
+  "what": "Present file/folder picker for the user to select Markdown sources to import",
+  "why": "The user must choose which .md files or folder to import into the vault",
+  "where": {
+    "component": "features/vault/vault-knowledge-import/VaultKnowledgeImportDialog.tsx"
+  },
+  "ui": {
+    "renders": "dialog",
+    "fields": [],
+    "actions": [
+      {
+        "label": "Select files (.md)",
+        "triggers": "Tauri open() with md filter, multiple=true"
+      },
+      {
+        "label": "Select folder",
+        "triggers": "Tauri open() with directory=true"
+      }
+    ]
+  },
+  "transitions": {
+    "on_files_selected": "02-call-backend",
+    "on_cancel": "close_dialog"
+  },
+  "success_handling": {
+    "criteria": "User selects at least one .md file or a folder containing Markdown files",
+    "transition": "02-call-backend"
+  },
+  "error_handling": [
+    {
+      "type": "picker_cancelled",
+      "display": "none",
+      "description": "User dismissed the file picker without selecting — stay on current step"
+    },
+    {
+      "type": "no_files_selected",
+      "display": "toast_error",
+      "description": "User confirmed the picker but no files matched the .md filter"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-02-22",
+      "reason": "Two separate pickers for clarity",
+      "rationale": "Users may want to pick individual files or an entire folder — both are valid import sources"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "type": "action",
-  "what": "Expand source paths into a flat list of .md file paths",
-  "why": "Users may provide individual files or folders; this step normalizes them to file paths",
+  "what": "Expand source paths into a flat list of text file paths (.md, .txt, .rst, .mdx, .markdown)",
+  "why": "Users may provide individual files or folders of various text formats; this step normalizes them to file paths",
   "where": {
     "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
     "implementation": "features/vault/vault-knowledge-import/actions/scan-sources.ts"
@@ -20,9 +20,9 @@
       "recoverable": true
     },
     {
-      "scenario": "No markdown files found",
+      "scenario": "No text files found",
       "criteria": "filePaths array is empty after scanning all sources",
-      "action": "Return NO_MARKDOWN_FILES error",
+      "action": "Return NO_TEXT_FILES error",
       "severity": "error",
       "recoverable": true
     }

@@ -34,6 +34,12 @@ export const useVaultKnowledgeImportDialog = (props: VaultKnowledgeImportDialogP
           };
           if (event === 'vault:knowledge-import:importing') {
             setProgress(`Importing: ${(data as { title?: string }).title ?? ''}`);
+          } else if (event === 'vault:knowledge-import:enriching') {
+            const d = data as { total?: number; needs_enrichment?: number };
+            setProgress(`Enriching metadata for ${d.needs_enrichment ?? 0} file(s)...`);
+          } else if (event === 'vault:knowledge-import:enriching-file') {
+            const d = data as { index?: number; total?: number };
+            setProgress(`Enriching metadata (${d.index ?? 0}/${d.total ?? 0})...`);
           } else if (messages[event]) {
             setProgress(messages[event]);
           }
@@ -60,7 +66,7 @@ export const useVaultKnowledgeImportDialog = (props: VaultKnowledgeImportDialogP
   const handlePickFiles = async () => {
     const selected = await open({
       multiple: true,
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      filters: [{ name: 'Text files', extensions: ['md', 'txt', 'rst', 'mdx', 'markdown'] }],
     }).catch(() => null);
 
     if (!selected || (Array.isArray(selected) && !selected.length)) {

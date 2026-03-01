@@ -37,20 +37,22 @@ export const VaultListSection: Component = () => {
 
   return (
     <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-xl font-semibold">Vaults</h2>
-          <p class="text-sm text-[var(--color-text-muted)] mt-0.5">
-            All registered vaults — register, sync, and link to projects
-          </p>
+      <Show when={!activeVault()}>
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-semibold">Vaults</h2>
+            <p class="text-sm text-[var(--color-text-muted)] mt-0.5">
+              All registered vaults — register, sync, and link to projects
+            </p>
+          </div>
+          <button
+            onClick={() => setRegistrationOpen(true)}
+            class="px-4 py-2 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+          >
+            Register Vault
+          </button>
         </div>
-        <button
-          onClick={() => setRegistrationOpen(true)}
-          class="px-4 py-2 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
-        >
-          Register Vault
-        </button>
-      </div>
+      </Show>
 
       <Show
         when={!loading()}

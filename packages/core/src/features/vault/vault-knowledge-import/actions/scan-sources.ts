@@ -2,11 +2,13 @@ import { readdirSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import type { StepResult, FlowError } from '@nori/shared';
 
+const READABLE_TEXT_EXTENSIONS = new Set(['.md', '.txt', '.rst', '.mdx', '.markdown']);
+
 export interface ScanResult {
   file_paths: string[];
 }
 
-function collectMdFiles(dirPath: string, results: string[]): void {
+function collectTextFiles(dirPath: string, results: string[]): void {
   let entries: string[];
   try {
     entries = readdirSync(dirPath);
@@ -18,8 +20,8 @@ function collectMdFiles(dirPath: string, results: string[]): void {
     try {
       const stat = statSync(fullPath);
       if (stat.isDirectory()) {
-        collectMdFiles(fullPath, results);
-      } else if (extname(entry).toLowerCase() === '.md') {
+        collectTextFiles(fullPath, results);
+      } else if (READABLE_TEXT_EXTENSIONS.has(extname(entry).toLowerCase())) {
         results.push(fullPath);
       }
     } catch {
@@ -37,8 +39,8 @@ export function scanSources(
     try {
       const stat = statSync(sourcePath);
       if (stat.isDirectory()) {
-        collectMdFiles(sourcePath, filePaths);
-      } else if (extname(sourcePath).toLowerCase() === '.md') {
+        collectTextFiles(sourcePath, filePaths);
+      } else if (READABLE_TEXT_EXTENSIONS.has(extname(sourcePath).toLowerCase())) {
         filePaths.push(sourcePath);
       }
     } catch {
@@ -60,8 +62,8 @@ export function scanSources(
     return {
       success: false,
       error: {
-        code: 'NO_MARKDOWN_FILES',
-        message: 'No markdown files found in the provided sources',
+        code: 'NO_TEXT_FILES',
+        message: 'No text files found in the provided sources',
         step: '02-scan-sources',
         severity: 'error',
         recoverable: true,

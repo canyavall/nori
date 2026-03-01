@@ -5,6 +5,7 @@ import { createNoopEmitter } from '../../shared/utils/flow-emitter.js';
 import { validateVault } from './actions/validate-vault.js';
 import { scanSources } from './actions/scan-sources.js';
 import { parseFiles } from './actions/parse-files.js';
+import { enrichMetadata } from './actions/enrich-metadata.js';
 import { importEntries } from './actions/import-entries.js';
 
 export interface VaultKnowledgeImportInput {
@@ -29,7 +30,7 @@ export async function runVaultKnowledgeImport(
   if (!vaultResult.success) return vaultResult;
   const { local_path } = vaultResult.data;
 
-  // Step 02: Scan sources for .md files
+  // Step 02: Scan sources for text files
   emit.emit('vault:knowledge-import:scanning', { source_count: input.source_paths.length });
   const scanResult = scanSources(input.source_paths);
   if (!scanResult.success) return scanResult;
@@ -49,19 +50,33 @@ export async function runVaultKnowledgeImport(
     emit.emit('vault:knowledge-import:entry-skipped', { file_path: s.file_path, reason: s.reason });
   }
 
-  // Step 04: Import entries into vault
+  // Step 04: Enrich metadata with LLM for files missing title/category/tags/description
+  const needsEnrichmentCount = parsed.filter(
+    (e) => !e.title || !e.category || e.tags.length === 0 || !e.description
+  ).length;
+  emit.emit('vault:knowledge-import:enriching', {
+    total: parsed.length,
+    needs_enrichment: needsEnrichmentCount,
+  });
+  const enrichResult = await enrichMetadata(parsed, (file_path, index, total) => {
+    emit.emit('vault:knowledge-import:enriching-file', { file_path, index, total });
+  });
+  if (!enrichResult.success) return enrichResult;
+  const { enriched } = enrichResult.data;
+
+  // Step 05: Import entries into vault
   const importResult = importEntries(
     input.db,
     input.vault_id,
     local_path,
-    parsed,
+    enriched,
     (title) => emit.emit('vault:knowledge-import:importing', { title })
   );
   if (!importResult.success) return importResult;
 
   const { imported_count, skipped_count } = importResult.data;
 
-  // Step 05: Index already populated — importEntries inserts each entry into DB in step 04
+  // Step 06: Index already populated — importEntries inserts each entry into DB in step 05
   emit.emit('vault:knowledge-import:rebuilding-index', { vault_id: input.vault_id });
 
   emit.emit('vault:knowledge-import:completed', {

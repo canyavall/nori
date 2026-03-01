@@ -11,6 +11,7 @@ export function withSSE(
 
     const emitter: FlowEmitter = {
       emit: (event: string, data?: Record<string, unknown>) => {
+        console.log(`[sse] ${event}`, JSON.stringify(data ?? {}));
         stream.writeSSE({
           id: String(id++),
           event,

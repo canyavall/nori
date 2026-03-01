@@ -1,6 +1,6 @@
 {
   "type": "action",
-  "what": "Write each parsed entry to the vault directory and register it in the database",
+  "what": "Write each enriched entry to the vault directory with full frontmatter (title, category, tags, description, rules, required_knowledge) and register it in the database",
   "why": "Makes knowledge entries available for search and knowledge injection",
   "where": {
     "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",

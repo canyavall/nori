@@ -29,13 +29,16 @@ export function importEntries(
   const now = new Date().toISOString();
 
   for (const entry of entries) {
-    onProgress(entry.title);
+    const title = entry.title ?? 'untitled';
+    const category = entry.category ?? 'general';
+    onProgress(title);
 
-    const slug = slugify(entry.title);
-    const categoryDir = join(vaultPath, entry.category);
+    const slug = slugify(title);
+    const categoryDir = join(vaultPath, category);
     const destPath = join(categoryDir, `${slug}.md`);
 
     if (existsSync(destPath)) {
+      console.log(`[import-entries] skip (exists): ${destPath}`);
       skippedCount++;
       continue;
     }
@@ -44,9 +47,12 @@ export function importEntries(
       mkdirSync(categoryDir, { recursive: true });
 
       const frontmatter = {
-        title: entry.title,
-        category: entry.category,
+        title,
+        category,
         tags: entry.tags,
+        description: entry.description ?? '',
+        rules: entry.rules,
+        required_knowledge: entry.required_knowledge,
         created: entry.created ?? now,
         updated: now,
       };
@@ -57,13 +63,14 @@ export function importEntries(
       const contentHash = Buffer.from(entry.content).toString('base64').slice(0, 32);
 
       db.run(
-        `INSERT OR IGNORE INTO knowledge (id, vault_id, file_path, title, category, tags, content_hash, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [entryId, vaultId, destPath, entry.title, entry.category, JSON.stringify(entry.tags), contentHash, now, now]
+        `INSERT OR IGNORE INTO knowledge_entries (id, vault_id, file_path, title, category, tags, description, rules, required_knowledge, content_hash, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [entryId, vaultId, destPath, title, category, JSON.stringify(entry.tags), entry.description ?? '', JSON.stringify(entry.rules), JSON.stringify(entry.required_knowledge), contentHash, now, now]
       );
 
       importedCount++;
-    } catch {
+    } catch (err) {
+      console.log(`[import-entries] skip (write error): ${destPath} — ${err instanceof Error ? err.message : String(err)}`);
       skippedCount++;
     }
   }

@@ -13,6 +13,8 @@
       "vault:knowledge-import:scanning",
       "vault:knowledge-import:found",
       "vault:knowledge-import:parsing",
+      "vault:knowledge-import:enriching",
+      "vault:knowledge-import:enriching-file",
       "vault:knowledge-import:importing",
       "vault:knowledge-import:entry-imported",
       "vault:knowledge-import:entry-skipped",

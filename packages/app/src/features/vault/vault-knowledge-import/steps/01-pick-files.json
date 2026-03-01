@@ -10,8 +10,8 @@
     "fields": [],
     "actions": [
       {
-        "label": "Select files (.md)",
-        "triggers": "Tauri open() with md filter, multiple=true"
+        "label": "Select files",
+        "triggers": "Tauri open() with text file filter (md, txt, rst, mdx, markdown), multiple=true"
       },
       {
         "label": "Select folder",
@@ -24,7 +24,7 @@
     "on_cancel": "close_dialog"
   },
   "success_handling": {
-    "criteria": "User selects at least one .md file or a folder containing Markdown files",
+    "criteria": "User selects at least one text file or a folder containing text files",
     "transition": "02-call-backend"
   },
   "error_handling": [

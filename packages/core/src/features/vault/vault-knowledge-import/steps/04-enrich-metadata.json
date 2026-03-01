@@ -1,0 +1,36 @@
+{
+  "type": "action",
+  "what": "Use LLM to fill in missing title, category, tags, description, rules, and required_knowledge for each parsed entry",
+  "why": "Files without standard frontmatter (e.g. non-md formats or custom schemas) need metadata generated before import",
+  "where": {
+    "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
+    "implementation": "features/vault/vault-knowledge-import/actions/enrich-metadata.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "All entries have non-null title and category after enrichment (LLM or fallback)",
+    "event": { "action": "vault_knowledge_import_enrich_metadata", "status": "success", "message": "Metadata enriched", "data_fields": ["enriched_count"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "LLM unavailable (no auth)",
+      "criteria": "resolveAuth returns type 'none'",
+      "action": "Apply fallback: filename → title, parent_folder → category; non-fatal",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "LLM call fails for a specific file",
+      "criteria": "callAnthropicApi throws or returns malformed JSON",
+      "action": "Apply fallback for that file, continue with remaining files",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-01", "reason": "Non-fatal enrichment", "rationale": "Import should succeed even without LLM credentials; fallback metadata (filename + folder) is better than skipping the file entirely" },
+    { "date": "2026-03-01", "reason": "Never overwrite existing fields", "rationale": "If a file already has title or category in its frontmatter, keep it — LLM is only used to fill gaps" },
+    { "date": "2026-03-01", "reason": "Haiku for enrichment", "rationale": "Metadata generation is a simple structured output task; Haiku is fast and cheap enough to run per-file" }
+  ],
+  "calls": ["features/vault/vault-knowledge-import/actions/enrich-metadata.ts"]
+}

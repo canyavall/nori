@@ -1,7 +1,7 @@
 {
   "type": "action",
-  "what": "Read each .md file and parse frontmatter + content",
-  "why": "Need title, category, tags from frontmatter to register entries in the vault",
+  "what": "Read each text file and extract frontmatter + content; no fields are required",
+  "why": "Lenient parsing allows files with partial or no frontmatter to proceed to the enrichment step",
   "where": {
     "entry_point": "features/vault/vault-knowledge-import/vault-knowledge-import.ts",
     "implementation": "features/vault/vault-knowledge-import/actions/parse-files.ts"
@@ -12,13 +12,6 @@
     "event": { "action": "vault_knowledge_import_parse_files", "status": "success", "message": "Files parsed", "data_fields": ["parsed_count", "skipped_count"] }
   },
   "error_handling": [
-    {
-      "scenario": "File missing required frontmatter fields",
-      "criteria": "title or category absent from parsed frontmatter",
-      "action": "Add to skipped list with reason, continue",
-      "severity": "warning",
-      "recoverable": true
-    },
     {
       "scenario": "File read error",
       "criteria": "readFileSync throws",

@@ -42,6 +42,11 @@
       "date": "2026-02-22",
       "reason": "Edit button only visible on hover",
       "rationale": "Keeps the tree uncluttered; power users find it on hover"
+    },
+    {
+      "date": "2026-03-01",
+      "reason": "Hide 'Vaults' heading and 'Register Vault' button when a vault is selected",
+      "rationale": "Once the user has drilled into a vault's knowledge tree the list-level chrome (heading and register action) is no longer relevant and wastes vertical space"
     }
   ]
 }

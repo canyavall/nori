@@ -19,7 +19,7 @@ export const VaultKnowledgeImportDialog = (props: VaultKnowledgeImportDialogProp
           <Switch>
             <Match when={step() === 'pick'}>
               <p class="text-sm text-[var(--color-text-muted)] mb-4">
-                Select individual .md files or a folder containing Markdown files.
+                Select text files (.md, .txt, .rst, etc.) or a folder — metadata will be generated automatically.
               </p>
               <div class="flex flex-col gap-2">
                 <button
@@ -27,7 +27,7 @@ export const VaultKnowledgeImportDialog = (props: VaultKnowledgeImportDialogProp
                   onClick={handlePickFiles}
                   class="w-full px-4 py-2.5 rounded-md border border-[var(--color-border)] text-sm text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors text-left"
                 >
-                  Select files (.md)
+                  Select files
                 </button>
                 <button
                   type="button"

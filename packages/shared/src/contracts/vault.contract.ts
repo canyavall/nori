@@ -122,6 +122,8 @@ export interface VaultKnowledgeImportEvents {
   'vault:knowledge-import:scanning': { source_count: number };
   'vault:knowledge-import:found': { file_count: number };
   'vault:knowledge-import:parsing': { file_path: string };
+  'vault:knowledge-import:enriching': { total: number; needs_enrichment: number };
+  'vault:knowledge-import:enriching-file': { file_path: string; index: number; total: number };
   'vault:knowledge-import:importing': { title: string };
   'vault:knowledge-import:entry-imported': { title: string };
   'vault:knowledge-import:entry-skipped': { file_path: string; reason: string };

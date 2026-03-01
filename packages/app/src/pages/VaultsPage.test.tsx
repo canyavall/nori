@@ -256,6 +256,26 @@ describe('VaultsPage', () => {
     });
   });
 
+  it('hides "Vaults" heading when a vault is selected', async () => {
+    const vault = makeVault();
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
+    setActiveVaultForTest(vault);
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByTestId('knowledge-tree')).toBeDefined());
+    expect(screen.queryByRole('heading', { name: 'Vaults' })).toBeNull();
+  });
+
+  it('hides "Register Vault" button when a vault is selected', async () => {
+    const vault = makeVault();
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
+    setActiveVaultForTest(vault);
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByTestId('knowledge-tree')).toBeDefined());
+    expect(screen.queryByRole('button', { name: 'Register Vault' })).toBeNull();
+  });
+
   it('vault cards are NOT shown alongside the knowledge tree when a vault is selected', async () => {
     const vault = makeVault({ name: 'my-vault' });
     vi.mocked(apiGet).mockResolvedValue({ data: [vault] });

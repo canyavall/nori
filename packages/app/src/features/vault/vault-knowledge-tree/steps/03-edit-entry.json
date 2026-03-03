@@ -1,47 +1,55 @@
 {
   "type": "ui_action",
-  "what": "Open the edit dialog for the knowledge entry the user clicked",
-  "why": "User clicked an entry in the tree and wants to modify its content or metadata",
+  "what": "Show the KnowledgeDetailPanel inline in the main content area when the user clicks an entry in the sidebar",
+  "why": "User selected an entry from the knowledge sidebar and wants to view or edit its content",
   "where": {
-    "component": "features/knowledge/knowledge-edit/KnowledgeEditDialog/KnowledgeEditDialog.tsx"
+    "component": "features/knowledge/knowledge-detail/KnowledgeDetailPanel/KnowledgeDetailPanel.tsx"
   },
   "ui": {
-    "renders": "dialog",
+    "renders": "display",
     "fields": [
       "title",
       "category",
+      "description",
       "tags",
+      "rules",
+      "required_knowledge",
       "content"
     ],
+    "modes": {
+      "view": "All fields displayed as read-only text; Edit button (top-right) and disabled Delete button",
+      "edit": "All fields as editable inputs using EditForm; Save Changes + Cancel buttons; Delete button enabled"
+    },
     "validation_schema": "@nori/shared:KnowledgeEditRequest"
   },
   "transitions": {
-    "on_save": "02-show-tree",
-    "on_cancel": "02-show-tree"
+    "on_edit_click": "edit mode (inline, no navigation)",
+    "on_save": "view mode (reload entry)",
+    "on_cancel": "view mode"
   },
   "success_handling": {
-    "criteria": "User saves changes to the entry",
-    "transition": "02-show-tree"
+    "criteria": "User saves changes to the entry; panel returns to view mode with updated data",
+    "transition": "back to view mode"
   },
   "error_handling": [
     {
       "scenario": "Entry not found",
       "criteria": "GET /api/knowledge/:id returns 404",
-      "action": "Show error message inside dialog",
+      "action": "Show error state in panel",
       "severity": "error",
       "recoverable": false
     }
   ],
   "decisions": [
     {
-      "date": "2026-02-22",
-      "reason": "Reuse existing KnowledgeEditDialog",
-      "rationale": "KnowledgeEditDialog already handles load → edit → save → audit; no duplication needed"
+      "date": "2026-03-02",
+      "reason": "Replace KnowledgeEditDialog with inline KnowledgeDetailPanel",
+      "rationale": "The vault detail page has dedicated space for the knowledge panel; an inline panel is less disruptive than a modal dialog in this context"
     },
     {
-      "date": "2026-02-22",
-      "reason": "Reload tree after save or cancel",
-      "rationale": "Ensures the tree reflects latest data after an edit (title/category may have changed)"
+      "date": "2026-03-02",
+      "reason": "View mode first, then edit mode on demand",
+      "rationale": "User typically wants to read before editing; separating modes prevents accidental changes"
     }
   ]
 }

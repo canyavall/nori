@@ -4,7 +4,6 @@ import type { DiscoveredProject, Vault } from '@nori/shared';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-// Mock @solidjs/router so <A> renders a plain <a> without needing a Router context
 const navigateMock = vi.fn();
 
 vi.mock('@solidjs/router', () => ({
@@ -18,12 +17,12 @@ vi.mock('@solidjs/router', () => ({
 
 const { getSidebarContext, setSidebarContextMock, getContextName, setContextNameMock, getActiveProject, setActiveProjectMock } =
   vi.hoisted(() => {
-    let _context: 'project' | 'vault' | null = null;
+    let _context: 'project' | null = null;
     let _name: string | null = null;
     let _project: DiscoveredProject | null = null;
     return {
       getSidebarContext: () => _context,
-      setSidebarContextMock: (v: 'project' | 'vault' | null) => { _context = v; },
+      setSidebarContextMock: (v: 'project' | null) => { _context = v; },
       getContextName: () => _name,
       setContextNameMock: (v: string | null) => { _name = v; },
       getActiveProject: () => _project,
@@ -35,8 +34,6 @@ vi.mock('../../../stores/navigation.store', () => ({
   sidebarContext: getSidebarContext,
   activeContextName: getContextName,
   activeProject: getActiveProject,
-  activeVault: getActiveVault,
-  clearVaultContext: vi.fn(),
   clearContext: vi.fn(),
 }));
 
@@ -52,46 +49,6 @@ vi.mock('../../../stores/vault.store', () => ({
   vaults: getVaults,
 }));
 
-// Mock activeVault for vault context tests
-const { getActiveVault, setActiveVaultMock } = vi.hoisted(() => {
-  let _vault: Vault | null = null;
-  return {
-    getActiveVault: () => _vault,
-    setActiveVaultMock: (v: Vault | null) => { _vault = v; },
-  };
-});
-
-// Mock API calls
-vi.mock('../../../lib/api', () => ({
-  apiGet: vi.fn().mockResolvedValue({ data: [] }),
-  apiPost: vi.fn(),
-  apiDelete: vi.fn(),
-}));
-
-// Mock Tauri dialog plugin
-vi.mock('@tauri-apps/plugin-dialog', () => ({
-  open: vi.fn(),
-}));
-
-// Mock SSE
-vi.mock('../../../lib/sse', () => ({
-  connectSSE: vi.fn(() => ({ abort: vi.fn() })),
-}));
-
-// Mock vault-link-project ProjectPicker
-vi.mock('../../../features/vault/vault-link-project/ProjectPicker/ProjectPicker', () => ({
-  ProjectPicker: () => <div data-testid="project-picker" />,
-}));
-
-// Mock import/export dialogs
-vi.mock('../../../features/vault/vault-knowledge-import/VaultKnowledgeImportDialog', () => ({
-  VaultKnowledgeImportDialog: () => <div data-testid="import-dialog" />,
-}));
-
-vi.mock('../../../features/vault/vault-knowledge-export/VaultKnowledgeExportDialog', () => ({
-  VaultKnowledgeExportDialog: () => <div data-testid="export-dialog" />,
-}));
-
 import { ContextualSidebar } from './ContextualSidebar';
 import * as navigationStore from '../../../stores/navigation.store';
 
@@ -104,12 +61,9 @@ describe('ContextualSidebar', () => {
     setSidebarContextMock(null);
     setContextNameMock(null);
     setActiveProjectMock(null);
-    setActiveVaultMock(null);
     setVaultsMock([]);
     cleanup();
   });
-
-  // ── Helpers ─────────────────────────────────────────────────────────────
 
   function makeProject(overrides: Partial<DiscoveredProject> = {}): DiscoveredProject {
     return {
@@ -142,14 +96,23 @@ describe('ContextualSidebar', () => {
 
   // ── Project context ──────────────────────────────────────────────────────
 
-  it('does NOT show a Vaults nav link in project context', () => {
+  it('shows Project label in header', () => {
     setSidebarContextMock('project');
+    setContextNameMock('my-app');
     setActiveProjectMock(makeProject());
     render(() => <ContextualSidebar />);
-    expect(screen.queryByRole('link', { name: 'Vaults' })).toBeNull();
+    expect(screen.getByText('Project')).toBeDefined();
   });
 
-  it('shows Linked Vaults label in project context', () => {
+  it('shows the active project name in the header', () => {
+    setSidebarContextMock('project');
+    setContextNameMock('awesome-project');
+    setActiveProjectMock(makeProject({ name: 'awesome-project' }));
+    render(() => <ContextualSidebar />);
+    expect(screen.getByText('awesome-project')).toBeDefined();
+  });
+
+  it('shows Linked Vaults label', () => {
     setSidebarContextMock('project');
     setActiveProjectMock(makeProject());
     render(() => <ContextualSidebar />);
@@ -175,18 +138,7 @@ describe('ContextualSidebar', () => {
     expect(screen.queryByText('\u00b7 other-vault')).toBeNull();
   });
 
-  it('shows all linked vault names when multiple vaults are connected', () => {
-    const v1 = makeVault({ id: 'v1', name: 'vault-alpha' });
-    const v2 = makeVault({ id: 'v2', name: 'vault-beta' });
-    setSidebarContextMock('project');
-    setActiveProjectMock(makeProject({ connected_vaults: ['v1', 'v2'] }));
-    setVaultsMock([v1, v2]);
-    render(() => <ContextualSidebar />);
-    expect(screen.getByText('\u00b7 vault-alpha')).toBeDefined();
-    expect(screen.getByText('\u00b7 vault-beta')).toBeDefined();
-  });
-
-  it('shows Sessions nav link in project context', () => {
+  it('shows Sessions nav link', () => {
     setSidebarContextMock('project');
     setActiveProjectMock(makeProject());
     render(() => <ContextualSidebar />);
@@ -201,148 +153,38 @@ describe('ContextualSidebar', () => {
     expect(link.getAttribute('href')).toBe('/sessions');
   });
 
-  it('does NOT show Knowledge link when context is project', () => {
+  it('does NOT show Knowledge link', () => {
     setSidebarContextMock('project');
     setActiveProjectMock(makeProject());
     render(() => <ContextualSidebar />);
     expect(screen.queryByRole('link', { name: 'Knowledge' })).toBeNull();
   });
 
-  // ── Vault context ────────────────────────────────────────────────────────
-
-  it('shows "Knowledge" link when context is vault', () => {
-    setSidebarContextMock('vault');
-    setContextNameMock('my-vault');
-    render(() => <ContextualSidebar />);
-    expect(screen.getByRole('link', { name: 'Knowledge' })).toBeDefined();
-  });
-
-  it('Knowledge link points to /knowledge in vault context', () => {
-    setSidebarContextMock('vault');
-    render(() => <ContextualSidebar />);
-    const link = screen.getByRole('link', { name: 'Knowledge' }) as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/knowledge');
-  });
-
-  it('does NOT show Vaults link when context is vault', () => {
-    setSidebarContextMock('vault');
-    render(() => <ContextualSidebar />);
-    expect(screen.queryByRole('link', { name: 'Vaults' })).toBeNull();
-  });
-
-  it('does NOT show Sessions link when context is vault', () => {
-    setSidebarContextMock('vault');
-    render(() => <ContextualSidebar />);
-    expect(screen.queryByRole('link', { name: 'Sessions' })).toBeNull();
-  });
-
-  it('shows Linked Projects section in vault context', () => {
-    setSidebarContextMock('vault');
-    setContextNameMock('my-vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    expect(screen.getByText('Linked Projects')).toBeDefined();
-  });
-
-  it('shows Import Knowledge button in vault context', () => {
-    setSidebarContextMock('vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    expect(screen.getByRole('button', { name: 'Import Knowledge' })).toBeDefined();
-  });
-
-  it('shows Export Knowledge button in vault context', () => {
-    setSidebarContextMock('vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    expect(screen.getByRole('button', { name: 'Export Knowledge' })).toBeDefined();
-  });
-
-  it('shows + Add button in Linked Projects section', () => {
-    setSidebarContextMock('vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    expect(screen.getByTitle('Link a project')).toBeDefined();
-  });
-
-  it('shows import dialog when Import Knowledge is clicked', async () => {
-    setSidebarContextMock('vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    const btn = screen.getByRole('button', { name: 'Import Knowledge' });
-    btn.click();
-    expect(screen.getByTestId('import-dialog')).toBeDefined();
-  });
-
-  it('shows export dialog when Export Knowledge is clicked', async () => {
-    setSidebarContextMock('vault');
-    setActiveVaultMock(makeVault());
-    render(() => <ContextualSidebar />);
-    const btn = screen.getByRole('button', { name: 'Export Knowledge' });
-    btn.click();
-    expect(screen.getByTestId('export-dialog')).toBeDefined();
-  });
-
-  // ── Header ───────────────────────────────────────────────────────────────
-
-  it('shows Project label in header when context is project', () => {
+  it('does NOT show vault context elements (Import Knowledge, Export Knowledge)', () => {
     setSidebarContextMock('project');
-    setContextNameMock('my-app');
     setActiveProjectMock(makeProject());
     render(() => <ContextualSidebar />);
-    expect(screen.getByText('Project')).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Import Knowledge' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Export Knowledge' })).toBeNull();
   });
 
-  it('shows Vault label in header when context is vault', () => {
-    setSidebarContextMock('vault');
-    setContextNameMock('my-vault');
-    render(() => <ContextualSidebar />);
-    expect(screen.getByText('Vault')).toBeDefined();
-  });
+  // ── Header navigation ────────────────────────────────────────────────────
 
-  it('shows the active context name in the header', () => {
-    setSidebarContextMock('project');
-    setContextNameMock('awesome-project');
-    setActiveProjectMock(makeProject({ name: 'awesome-project' }));
-    render(() => <ContextualSidebar />);
-    expect(screen.getByText('awesome-project')).toBeDefined();
-  });
-
-  // ── Header clear-context button ──────────────────────────────────────────
-
-  it('clicking vault name in header calls clearVaultContext', () => {
-    setSidebarContextMock('vault');
-    setContextNameMock('Hytale');
-    setActiveVaultMock(makeVault({ name: 'Hytale' }));
-    render(() => <ContextualSidebar />);
-    screen.getByTitle('Back to list').click();
-    expect(navigationStore.clearVaultContext).toHaveBeenCalledTimes(1);
-  });
-
-  it('clicking vault name in header navigates to /vaults', () => {
-    setSidebarContextMock('vault');
-    setContextNameMock('Hytale');
-    setActiveVaultMock(makeVault({ name: 'Hytale' }));
-    render(() => <ContextualSidebar />);
-    screen.getByTitle('Back to list').click();
-    expect(navigateMock).toHaveBeenCalledWith('/vaults');
-  });
-
-  it('clicking project name in header calls clearContext', () => {
+  it('clicking project name calls clearContext', () => {
     setSidebarContextMock('project');
     setContextNameMock('my-app');
     setActiveProjectMock(makeProject({ name: 'my-app' }));
     render(() => <ContextualSidebar />);
-    screen.getByTitle('Back to list').click();
+    screen.getByTitle('Back to projects').click();
     expect(navigationStore.clearContext).toHaveBeenCalledTimes(1);
   });
 
-  it('clicking project name in header navigates to /projects', () => {
+  it('clicking project name navigates to /projects', () => {
     setSidebarContextMock('project');
     setContextNameMock('my-app');
     setActiveProjectMock(makeProject({ name: 'my-app' }));
     render(() => <ContextualSidebar />);
-    screen.getByTitle('Back to list').click();
+    screen.getByTitle('Back to projects').click();
     expect(navigateMock).toHaveBeenCalledWith('/projects');
   });
 });

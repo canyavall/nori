@@ -1,15 +1,15 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import type { Vault } from '@nori/shared';
 import { apiGet } from '../../../lib/api';
 import { vaults, setVaults, setRegistrationOpen, registrationOpen, updateVault } from '../../../stores/vault.store';
 import { connectSSE } from '../../../lib/sse';
-import { selectVault, activeVault, clearVaultContext } from '../../../stores/navigation.store';
 
 export type SyncStep = 'status' | 'pulling' | 'pushing' | 'pull-results' | 'push-results' | 'conflicts';
 
 export const useVaultListSection = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = createSignal(true);
-  const [linkProjectOpen, setLinkProjectOpen] = createSignal(false);
   const [syncVaultId, setSyncVaultId] = createSignal<string | null>(null);
   const [syncStep, setSyncStep] = createSignal<SyncStep>('status');
   const [progressMessage, setProgressMessage] = createSignal('');
@@ -28,7 +28,6 @@ export const useVaultListSection = () => {
   });
 
   onMount(async () => {
-    clearVaultContext();
     try {
       const res = await apiGet<{ data: Vault[] }>('/api/vault');
       setVaults(res.data);
@@ -37,6 +36,10 @@ export const useVaultListSection = () => {
     }
     setLoading(false);
   });
+
+  function handleSelectVault(vault: Vault) {
+    navigate(`/vaults/${vault.id}`);
+  }
 
   function openSync(vaultId: string) {
     sseController?.abort();
@@ -166,11 +169,6 @@ export const useVaultListSection = () => {
     setSyncStep('status');
   }
 
-  function handleLinkProject(e: MouseEvent) {
-    e.stopPropagation();
-    setLinkProjectOpen(true);
-  }
-
   function handleSyncToggle(e: MouseEvent, vault: Vault) {
     e.stopPropagation();
     if (syncVaultId() === vault.id) {
@@ -182,8 +180,6 @@ export const useVaultListSection = () => {
 
   return {
     loading,
-    linkProjectOpen,
-    setLinkProjectOpen,
     syncVaultId,
     setSyncVaultId,
     syncStep,
@@ -199,14 +195,12 @@ export const useVaultListSection = () => {
     vaults,
     registrationOpen,
     setRegistrationOpen,
-    activeVault,
     openSync,
     closeSync,
     handlePull,
     handlePush,
     handleSyncDone,
-    handleLinkProject,
     handleSyncToggle,
-    selectVault,
+    handleSelectVault,
   };
-}
+};

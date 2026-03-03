@@ -34,11 +34,14 @@ After editing `index.ts`, run `bun run --filter @nori/shared build` before runni
 - Run core tests: `bun run --filter @nori/core test`
 - Run server tests: `bun run --filter @nori/server test`
 
-## VaultsPage — master-detail layout (2026-02-22)
-- When a vault is selected (`activeVault()`), VaultsPage switches to master-detail: left `w-96` vault list + right `flex-1` `VaultKnowledgeTree`
-- When no vault selected: full-width `grid-cols-2` grid (original behavior)
-- VaultsPage calls `clearVaultContext()` on mount (NOT `clearContext`) — clears vault only, not project
-- Tests: mock `clearVaultContext` not `clearContext`; to test pre-selected vault, use `mockImplementationOnce(() => {})` to skip the mount clear
+## VaultsPage — grid + vault detail page (2026-03-02)
+- VaultsPage shows full-width grid of vault cards (no inline tree, no master-detail)
+- Clicking a vault card navigates to `/vaults/:id` (VaultDetailPage)
+- VaultDetailPage wraps VaultDetailSection: sub-header (back + vault name + Link Projects + Vault Settings) + left knowledge sidebar + main content (KnowledgeDetailPanel)
+- KnowledgeDetailPanel: view mode + edit mode; reuses EditForm from knowledge-edit flow
+- navigation.store no longer has activeVault/selectVault/clearVaultContext — vault context is now URL-driven
+- Default route `/` → ProjectsPage (changed from VaultsPage)
+- Tests: VaultsPage.test.tsx mocks `@solidjs/router` with static factory (no async import); checks navigate called with `/vaults/:id`
 
 ## Convention audit fixes (2026-02-22)
 All 8 convention audit issues resolved on `feat/tauri-monorepo-restructure`:
@@ -76,12 +79,13 @@ Completed full convention migration on `feat/tauri-monorepo-restructure`:
 - SolidJS `keyed` pattern used for Show+non-null (e.g., `<Show when={vault()} keyed>{(v) => ...}</Show>`)
 - `Match` component does NOT support `keyed` — use `<Match when={...}><Show when={...} keyed>{...}</Show></Match>` pattern instead
 
-## vault-knowledge-tree FE flow (2026-02-22)
+## vault-knowledge-tree / VaultDetailSection (2026-03-02)
 - Location: `packages/app/src/features/vault/vault-knowledge-tree/`
-- Components: `VaultKnowledgeTree.tsx` (orchestrator), `CategoryTree.tsx` (tree display)
-- Uses `GET /api/knowledge?vault_id=` (existing endpoint) — no new backend flow
-- On entry click: opens `KnowledgeEditDialog`, reloads tree on close
-- Categories sorted alphabetically, collapsible, edit button revealed on hover
+- Main component: `VaultDetailSection/VaultDetailSection.tsx` — full-page layout
+- `CategoryTree.tsx` unchanged — used in sidebar; `onEditEntry` callback sets selectedEntryId
+- `KnowledgeDetailPanel` in `knowledge-detail/KnowledgeDetailPanel/` — inline view+edit panel (not dialog)
+- `KnowledgeCreateDialog` closes via `knowledge.store.setCreateOpen(false)` — use `setCreateOpen(true)` to open it
+- ContextualSidebar: project context only (no vault context); always shows Linked Vaults, Sessions, Skills, Rules, Hooks, MCPs
 
 ## Frontend vault-registration flow (updated 2026-02-21)
 Steps: `00-choose-type` → `01-show-form` → `02-validate-input` → `03-call-backend` → `04-show-result`

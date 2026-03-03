@@ -11,16 +11,10 @@ export const VaultRow: Component<VaultRowProps> = (props) => {
   const vault = props.vault;
 
   return (
-    <div class={`rounded-lg border bg-[var(--color-bg-secondary)] overflow-hidden ${
-      props.activeVault()?.id === vault.id
-        ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]'
-        : 'border-[var(--color-border)]'
-    }`}>
+    <div class="overflow-hidden">
       <VaultCard
         vault={vault}
-        isSelected={!!(props.activeVault()?.id === vault.id)}
-        onSelect={() => props.selectVault(vault)}
-        onLinkProject={props.handleLinkProject}
+        onNavigate={props.onNavigate}
         onSync={(e) => props.handleSyncToggle(e, vault)}
         syncOpen={props.syncVaultId() === vault.id}
       />

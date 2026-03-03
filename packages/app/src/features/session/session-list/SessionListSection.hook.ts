@@ -3,7 +3,7 @@ import type { Session } from '@nori/shared';
 import { apiGet, apiPost } from '../../../lib/api';
 import { sessions, setSessions, addSession, updateSession } from '../../../stores/session.store';
 import { vaults } from '../../../stores/vault.store';
-import { activeVault, activeProject } from '../../../stores/navigation.store';
+import { activeProject } from '../../../stores/navigation.store';
 
 export type PageStep = 'loading' | 'list' | 'detail' | 'creating' | 'create-vault-pick';
 
@@ -16,8 +16,6 @@ export const useSessionListSection = () => {
   const [sessionTitle, setSessionTitle] = createSignal('');
 
   const effectiveVaultId = createMemo(() => {
-    const navVault = activeVault();
-    if (navVault) return navVault.id;
     const proj = activeProject();
     if (proj?.connected_vaults.length) return proj.connected_vaults[0];
     const v = vaults();

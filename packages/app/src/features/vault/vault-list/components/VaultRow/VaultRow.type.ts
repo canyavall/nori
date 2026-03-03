@@ -4,7 +4,6 @@ import type { SyncStep } from '../../VaultListSection.hook';
 
 export interface VaultRowProps {
   vault: Vault;
-  activeVault: Accessor<Vault | null>;
   syncVaultId: Accessor<string | null>;
   syncStep: Accessor<SyncStep>;
   setSyncStep: (step: SyncStep) => void;
@@ -20,7 +19,6 @@ export interface VaultRowProps {
   handlePull: (vault: Vault) => void;
   handlePush: (vault: Vault) => void;
   handleSyncDone: () => void;
-  handleLinkProject: (e: MouseEvent) => void;
   handleSyncToggle: (e: MouseEvent, vault: Vault) => void;
-  selectVault: (vault: Vault) => void;
+  onNavigate: () => void;
 }

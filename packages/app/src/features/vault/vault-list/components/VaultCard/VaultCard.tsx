@@ -8,57 +8,48 @@ export const VaultCard: Component<VaultCardProps> = (props) => {
 
   return (
     <div
-      onClick={props.onSelect}
-      class="p-4 cursor-pointer transition-colors hover:bg-[var(--color-bg-tertiary)]/30"
+      onClick={props.onNavigate}
+      class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-6 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col gap-4"
     >
-      <div class="flex items-start justify-between gap-4 mb-3">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 mb-1">
-            <h3 class="font-medium truncate">{v.name}</h3>
-            <VaultTypeBadge type={v.vault_type} />
-          </div>
-          <Show when={v.git_url}>
-            <p class="text-sm text-[var(--color-text-muted)] font-mono truncate">{v.git_url}</p>
-          </Show>
-          <Show when={!v.git_url}>
-            <p class="text-sm text-[var(--color-text-muted)] font-mono truncate">{v.local_path}</p>
-          </Show>
-        </div>
-        <div class="flex gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={props.onLinkProject}
-            class="px-3 py-1.5 rounded-md text-xs text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
-          >
-            Link Project
-          </button>
-          <button
-            type="button"
-            onClick={props.onSync}
-            class="px-3 py-1.5 rounded-md text-xs text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
-          >
-            {props.syncOpen ? 'Close' : 'Sync'}
-          </button>
-        </div>
+      {/* Header: name + badge */}
+      <div class="flex items-start justify-between gap-2">
+        <h3 class="text-lg font-medium truncate">{v.name}</h3>
+        <VaultTypeBadge type={v.vault_type} />
       </div>
 
-      {/* Stats row */}
-      <div class="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
+      {/* Path */}
+      <div>
+        <p class="text-sm text-[var(--color-text-muted)] mb-1">Path</p>
+        <p class="text-sm font-mono text-[var(--color-text)] truncate">
+          {v.git_url ?? v.local_path}
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)]">
         <span>
+          Projects:{' '}
           <span class="font-medium text-[var(--color-text)]">{v.project_count ?? 0}</span>
-          {' '}project{(v.project_count ?? 0) !== 1 ? 's' : ''} connected
         </span>
+        <span>·</span>
         <span>
+          Knowledge:{' '}
           <span class="font-medium text-[var(--color-text)]">{v.knowledge_count ?? 0}</span>
-          {' '}knowledge {(v.knowledge_count ?? 0) !== 1 ? 'entries' : 'entry'}
         </span>
         <Show when={v.branch}>
-          <span class="px-2 py-0.5 rounded bg-[var(--color-bg-tertiary)]">{v.branch}</span>
-        </Show>
-        <Show when={v.last_synced_at}>
-          <span>Synced {new Date(v.last_synced_at ?? '').toLocaleDateString()}</span>
+          <span>·</span>
+          <span class="px-1.5 py-0.5 rounded bg-[var(--color-bg-tertiary)] text-xs">{v.branch}</span>
         </Show>
       </div>
+
+      {/* Sync button */}
+      <button
+        type="button"
+        onClick={props.onSync}
+        class="mt-auto w-full border border-[var(--color-border)] rounded-md py-1.5 text-sm hover:bg-[var(--color-bg-tertiary)] transition-colors"
+      >
+        {props.syncOpen ? 'Close' : 'Sync'}
+      </button>
     </div>
   );
 };

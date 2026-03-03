@@ -1,21 +1,42 @@
 {
   "type": "ui_action",
-  "what": "Display knowledge entries grouped by category as a collapsible tree",
-  "why": "Gives the user a clear structural overview of vault content organized by category",
+  "what": "Display the vault detail page: sub-header with vault name and actions, left knowledge sidebar, and main content area",
+  "why": "Provides the full vault detail UX: category tree for navigation, knowledge detail panel for viewing/editing entries",
   "where": {
-    "component": "features/vault/vault-knowledge-tree/CategoryTree/CategoryTree.tsx"
+    "component": "features/vault/vault-knowledge-tree/VaultDetailSection/VaultDetailSection.tsx"
   },
   "ui": {
     "renders": "display",
     "fields": [],
+    "layout": {
+      "sub_header": "Back arrow + vault name + 'Link Projects' button + 'Vault Settings' button",
+      "left_sidebar": "Create / Import / Export / Search toolbar + CategoryTree (collapsible by category)",
+      "main_content": "KnowledgeDetailPanel when entry selected, placeholder text when not"
+    },
     "actions": [
       {
-        "label": "Expand/collapse category",
-        "triggers": "toggles category open/closed inline"
+        "label": "Back (arrow)",
+        "triggers": "navigate to /vaults"
       },
       {
-        "label": "Click entry title",
-        "triggers": "03-edit-entry"
+        "label": "Link Projects",
+        "triggers": "opens VaultLinkProjectDialog"
+      },
+      {
+        "label": "Create Knowledge",
+        "triggers": "opens KnowledgeCreateDialog"
+      },
+      {
+        "label": "Import Knowledge",
+        "triggers": "opens VaultKnowledgeImportDialog"
+      },
+      {
+        "label": "Export Knowledge",
+        "triggers": "opens VaultKnowledgeExportDialog"
+      },
+      {
+        "label": "Click category entry",
+        "triggers": "03-view-entry (sets selectedEntryId, shows KnowledgeDetailPanel)"
       },
       {
         "label": "Refresh",
@@ -24,29 +45,24 @@
     ]
   },
   "transitions": {
-    "on_entry_click": "03-edit-entry",
-    "on_refresh": "01-load-knowledge"
+    "on_entry_click": "03-view-entry",
+    "on_back": "navigate:/vaults"
   },
   "success_handling": {
-    "criteria": "Knowledge tree is rendered with entries grouped by category",
-    "transition": "03-edit-entry (on entry click) or 01-load-knowledge (on refresh)"
+    "criteria": "Vault detail page renders with sidebar and placeholder or selected entry",
+    "transition": "03-view-entry (on entry click)"
   },
   "error_handling": [],
   "decisions": [
     {
-      "date": "2026-02-22",
-      "reason": "Group by category field on KnowledgeEntry",
-      "rationale": "Category is the primary organizational axis; grouping creates a meaningful hierarchy without extra backend logic"
+      "date": "2026-03-02",
+      "reason": "Move from inline tree overlay to full vault detail page",
+      "rationale": "Clicking a vault card now navigates to /vaults/:id; the full page gives more room for the sidebar + knowledge detail panel"
     },
     {
-      "date": "2026-02-22",
-      "reason": "Edit button only visible on hover",
-      "rationale": "Keeps the tree uncluttered; power users find it on hover"
-    },
-    {
-      "date": "2026-03-01",
-      "reason": "Hide 'Vaults' heading and 'Register Vault' button when a vault is selected",
-      "rationale": "Once the user has drilled into a vault's knowledge tree the list-level chrome (heading and register action) is no longer relevant and wastes vertical space"
+      "date": "2026-03-02",
+      "reason": "Embed knowledge sidebar inside vault detail rather than ContextualSidebar",
+      "rationale": "Vault context is URL-driven; the global ContextualSidebar is reserved for project context only"
     }
   ]
 }

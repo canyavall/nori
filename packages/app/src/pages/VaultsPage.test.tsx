@@ -12,19 +12,11 @@ vi.mock('../lib/sse', () => ({
   connectSSE: vi.fn(() => new AbortController()),
 }));
 
-// Navigation store: use a real SolidJS signal so reactive Show blocks update
-// when selectVault / clearVaultContext are called during tests.
-vi.mock('../stores/navigation.store', async () => {
-  const { createSignal } = await import('solid-js');
-  const [activeVault, setActiveVault] = createSignal<Vault | null>(null);
-  return {
-    activeVault,
-    selectVault: vi.fn((v: Vault) => setActiveVault(v)),
-    clearVaultContext: vi.fn(() => setActiveVault(null)),
-    // Exposed so beforeEach can reset the signal between tests
-    __setActiveVault: setActiveVault,
-  };
-});
+// Router mock: capture navigate calls
+const mockNavigate = vi.fn();
+vi.mock('@solidjs/router', () => ({
+  useNavigate: () => mockNavigate,
+}));
 
 const {
   getVaults,
@@ -76,25 +68,8 @@ vi.mock('../features/vault/vault-sync-panel/ConflictResolver/ConflictResolver', 
   ConflictResolver: () => <div data-testid="conflict-resolver" />,
 }));
 
-vi.mock('../features/vault/vault-knowledge-tree/VaultKnowledgeTree/VaultKnowledgeTree', () => ({
-  VaultKnowledgeTree: (props: { vault: Vault }) => (
-    <div data-testid="knowledge-tree" data-vault-id={props.vault.id} />
-  ),
-}));
-
 import { apiGet } from '../lib/api';
-import * as navStore from '../stores/navigation.store';
-import { selectVault, clearVaultContext, activeVault } from '../stores/navigation.store';
 import { VaultsPage } from './VaultsPage';
-
-// Helper to reset the reactive signal between tests
-function resetActiveVault() {
-  (navStore as unknown as { __setActiveVault: (v: Vault | null) => void }).__setActiveVault(null);
-}
-
-function setActiveVaultForTest(vault: Vault) {
-  (navStore as unknown as { __setActiveVault: (v: Vault | null) => void }).__setActiveVault(vault);
-}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -118,22 +93,7 @@ function makeVault(overrides: Partial<Vault> = {}): Vault {
 describe('VaultsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetActiveVault();
     cleanup();
-  });
-
-  it('clears vault context on mount', () => {
-    vi.mocked(apiGet).mockResolvedValue({ data: [] });
-    render(() => <VaultsPage />);
-    expect(vi.mocked(clearVaultContext)).toHaveBeenCalledOnce();
-  });
-
-  it('clears vault context even when a vault was previously selected', () => {
-    const vault = makeVault({ id: 'vault-1', name: 'hytale' });
-    setActiveVaultForTest(vault);
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    render(() => <VaultsPage />);
-    expect(vi.mocked(clearVaultContext)).toHaveBeenCalledOnce();
   });
 
   it('shows loading state initially', () => {
@@ -159,13 +119,13 @@ describe('VaultsPage', () => {
     });
   });
 
-  it('calls selectVault when a vault card is clicked', async () => {
-    const vault = makeVault();
+  it('clicking a vault card navigates to /vaults/:id', async () => {
+    const vault = makeVault({ id: 'vault-42' });
     vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
     render(() => <VaultsPage />);
     await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
     fireEvent.click(screen.getByText('hytale'));
-    expect(vi.mocked(selectVault)).toHaveBeenCalledWith(vault);
+    expect(mockNavigate).toHaveBeenCalledWith('/vaults/vault-42');
   });
 
   it('shows Register Vault button', async () => {
@@ -188,113 +148,12 @@ describe('VaultsPage', () => {
     await waitFor(() => expect(screen.getByText('develop')).toBeDefined());
   });
 
-  it('vault card does not have accent border before any vault is selected', async () => {
-    const vault = makeVault();
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    render(() => <VaultsPage />);
-    await waitFor(() => {
-      const card = screen.getByText('hytale').closest('[class*="rounded-lg"]');
-      expect(card?.className).not.toContain('border-[var(--color-accent)]');
-    });
-  });
-
-  // ── Knowledge tree panel ──────────────────────────────────────────────────────
-
-  it('does not show knowledge tree when no vault is selected', async () => {
-    vi.mocked(apiGet).mockResolvedValue({ data: [makeVault()] });
-    render(() => <VaultsPage />);
-    await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
-    expect(screen.queryByTestId('knowledge-tree')).toBeNull();
-  });
-
-  it('clicking a vault card switches from grid to master-detail and shows the knowledge tree', async () => {
-    const vault = makeVault({ id: 'vault-42' });
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    render(() => <VaultsPage />);
-
-    // Wait for grid to appear (no vault selected yet)
-    await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
-    expect(screen.queryByTestId('knowledge-tree')).toBeNull();
-
-    // Click the vault card — selectVault updates the signal reactively
-    fireEvent.click(screen.getByText('hytale'));
-
-    // Knowledge tree should now be visible
-    await waitFor(() => {
-      const tree = screen.getByTestId('knowledge-tree');
-      expect(tree).toBeDefined();
-      expect(tree.getAttribute('data-vault-id')).toBe('vault-42');
-    });
-  });
-
-  it('knowledge tree receives the correct vault after clicking a card', async () => {
-    const vaultA = makeVault({ id: 'vault-a', name: 'alpha' });
-    const vaultB = makeVault({ id: 'vault-b', name: 'beta' });
-    vi.mocked(apiGet).mockResolvedValue({ data: [vaultA, vaultB] });
-    render(() => <VaultsPage />);
-
-    await waitFor(() => expect(screen.getByText('beta')).toBeDefined());
-    fireEvent.click(screen.getByText('beta'));
-
-    await waitFor(() => {
-      const tree = screen.getByTestId('knowledge-tree');
-      expect(tree.getAttribute('data-vault-id')).toBe('vault-b');
-    });
-  });
-
-  it('shows knowledge tree for a pre-selected vault', async () => {
-    const vault = makeVault({ id: 'vault-42' });
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    // Prevent onMount from clearing the pre-set vault
-    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
-    setActiveVaultForTest(vault);
-    render(() => <VaultsPage />);
-    await waitFor(() => {
-      const tree = screen.getByTestId('knowledge-tree');
-      expect(tree).toBeDefined();
-      expect(tree.getAttribute('data-vault-id')).toBe('vault-42');
-    });
-  });
-
-  it('hides "Vaults" heading when a vault is selected', async () => {
-    const vault = makeVault();
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
-    setActiveVaultForTest(vault);
-    render(() => <VaultsPage />);
-    await waitFor(() => expect(screen.getByTestId('knowledge-tree')).toBeDefined());
-    expect(screen.queryByRole('heading', { name: 'Vaults' })).toBeNull();
-  });
-
-  it('hides "Register Vault" button when a vault is selected', async () => {
-    const vault = makeVault();
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
-    setActiveVaultForTest(vault);
-    render(() => <VaultsPage />);
-    await waitFor(() => expect(screen.getByTestId('knowledge-tree')).toBeDefined());
-    expect(screen.queryByRole('button', { name: 'Register Vault' })).toBeNull();
-  });
-
-  it('vault cards are NOT shown alongside the knowledge tree when a vault is selected', async () => {
-    const vault = makeVault({ name: 'my-vault' });
-    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
-    vi.mocked(clearVaultContext).mockImplementationOnce(() => {});
-    setActiveVaultForTest(vault);
-    render(() => <VaultsPage />);
-    await waitFor(() => expect(screen.getByTestId('knowledge-tree')).toBeDefined());
-    // Vault cards should not be rendered when the tree is active
-    expect(screen.queryByText('my-vault')).toBeNull();
-  });
-
-  it('activeVault signal is set after clicking a vault card', async () => {
+  it('always shows Vaults heading and Register Vault button', async () => {
     const vault = makeVault();
     vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
     render(() => <VaultsPage />);
     await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
-
-    fireEvent.click(screen.getByText('hytale'));
-
-    expect(activeVault()).toBe(vault);
+    expect(screen.getByRole('heading', { name: 'Vaults' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Register Vault' })).toBeDefined();
   });
 });

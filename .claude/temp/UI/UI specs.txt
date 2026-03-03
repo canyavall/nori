@@ -1,0 +1,24 @@
+UI specs
+- Top bar navigation:
+	- will show on top left the name/logo of the App "Nori"
+	- Then we have 2 categories in the navigation,   "Vaults" and  "projects"
+	- On the right, there's the typical wheel for settings and the avatar.
+- When user enters, we will show main page of projects and "projects" in navigation will pass to be active
+	- In Main page for projects we will show a list of cards split in 2 categories called "Nori Project" and "Claude Code Discovery", each card is a project.
+	- Each card has "path to the project", "name", "vaults connected", and in case of the ones in "Claude Code discovery" there's a button called "Setup Nori"
+- When user clicks on the "Vaults"
+	- A list of cards are shown "Vaults"
+	- Each card has "name", "path", "Projects connected $number", "Knowledge entries $number", "Sync" button and a tag which defines if  is "local" or  "git"
+- When user clicks in a card
+	- On the left under the top navigation, We see the name of the vault
+	- On the left under the top navigation, we see a back icon
+	- On the right under navigation we see a button "Link Projects"	
+	- On the right of "Link projects" we can see the "Vault settings"
+	- On the left a sidebar appears with a navigation build over categories of "Knowledge" 
+	- On top of the left sidebar as icons or buttons we can see:"Create Knowledge , "Import Knowledge" "Export knowledge" and in the same level in the middle, a "Search" button.
+	- In the middle of main frame a placeholder "Select a knowledge"
+- When the user selects one entry from the left sidebar (knowledge), it opens in the middle:
+	- A small form with "title", "Category", "Description", "Tags", "Rules", "Required Knolwedge", "Content". Meanwhile all the other fields are simple text, content is a markdown editor
+	- A button at the top and end to "Edit"
+	- If in "edit" status, top and bottom button changes to "Save Changes" and on the button a "Cancel" button appears too
+	- A button "Delete nearby the top "Edit button" which is disabled in status mode

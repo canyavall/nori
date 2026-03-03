@@ -58,6 +58,7 @@ export const ProjectListSection: Component = () => {
           }
         >
           <Show when={noriProjects().length > 0}>
+            <h3 class="text-base font-medium mb-3">Nori Project</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <For each={noriProjects()}>
                 {(project) => (
@@ -73,7 +74,7 @@ export const ProjectListSection: Component = () => {
 
           <Show when={discoveredProjects().length > 0}>
             <div class={noriProjects().length > 0 ? 'mt-8' : ''}>
-              <h3 class="text-base font-medium mb-1">Discovered from Claude Code</h3>
+              <h3 class="text-base font-medium mb-1">Claude Code Discovery</h3>
               <p class="text-sm text-[var(--color-text-muted)] mb-4">
                 Projects found in your Claude Code config that haven't been set up with Nori yet.
               </p>

@@ -5,6 +5,7 @@ import { createSignal, Show, onMount } from 'solid-js';
 import './styles/app.css';
 import { App } from './App';
 import { VaultsPage } from './pages/VaultsPage';
+import { VaultDetailPage } from './pages/VaultDetailPage';
 import { KnowledgePage } from './pages/KnowledgePage';
 import { SessionsPage } from './pages/SessionsPage';
 import { KnowledgeDetailPage } from './pages/KnowledgeDetailPage';
@@ -48,8 +49,9 @@ function Root() {
       }
     >
       <Router root={App}>
-        <Route path="/" component={VaultsPage} />
+        <Route path="/" component={ProjectsPage} />
         <Route path="/vaults" component={VaultsPage} />
+        <Route path="/vaults/:id" component={VaultDetailPage} />
         <Route path="/knowledge" component={KnowledgePage} />
         <Route path="/knowledge/:id" component={KnowledgeDetailPage} />
         <Route path="/sessions" component={SessionsPage} />

@@ -3,7 +3,7 @@ import type { KnowledgeEntry } from '@nori/shared';
 import { apiGet } from '../../../lib/api';
 import { knowledgeEntries, setKnowledgeEntries, searchQuery, setSearchQuery, createOpen, setCreateOpen, extractOpen, setExtractOpen } from '../../../stores/knowledge.store';
 import { vaults } from '../../../stores/vault.store';
-import { activeVault, activeProject } from '../../../stores/navigation.store';
+import { activeProject } from '../../../stores/navigation.store';
 import type { SearchResultItem } from '../knowledge-search/SearchResults/SearchResults.type';
 
 export const useKnowledgeListSection = () => {
@@ -17,8 +17,6 @@ export const useKnowledgeListSection = () => {
   const [activeQuery, setActiveQuery] = createSignal('');
 
   const effectiveVaultId = createMemo(() => {
-    const navVault = activeVault();
-    if (navVault) return navVault.id;
     const proj = activeProject();
     if (proj?.connected_vaults.length) return proj.connected_vaults[0];
     const v = vaults();
@@ -85,7 +83,6 @@ export const useKnowledgeListSection = () => {
     createOpen,
     setCreateOpen,
     vaults,
-    activeVault,
     activeProject,
     handleSearch,
     handleClearSearch,

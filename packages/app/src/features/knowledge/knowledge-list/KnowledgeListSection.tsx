@@ -26,7 +26,6 @@ export const KnowledgeListSection: Component = () => {
     createOpen,
     setCreateOpen,
     vaults,
-    activeVault,
     activeProject,
     handleSearch,
     handleClearSearch,
@@ -39,7 +38,7 @@ export const KnowledgeListSection: Component = () => {
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-semibold">Knowledge</h2>
         <div class="flex items-center gap-3">
-          <Show when={vaults().length > 1 && !activeVault() && !activeProject()?.connected_vaults.length}>
+          <Show when={vaults().length > 1 && !activeProject()?.connected_vaults.length}>
             <select
               value={selectedVaultId()}
               onChange={(e) => setSelectedVaultId(e.currentTarget.value)}

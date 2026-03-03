@@ -81,7 +81,11 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     deleteError: () => '',
     deleteProgressMessage: () => '',
     contentViewMode: () => 'markdown' as const,
+    mainFieldsOpen: () => true,
+    additionalFieldsOpen: () => false,
     handleContentViewModeChange: vi.fn(),
+    toggleMainFields: vi.fn(),
+    toggleAdditionalFields: vi.fn(),
     handleEdit: vi.fn(),
     handleCancelEdit: vi.fn(),
     handleSave: vi.fn(),
@@ -117,15 +121,14 @@ describe('KnowledgeDetailSection', () => {
     expect(screen.getByText('Entry not found')).toBeDefined();
   });
 
-  it('renders entry title and category in view mode', () => {
-    const entry = makeEntry({ title: 'My Knowledge', category: 'Guides' });
+  it('renders entry title in view mode', () => {
+    const entry = makeEntry({ title: 'My Knowledge' });
     mockUse.mockReturnValue(makeDefaultHook({
       step: () => 'view',
       entryData: () => ({ entry, content: '# Hello', frontmatter: makeFrontmatter() }),
     }));
     render(() => <KnowledgeDetailSection />);
     expect(screen.getByText('My Knowledge')).toBeDefined();
-    expect(screen.getByText('Guides')).toBeDefined();
   });
 
   it('calls handleEdit when Edit button is clicked in view mode', () => {
@@ -154,35 +157,204 @@ describe('KnowledgeDetailSection', () => {
     expect(handleDeleteRequest).toHaveBeenCalledOnce();
   });
 
-  it('shows edit form in editing step', () => {
-    const entry = makeEntry();
-    mockUse.mockReturnValue(makeDefaultHook({
-      step: () => 'editing',
-      entryData: () => ({ entry, content: 'content', frontmatter: makeFrontmatter() }),
-    }));
-    render(() => <KnowledgeDetailSection />);
-    expect(screen.getByTestId('edit-form')).toBeDefined();
-  });
+  // ── Details accordion ──────────────────────────────────────────────────────
 
-  it('shows delete confirmation in confirm-delete step', () => {
-    const entry = makeEntry();
-    mockUse.mockReturnValue(makeDefaultHook({
-      step: () => 'confirm-delete',
-      entryData: () => ({ entry, content: 'content', frontmatter: makeFrontmatter() }),
-    }));
-    render(() => <KnowledgeDetailSection />);
-    expect(screen.getByTestId('delete-confirmation')).toBeDefined();
-  });
-
-  it('shows Markdown and Plain text toggle buttons in view mode', () => {
+  it('shows Details toggle in view mode', () => {
     const entry = makeEntry();
     mockUse.mockReturnValue(makeDefaultHook({
       step: () => 'view',
-      entryData: () => ({ entry, content: '# Hello', frontmatter: makeFrontmatter() }),
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('details-toggle')).toBeDefined();
+  });
+
+  it('shows details body when mainFieldsOpen is true', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('details-body')).toBeDefined();
+  });
+
+  it('hides details body when mainFieldsOpen is false', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => false,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.queryByTestId('details-body')).toBeNull();
+  });
+
+  it('calls toggleMainFields when Details toggle clicked', () => {
+    const toggleMainFields = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      toggleMainFields,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    fireEvent.click(screen.getByTestId('details-toggle'));
+    expect(toggleMainFields).toHaveBeenCalledOnce();
+  });
+
+  it('shows category value in details body', () => {
+    const entry = makeEntry({ category: 'Guides' });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByText('Guides')).toBeDefined();
+  });
+
+  it('shows placeholder when category is empty', () => {
+    const entry = makeEntry({ category: '' });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    const dashes = screen.getAllByText('—');
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it('shows placeholder when description is empty', () => {
+    const entry = makeEntry({ description: '' });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    const dashes = screen.getAllByText('—');
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it('shows placeholder when tags are empty', () => {
+    const entry = makeEntry({ tags: [] });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    const dashes = screen.getAllByText('—');
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it('renders tag chips when tags present', () => {
+    const entry = makeEntry({ tags: ['alpha', 'beta'] });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      mainFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByText('alpha')).toBeDefined();
+    expect(screen.getByText('beta')).toBeDefined();
+  });
+
+  // ── Additional accordion ──────────────────────────────────────────────────
+
+  it('shows Additional toggle in view mode', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('additional-toggle')).toBeDefined();
+  });
+
+  it('hides additional body by default (additionalFieldsOpen false)', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      additionalFieldsOpen: () => false,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.queryByTestId('additional-body')).toBeNull();
+  });
+
+  it('shows additional body when additionalFieldsOpen is true', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      additionalFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('additional-body')).toBeDefined();
+  });
+
+  it('calls toggleAdditionalFields when Additional toggle clicked', () => {
+    const toggleAdditionalFields = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      toggleAdditionalFields,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    fireEvent.click(screen.getByTestId('additional-toggle'));
+    expect(toggleAdditionalFields).toHaveBeenCalledOnce();
+  });
+
+  it('shows placeholder for rules when empty (additional expanded)', () => {
+    const entry = makeEntry({ rules: [] });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      additionalFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    const dashes = screen.getAllByText('—');
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it('shows rules when present and additional expanded', () => {
+    const entry = makeEntry({ rules: ['Use bun', 'No any types'] });
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+      additionalFieldsOpen: () => true,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByText('Use bun')).toBeDefined();
+    expect(screen.getByText('No any types')).toBeDefined();
+  });
+
+  // ── Content section ────────────────────────────────────────────────────────
+
+  it('always shows Markdown and Plain text toggle buttons in view mode', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
     }));
     render(() => <KnowledgeDetailSection />);
     expect(screen.getByRole('button', { name: 'Markdown' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Plain text' })).toBeDefined();
+  });
+
+  it('always shows MarkdownContent in view mode even with empty content', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('markdown-content')).toBeDefined();
   });
 
   it('calls handleContentViewModeChange with markdown when Markdown button clicked', () => {
@@ -221,7 +393,28 @@ describe('KnowledgeDetailSection', () => {
       contentViewMode: () => 'text' as const,
     }));
     render(() => <KnowledgeDetailSection />);
-    const mc = screen.getByTestId('markdown-content');
-    expect(mc.getAttribute('data-view-mode')).toBe('text');
+    expect(screen.getByTestId('markdown-content').getAttribute('data-view-mode')).toBe('text');
+  });
+
+  // ── Other states ──────────────────────────────────────────────────────────
+
+  it('shows edit form in editing step', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'editing',
+      entryData: () => ({ entry, content: 'content', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('edit-form')).toBeDefined();
+  });
+
+  it('shows delete confirmation in confirm-delete step', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'confirm-delete',
+      entryData: () => ({ entry, content: 'content', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByTestId('delete-confirmation')).toBeDefined();
   });
 });

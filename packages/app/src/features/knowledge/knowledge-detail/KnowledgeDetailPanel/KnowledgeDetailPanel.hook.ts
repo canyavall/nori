@@ -17,8 +17,12 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
   const [content, setContent] = createSignal('');
   const [frontmatter, setFrontmatter] = createSignal<KnowledgeFrontmatter | null>(null);
   const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
+  const [mainFieldsOpen, setMainFieldsOpen] = createSignal(true);
+  const [additionalFieldsOpen, setAdditionalFieldsOpen] = createSignal(false);
 
   const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
+  const toggleMainFields = () => setMainFieldsOpen((v) => !v);
+  const toggleAdditionalFields = () => setAdditionalFieldsOpen((v) => !v);
 
   const loadEntry = async () => {
     setStep('loading');
@@ -136,7 +140,11 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     content,
     frontmatter,
     contentViewMode,
+    mainFieldsOpen,
+    additionalFieldsOpen,
     handleContentViewModeChange,
+    toggleMainFields,
+    toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,

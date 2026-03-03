@@ -4,7 +4,7 @@ import { marked } from 'marked';
 import type { MarkdownContentProps } from './MarkdownContent.type';
 
 const sharedClass =
-  'text-sm text-[var(--color-text)] bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)] p-4 overflow-x-auto max-h-96 overflow-y-auto';
+  'text-sm text-[var(--color-text)] bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)] p-4 overflow-x-auto';
 
 export const MarkdownContent: Component<MarkdownContentProps> = (props) => {
   const html = () => marked.parse(props.content, { async: false });

@@ -28,8 +28,12 @@ export const useKnowledgeDetailSection = () => {
   const [deleteError, setDeleteError] = createSignal('');
   const [deleteProgressMessage, setDeleteProgressMessage] = createSignal('');
   const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
+  const [mainFieldsOpen, setMainFieldsOpen] = createSignal(true);
+  const [additionalFieldsOpen, setAdditionalFieldsOpen] = createSignal(false);
 
   const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
+  const toggleMainFields = () => setMainFieldsOpen((v) => !v);
+  const toggleAdditionalFields = () => setAdditionalFieldsOpen((v) => !v);
 
   let sseController: AbortController | undefined;
 
@@ -280,7 +284,11 @@ export const useKnowledgeDetailSection = () => {
     deleteError,
     deleteProgressMessage,
     contentViewMode,
+    mainFieldsOpen,
+    additionalFieldsOpen,
     handleContentViewModeChange,
+    toggleMainFields,
+    toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,

@@ -7,6 +7,19 @@ import { DeleteResult } from '../knowledge-delete/DeleteResult/DeleteResult';
 import { MarkdownContent } from '../../../components/ui/MarkdownContent/MarkdownContent';
 import { useKnowledgeDetailSection } from './KnowledgeDetailSection.hook';
 
+const Chevron: Component<{ open: boolean }> = (props) => (
+  <svg
+    class={`w-3.5 h-3.5 text-[var(--color-text-muted)] transition-transform ${props.open ? 'rotate-180' : ''}`}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+  </svg>
+);
+
 export const KnowledgeDetailSection: Component = () => {
   const {
     params,
@@ -20,7 +33,11 @@ export const KnowledgeDetailSection: Component = () => {
     deleteError,
     deleteProgressMessage,
     contentViewMode,
+    mainFieldsOpen,
+    additionalFieldsOpen,
     handleContentViewModeChange,
+    toggleMainFields,
+    toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,
@@ -60,7 +77,8 @@ export const KnowledgeDetailSection: Component = () => {
 
         {/* View mode */}
         <Match when={step() === 'view' && entryData()}>
-          <div class="space-y-6">
+          <div class="space-y-4">
+            {/* Nav + actions */}
             <div class="flex items-center justify-between">
               <button
                 type="button"
@@ -87,88 +105,129 @@ export const KnowledgeDetailSection: Component = () => {
               </div>
             </div>
 
-            <div class="space-y-4">
-              <div class="flex items-start justify-between">
-                <h2 class="text-xl font-semibold">{entryData()?.entry.title ?? ''}</h2>
-                <span class="px-2 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
-                  {entryData()?.entry.category ?? ''}
-                </span>
-              </div>
+            {/* Title */}
+            <h2 class="text-xl font-semibold">{entryData()?.entry.title ?? ''}</h2>
 
-              <Show when={entryData()?.entry.description}>
-                <p class="text-sm text-[var(--color-text-muted)]">{entryData()?.entry.description}</p>
-              </Show>
-
-              <Show when={(entryData()?.entry.tags.length ?? 0) > 0}>
-                <div class="flex flex-wrap gap-1.5">
-                  <For each={entryData()?.entry.tags ?? []}>
-                    {(tag) => (
-                      <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
-                        {tag}
-                      </span>
-                    )}
-                  </For>
-                </div>
-              </Show>
-
-              <Show when={(entryData()?.entry.rules?.length ?? 0) > 0}>
-                <div>
-                  <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Rules</p>
-                  <ul class="text-xs text-[var(--color-text-muted)] list-disc list-inside">
-                    <For each={entryData()?.entry.rules ?? []}>
-                      {(rule) => <li>{rule}</li>}
-                    </For>
-                  </ul>
-                </div>
-              </Show>
-
-              <Show when={(entryData()?.entry.required_knowledge?.length ?? 0) > 0}>
-                <div>
-                  <p class="text-xs font-medium text-[var(--color-text-muted)] mb-1">Required Knowledge</p>
-                  <div class="flex flex-wrap gap-1.5">
-                    <For each={entryData()?.entry.required_knowledge ?? []}>
-                      {(item) => (
-                        <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
-                          {item}
-                        </span>
-                      )}
-                    </For>
+            {/* Details accordion (category, description, tags — always rendered, expanded by default) */}
+            <div class="border border-[var(--color-border)] rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={toggleMainFields}
+                data-testid="details-toggle"
+                class="w-full flex items-center justify-between px-4 py-2.5 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors text-left"
+              >
+                <span class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Details</span>
+                <Chevron open={mainFieldsOpen()} />
+              </button>
+              <Show when={mainFieldsOpen()}>
+                <div class="px-4 py-3 space-y-3 border-t border-[var(--color-border)]" data-testid="details-body">
+                  <div>
+                    <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1">Category</p>
+                    <p class="text-sm text-[var(--color-text)]">{entryData()?.entry.category || '—'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1">Description</p>
+                    <p class="text-sm text-[var(--color-text)]">{entryData()?.entry.description || '—'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-1.5">Tags</p>
+                    <Show
+                      when={(entryData()?.entry.tags.length ?? 0) > 0}
+                      fallback={<p class="text-sm text-[var(--color-text-muted)]">—</p>}
+                    >
+                      <div class="flex flex-wrap gap-1.5">
+                        <For each={entryData()?.entry.tags ?? []}>
+                          {(tag) => (
+                            <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                              {tag}
+                            </span>
+                          )}
+                        </For>
+                      </div>
+                    </Show>
+                  </div>
+                  <div class="text-xs text-[var(--color-text-muted)]">
+                    <span>Created: {new Date(entryData()?.entry.created_at ?? '').toLocaleDateString()}</span>
+                    <span class="mx-2">|</span>
+                    <span>Updated: {new Date(entryData()?.entry.updated_at ?? '').toLocaleDateString()}</span>
                   </div>
                 </div>
               </Show>
+            </div>
 
-              <div class="text-xs text-[var(--color-text-muted)]">
-                <span>Created: {new Date(entryData()?.entry.created_at ?? '').toLocaleDateString()}</span>
-                <span class="mx-2">|</span>
-                <span>Updated: {new Date(entryData()?.entry.updated_at ?? '').toLocaleDateString()}</span>
-              </div>
-
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Content</p>
-                  <div class="flex rounded-md border border-[var(--color-border)] overflow-hidden text-xs">
-                    <button
-                      type="button"
-                      onClick={() => handleContentViewModeChange('markdown')}
-                      class={contentViewMode() === 'markdown'
-                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
-                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+            {/* Additional accordion (rules, required knowledge — collapsed by default) */}
+            <div class="border border-[var(--color-border)] rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={toggleAdditionalFields}
+                data-testid="additional-toggle"
+                class="w-full flex items-center justify-between px-4 py-2.5 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors text-left"
+              >
+                <span class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Additional</span>
+                <Chevron open={additionalFieldsOpen()} />
+              </button>
+              <Show when={additionalFieldsOpen()}>
+                <div class="px-4 py-3 space-y-3 border-t border-[var(--color-border)]" data-testid="additional-body">
+                  <div>
+                    <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide mb-1">Rules</p>
+                    <Show
+                      when={(entryData()?.entry.rules?.length ?? 0) > 0}
+                      fallback={<p class="text-sm text-[var(--color-text-muted)]">—</p>}
                     >
-                      Markdown
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleContentViewModeChange('text')}
-                      class={contentViewMode() === 'text'
-                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
-                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                      <ul class="text-xs text-[var(--color-text-muted)] list-disc list-inside">
+                        <For each={entryData()?.entry.rules ?? []}>
+                          {(rule) => <li>{rule}</li>}
+                        </For>
+                      </ul>
+                    </Show>
+                  </div>
+                  <div>
+                    <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide mb-1">Required Knowledge</p>
+                    <Show
+                      when={(entryData()?.entry.required_knowledge?.length ?? 0) > 0}
+                      fallback={<p class="text-sm text-[var(--color-text-muted)]">—</p>}
                     >
-                      Plain text
-                    </button>
+                      <div class="flex flex-wrap gap-1.5">
+                        <For each={entryData()?.entry.required_knowledge ?? []}>
+                          {(item) => (
+                            <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                              {item}
+                            </span>
+                          )}
+                        </For>
+                      </div>
+                    </Show>
                   </div>
                 </div>
-                <MarkdownContent content={entryData()?.content ?? ''} viewMode={contentViewMode()} />
+              </Show>
+            </div>
+
+            {/* Content — always visible, no height cap */}
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Content</p>
+                <div class="flex rounded-md border border-[var(--color-border)] overflow-hidden text-xs">
+                  <button
+                    type="button"
+                    onClick={() => handleContentViewModeChange('markdown')}
+                    class={contentViewMode() === 'markdown'
+                      ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                      : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                  >
+                    Markdown
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleContentViewModeChange('text')}
+                    class={contentViewMode() === 'text'
+                      ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                      : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                  >
+                    Plain text
+                  </button>
+                </div>
               </div>
+              <MarkdownContent content={entryData()?.content ?? ''} viewMode={contentViewMode()} />
             </div>
           </div>
         </Match>
@@ -246,4 +305,4 @@ export const KnowledgeDetailSection: Component = () => {
       </Switch>
     </div>
   );
-}
+};

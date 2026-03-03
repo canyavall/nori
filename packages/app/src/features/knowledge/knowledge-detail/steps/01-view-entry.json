@@ -1,7 +1,7 @@
 {
   "type": "ui_action",
-  "what": "Display a knowledge entry with a markdown/plain-text content toggle",
-  "why": "Lets users read structured markdown visually or inspect raw content as needed",
+  "what": "Display a knowledge entry with collapsible sections and a markdown/plain-text content toggle",
+  "why": "Reduces visual noise by collapsing optional metadata while always showing the title and content",
   "where": {
     "component": "features/knowledge/knowledge-detail/KnowledgeDetailSection.tsx",
     "panel_component": "features/knowledge/knowledge-detail/KnowledgeDetailPanel/KnowledgeDetailPanel.tsx",
@@ -9,15 +9,29 @@
   },
   "ui": {
     "renders": "display",
-    "fields": [
-      "title", "category", "description", "tags", "rules",
-      "required_knowledge", "created_at", "updated_at", "content"
-    ],
-    "content_toggle": {
-      "modes": ["markdown", "text"],
-      "default": "markdown",
-      "position": "top-right of content section",
-      "description": "Segmented control with 'Markdown' and 'Plain text' buttons"
+    "layout": {
+      "title": "Always visible as h2",
+      "details_accordion": {
+        "label": "Details",
+        "fields": ["category", "description", "tags"],
+        "default": "expanded",
+        "empty_placeholder": "—"
+      },
+      "additional_accordion": {
+        "label": "Additional",
+        "fields": ["rules", "required_knowledge"],
+        "default": "collapsed",
+        "empty_placeholder": "—"
+      },
+      "content_section": {
+        "always_visible": true,
+        "height": "fills remaining page height (no max-h cap)",
+        "toggle": {
+          "modes": ["markdown", "text"],
+          "default": "markdown",
+          "position": "top-right of content label"
+        }
+      }
     }
   },
   "transitions": {
@@ -29,7 +43,12 @@
     {
       "date": "2026-03-03",
       "reason": "Add markdown rendering toggle to content view",
-      "rationale": "Users need to see both the rendered markdown (readable) and raw text (inspectable). Default is markdown since that is the primary use case. State is owned by the hook; MarkdownContent is a shared UI component driven by marked v17."
+      "rationale": "Users need to see both the rendered markdown (readable) and raw text (inspectable). Default is markdown. State is owned by the hook; MarkdownContent is a shared UI component driven by marked v17."
+    },
+    {
+      "date": "2026-03-03",
+      "reason": "Collapsible sections for metadata, content always visible",
+      "rationale": "Main fields (category, description, tags) always rendered but collapsible (expanded by default) to keep the page focused. Additional fields (rules, required_knowledge) collapsed by default since they are less frequently needed. Content is always shown without height cap so users can read the full entry."
     }
   ]
 }

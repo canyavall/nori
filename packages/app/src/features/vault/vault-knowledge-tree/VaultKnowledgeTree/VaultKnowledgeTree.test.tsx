@@ -133,13 +133,13 @@ describe('VaultKnowledgeTree', () => {
     await waitFor(() => expect(screen.getByText('Uncategorized')).toBeDefined());
   });
 
-  it('opens edit dialog when Edit button is clicked', async () => {
+  it('opens edit dialog when entry row is clicked', async () => {
     const entry = makeEntry({ id: 'entry-42', title: 'My Entry', category: 'General' });
     vi.mocked(apiGet).mockResolvedValue({ data: [entry] });
     render(() => <VaultKnowledgeTree vault={makeVault()} />);
     await waitFor(() => expect(screen.getByText('My Entry')).toBeDefined());
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: /My Entry/ }));
 
     await waitFor(() => {
       const dialog = screen.getByTestId('edit-dialog');
@@ -153,7 +153,7 @@ describe('VaultKnowledgeTree', () => {
     render(() => <VaultKnowledgeTree vault={makeVault()} />);
     await waitFor(() => expect(screen.getByText('My Entry')).toBeDefined());
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: /My Entry/ }));
     await waitFor(() => screen.getByTestId('edit-dialog'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
@@ -168,7 +168,7 @@ describe('VaultKnowledgeTree', () => {
 
     const callsBefore = vi.mocked(apiGet).mock.calls.length;
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: /My Entry/ }));
     await waitFor(() => screen.getByTestId('edit-dialog'));
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 

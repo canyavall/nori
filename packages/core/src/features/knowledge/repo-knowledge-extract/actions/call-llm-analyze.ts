@@ -35,7 +35,6 @@ function normalizeProposal(raw: Record<string, unknown>): KnowledgeProposal {
     description: String(raw.description ?? ''),
     required_knowledge: Array.isArray(raw.required_knowledge) ? raw.required_knowledge.map(String) : [],
     rules: Array.isArray(raw.rules) ? raw.rules.map(String) : [],
-    optional_knowledge: Array.isArray(raw.optional_knowledge) ? raw.optional_knowledge.map(String) : undefined,
     content: String(raw.content ?? ''),
   };
 }

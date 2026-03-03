@@ -1,0 +1,27 @@
+{
+  "type": "action",
+  "what": "Recursively delete the vault's local directory from the filesystem",
+  "why": "For local vaults, the files were created by Nori and should be cleaned up. For git vaults, the git repo is user-owned and must not be touched.",
+  "where": {
+    "entry_point": "features/vault/vault-delete/vault-delete.ts",
+    "implementation": "features/vault/vault-delete/actions/delete-local-files.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "vault_type === 'local' and fs.rm succeeds, or vault_type !== 'local' (skipped)",
+    "event": { "action": "vault:delete:deleting-local-files", "status": "success", "message": "Local files deleted", "data_fields": ["local_path"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Filesystem error during deletion",
+      "criteria": "fs.rm throws",
+      "action": "Return FS_DELETE_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Conditional execution based on vault_type", "rationale": "Git vault repos are user-owned — Nori must not delete them. Local vaults were created by Nori and should be cleaned up." }
+  ],
+  "calls": ["features/vault/vault-delete/actions/delete-local-files.ts"]
+}

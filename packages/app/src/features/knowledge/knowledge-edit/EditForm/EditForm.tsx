@@ -6,7 +6,7 @@ export const EditForm = (props: EditFormProps) => {
   const {
     title, setTitle, category, setCategory, tagsInput, setTagsInput,
     description, setDescription, requiredKnowledgeInput, setRequiredKnowledgeInput,
-    rulesInput, setRulesInput, optionalKnowledgeInput, setOptionalKnowledgeInput,
+    rulesInput, setRulesInput,
     content, setContent, errors, tags, handleSubmit,
   } = useEditForm(props);
 
@@ -106,18 +106,6 @@ export const EditForm = (props: EditFormProps) => {
           value={requiredKnowledgeInput()}
           onInput={(e) => setRequiredKnowledgeInput(e.currentTarget.value)}
           placeholder="prerequisite-topic-1, prerequisite-topic-2"
-          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
-        />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1" for="ke-optional-knowledge">Optional Knowledge (comma separated)</label>
-        <input
-          id="ke-optional-knowledge"
-          type="text"
-          value={optionalKnowledgeInput()}
-          onInput={(e) => setOptionalKnowledgeInput(e.currentTarget.value)}
-          placeholder="optional-topic-1, optional-topic-2"
           class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
         />
       </div>

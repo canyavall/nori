@@ -9,6 +9,7 @@ const mockRunVaultLinkProject = vi.fn();
 const mockRunVaultUnlinkProject = vi.fn();
 const mockRunVaultKnowledgeImport = vi.fn();
 const mockRunVaultKnowledgeExport = vi.fn();
+const mockRunVaultDelete = vi.fn();
 const mockQueryAll = vi.fn();
 const mockQueryOne = vi.fn();
 
@@ -19,6 +20,7 @@ vi.mock('@nori/core', () => ({
   runVaultUnlinkProject: mockRunVaultUnlinkProject,
   runVaultKnowledgeImport: mockRunVaultKnowledgeImport,
   runVaultKnowledgeExport: mockRunVaultKnowledgeExport,
+  runVaultDelete: mockRunVaultDelete,
   queryAll: mockQueryAll,
   queryOne: mockQueryOne,
 }));
@@ -409,6 +411,86 @@ describe('POST /api/vault/:id/knowledge/import', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source_paths: ['/home/user/note.md'] }),
     });
+
+    expect(mockSaveDb).not.toHaveBeenCalled();
+  });
+});
+
+// ─── DELETE /api/vault/:id ────────────────────────────────────────────────────
+
+describe('DELETE /api/vault/:id', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('deletes a local vault and returns deleted_files: true', async () => {
+    mockRunVaultDelete.mockResolvedValueOnce({
+      success: true,
+      data: {
+        vault_id: 'vault-id-123',
+        vault_name: 'my-local-vault',
+        vault_type: 'local',
+        deleted_files: true,
+      },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123', { method: 'DELETE' });
+
+    expect(res.status).toBe(200);
+    expect(mockRunVaultDelete).toHaveBeenCalledOnce();
+    expect(mockSaveDb).toHaveBeenCalledOnce();
+    const body = await res.json() as { success: boolean; data: { deleted_files: boolean } };
+    expect(body.success).toBe(true);
+    expect(body.data.deleted_files).toBe(true);
+  });
+
+  it('deletes a git vault and returns deleted_files: false', async () => {
+    mockRunVaultDelete.mockResolvedValueOnce({
+      success: true,
+      data: {
+        vault_id: 'vault-id-123',
+        vault_name: 'test-vault',
+        vault_type: 'git',
+        deleted_files: false,
+      },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/vault-id-123', { method: 'DELETE' });
+
+    expect(res.status).toBe(200);
+    expect(mockRunVaultDelete).toHaveBeenCalledOnce();
+    expect(mockSaveDb).toHaveBeenCalledOnce();
+    const body = await res.json() as { success: boolean; data: { deleted_files: boolean } };
+    expect(body.success).toBe(true);
+    expect(body.data.deleted_files).toBe(false);
+  });
+
+  it('returns error and does not save db when vault not found', async () => {
+    mockRunVaultDelete.mockResolvedValueOnce({
+      success: false,
+      error: { code: 'VAULT_NOT_FOUND', message: 'Vault not found', step: '01', severity: 'error', recoverable: true },
+    });
+
+    const app = buildApp();
+    const res = await app.request('/api/vault/bad-vault-id', { method: 'DELETE' });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; error: { code: string } };
+    expect(body.success).toBe(false);
+    expect(body.error.code).toBe('VAULT_NOT_FOUND');
+    expect(mockSaveDb).not.toHaveBeenCalled();
+  });
+
+  it('does not call saveDb on flow error', async () => {
+    mockRunVaultDelete.mockResolvedValueOnce({
+      success: false,
+      error: { code: 'DB_DELETE_FAILED', message: 'DB error', step: '02', severity: 'fatal', recoverable: false },
+    });
+
+    const app = buildApp();
+    await app.request('/api/vault/vault-id-123', { method: 'DELETE' });
 
     expect(mockSaveDb).not.toHaveBeenCalled();
   });

@@ -10,6 +10,7 @@ export interface Vault {
   last_synced_at: string | null;
   project_count?: number;
   knowledge_count?: number;
+  incomplete_knowledge_count?: number;
 }
 
 export interface VaultLink {

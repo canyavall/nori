@@ -20,7 +20,6 @@ export interface KnowledgeFrontmatter {
   description: string;
   required_knowledge: string[];
   rules: string[];
-  optional_knowledge?: string[];
   created?: string;
   updated?: string;
 }
@@ -32,6 +31,5 @@ export interface KnowledgeProposal {
   description: string;
   required_knowledge: string[];
   rules: string[];
-  optional_knowledge?: string[];
   content: string;
 }

@@ -1,5 +1,6 @@
 import { createSignal, onMount } from 'solid-js';
 import type { KnowledgeEntry, KnowledgeFrontmatter } from '@nori/shared';
+import type { ContentViewMode } from '../../../../components/ui/MarkdownContent/MarkdownContent.type';
 import { apiGet } from '../../../../lib/api';
 import { connectSSE } from '../../../../lib/sse';
 import { updateKnowledgeEntry } from '../../../../stores/knowledge.store';
@@ -15,6 +16,9 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
   const [entry, setEntry] = createSignal<KnowledgeEntry | null>(null);
   const [content, setContent] = createSignal('');
   const [frontmatter, setFrontmatter] = createSignal<KnowledgeFrontmatter | null>(null);
+  const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
+
+  const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
 
   const loadEntry = async () => {
     setStep('loading');
@@ -69,7 +73,6 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     description: string;
     required_knowledge: string[];
     rules: string[];
-    optional_knowledge?: string[];
     content: string;
   }) {
     setStep('saving');
@@ -132,6 +135,8 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     entry,
     content,
     frontmatter,
+    contentViewMode,
+    handleContentViewModeChange,
     handleEdit,
     handleCancelEdit,
     handleSave,

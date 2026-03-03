@@ -156,4 +156,35 @@ describe('VaultsPage', () => {
     expect(screen.getByRole('heading', { name: 'Vaults' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Register Vault' })).toBeDefined();
   });
+
+  it('shows incomplete entries warning when vault has incomplete knowledge', async () => {
+    const vault = makeVault({ incomplete_knowledge_count: 3 });
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByText(/3/)).toBeDefined());
+    expect(screen.getByText(/entries missing required fields/)).toBeDefined();
+  });
+
+  it('uses singular "entry" when exactly one entry is incomplete', async () => {
+    const vault = makeVault({ incomplete_knowledge_count: 1 });
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByText(/entry missing required fields/)).toBeDefined());
+  });
+
+  it('does not show incomplete warning when all knowledge entries are complete', async () => {
+    const vault = makeVault({ incomplete_knowledge_count: 0 });
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
+    expect(screen.queryByText(/missing required fields/)).toBeNull();
+  });
+
+  it('does not show incomplete warning when incomplete_knowledge_count is absent', async () => {
+    const vault = makeVault();
+    vi.mocked(apiGet).mockResolvedValue({ data: [vault] });
+    render(() => <VaultsPage />);
+    await waitFor(() => expect(screen.getByText('hytale')).toBeDefined());
+    expect(screen.queryByText(/missing required fields/)).toBeNull();
+  });
 });

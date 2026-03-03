@@ -1,0 +1,17 @@
+{
+  "type": "ui_action",
+  "what": "Final confirmation before deletion",
+  "why": "Two-step confirmation reduces accidental deletes",
+  "where": { "component": "features/vault/vault-settings/VaultSettingsDialog/ConfirmDeleteStep.tsx" },
+  "ui": {
+    "renders": "display",
+    "fields": [],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_confirm": "03-delete-api-call",
+    "on_cancel": "00-settings"
+  },
+  "error_handling": [],
+  "decisions": []
+}

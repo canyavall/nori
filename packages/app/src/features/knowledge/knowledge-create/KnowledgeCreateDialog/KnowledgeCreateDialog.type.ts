@@ -11,5 +11,4 @@ export interface EditableProposal extends KnowledgeProposal {
   tagsInput: string;
   requiredKnowledgeInput: string;
   rulesInput: string;
-  optionalKnowledgeInput: string;
 }

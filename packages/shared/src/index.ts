@@ -29,6 +29,8 @@ export {
   type VaultKnowledgeImportInput,
   vaultKnowledgeExportSchema,
   type VaultKnowledgeExportInput,
+  vaultDeleteSchema,
+  type VaultDeleteInput,
 } from './schemas/vault.schema.js';
 
 // Schemas — Knowledge
@@ -75,6 +77,8 @@ export {
   type VaultReconciliationEvents,
   type VaultRegenerateDbEvents,
   type VaultEmbeddingEvents,
+  type VaultDeleteResponse,
+  type VaultDeleteEvents,
   VAULT_REGISTRATION_API,
   VAULT_LOCAL_REGISTRATION_API,
   VAULT_LIST_API,
@@ -83,6 +87,7 @@ export {
   VAULT_UNLINK_PROJECT_API,
   VAULT_KNOWLEDGE_IMPORT_API,
   VAULT_KNOWLEDGE_EXPORT_API,
+  VAULT_DELETE_API,
   VAULT_PULL_API,
   VAULT_PUSH_API,
   VAULT_RECONCILIATION_API,

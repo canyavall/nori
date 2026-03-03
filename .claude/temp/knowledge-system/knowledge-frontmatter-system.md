@@ -28,9 +28,6 @@ Auto-generated knowledge.json from YAML frontmatter with mtime-based caching for
 - `required_knowledge`: Array of package names (use `[]` if none)
 - `rules`: Array of glob patterns for automatic loading based on file/folder paths
 
-**Optional fields**:
-- `optional_knowledge`: Array of package names
-
 **Example**:
 ```yaml
 ---

@@ -14,7 +14,6 @@ export function validateChanges(
   description: string,
   required_knowledge: string[],
   rules: string[],
-  optional_knowledge: string[] | undefined,
   content: string
 ): StepResult<ValidatedChanges> | FlowError {
   // Validate frontmatter
@@ -25,7 +24,6 @@ export function validateChanges(
     description,
     required_knowledge,
     rules,
-    optional_knowledge,
   });
 
   if (!result.success) {

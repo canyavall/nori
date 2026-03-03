@@ -52,9 +52,6 @@ Required fields:
 - `required_knowledge` - Array of package names (can be `[]`)
 - `rules` - Array of glob patterns (can be `[]`)
 
-Optional fields:
-- `optional_knowledge` - Array of package names
-
 **4. File System Consistency**
 - All knowledge_path files exist
 - All .md files in vault registered

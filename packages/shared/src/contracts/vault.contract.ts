@@ -117,6 +117,23 @@ export interface VaultUnlinkProjectEvents {
   'vault:unlink-project:completed': { vault_id: string; link_id: string; project_path: string };
 }
 
+export interface VaultDeleteResponse {
+  vault_id: string;
+  vault_name: string;
+  vault_type: 'git' | 'local';
+  deleted_files: boolean;
+}
+
+export interface VaultDeleteEvents {
+  'vault:delete:started': { vault_id: string };
+  'vault:delete:validating-vault': { vault_id: string };
+  'vault:delete:deleting-knowledge-entries': { vault_id: string };
+  'vault:delete:deleting-vault-links': { vault_id: string };
+  'vault:delete:deleting-vault-record': { vault_id: string };
+  'vault:delete:deleting-local-files': { local_path: string };
+  'vault:delete:completed': { vault_id: string; vault_name: string; deleted_files: boolean };
+}
+
 export interface VaultKnowledgeImportEvents {
   'vault:knowledge-import:started': { vault_id: string; source_count: number };
   'vault:knowledge-import:scanning': { source_count: number };
@@ -251,4 +268,9 @@ export const VAULT_KNOWLEDGE_IMPORT_API = {
 export const VAULT_KNOWLEDGE_EXPORT_API = {
   method: 'POST' as const,
   path: '/api/vault/:id/knowledge/export',
+} as const;
+
+export const VAULT_DELETE_API = {
+  method: 'DELETE' as const,
+  path: '/api/vault/:id',
 } as const;

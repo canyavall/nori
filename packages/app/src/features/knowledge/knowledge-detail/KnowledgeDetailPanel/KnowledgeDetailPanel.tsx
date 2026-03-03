@@ -1,6 +1,7 @@
 import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { EditForm } from '../../knowledge-edit/EditForm/EditForm';
+import { MarkdownContent } from '../../../../components/ui/MarkdownContent/MarkdownContent';
 import type { KnowledgeDetailPanelProps } from './KnowledgeDetailPanel.type';
 import { useKnowledgeDetailPanel } from './KnowledgeDetailPanel.hook';
 
@@ -13,6 +14,8 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
     entry,
     content,
     frontmatter,
+    contentViewMode,
+    handleContentViewModeChange,
     handleEdit,
     handleCancelEdit,
     handleSave,
@@ -140,10 +143,30 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
             {/* Content */}
             <Show when={content()}>
               <div>
-                <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Content</p>
-                <pre class="text-sm text-[var(--color-text)] font-mono whitespace-pre-wrap bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)] p-4 overflow-x-auto">
-                  {content()}
-                </pre>
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Content</p>
+                  <div class="flex rounded-md border border-[var(--color-border)] overflow-hidden text-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleContentViewModeChange('markdown')}
+                      class={contentViewMode() === 'markdown'
+                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                    >
+                      Markdown
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleContentViewModeChange('text')}
+                      class={contentViewMode() === 'text'
+                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                    >
+                      Plain text
+                    </button>
+                  </div>
+                </div>
+                <MarkdownContent content={content()} viewMode={contentViewMode()} />
               </div>
             </Show>
           </div>
@@ -170,7 +193,6 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
               initialDescription={e.description ?? ''}
               initialRequiredKnowledge={e.required_knowledge ?? []}
               initialRules={e.rules ?? []}
-              initialOptionalKnowledge={frontmatter()?.optional_knowledge}
               initialContent={content()}
               error={saveError()}
               onSave={handleSave}

@@ -1,0 +1,21 @@
+{
+  "type": "validation",
+  "what": "User must type the exact vault name to proceed",
+  "why": "Prevents accidental deletion by requiring deliberate confirmation",
+  "where": { "component": "features/vault/vault-settings/VaultSettingsDialog/EnterVaultNameStep.tsx" },
+  "ui": {
+    "renders": "form",
+    "fields": [
+      { "name": "vault_name_confirmation", "type": "text", "label": "Type vault name to confirm" }
+    ],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_valid": "02-confirm-delete",
+    "on_cancel": "00-settings"
+  },
+  "error_handling": [],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Name confirmation is FE-only", "rationale": "Server only needs the vault ID. Name confirmation is a UX safety net." }
+  ]
+}

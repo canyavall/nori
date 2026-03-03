@@ -14,14 +14,13 @@ const parseLines = (input: string): string[] =>
     .map((l) => l.trim())
     .filter(Boolean);
 
-export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'initialOptionalKnowledge' | 'onNext'>) => {
+export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'onNext'>) => {
   const [title, setTitle] = createSignal(props.initialTitle);
   const [category, setCategory] = createSignal(props.initialCategory);
   const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
   const [description, setDescription] = createSignal(props.initialDescription);
   const [requiredKnowledgeInput, setRequiredKnowledgeInput] = createSignal(props.initialRequiredKnowledge.join(', '));
   const [rulesInput, setRulesInput] = createSignal(props.initialRules.join('\n'));
-  const [optionalKnowledgeInput, setOptionalKnowledgeInput] = createSignal((props.initialOptionalKnowledge ?? []).join(', '));
   const [errors, setErrors] = createSignal<Record<string, string>>({});
 
   const tags = () => parseTags(tagsInput());
@@ -31,7 +30,6 @@ export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTit
 
     const requiredKnowledge = parseTags(requiredKnowledgeInput());
     const rules = parseLines(rulesInput());
-    const optionalKnowledge = parseTags(optionalKnowledgeInput());
 
     const result = knowledgeFrontmatterSchema.safeParse({
       title: title(),
@@ -40,7 +38,6 @@ export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTit
       description: description(),
       required_knowledge: requiredKnowledge,
       rules,
-      optional_knowledge: optionalKnowledge.length > 0 ? optionalKnowledge : undefined,
     });
 
     if (!result.success) {
@@ -63,7 +60,6 @@ export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTit
       description: result.data.description,
       required_knowledge: result.data.required_knowledge,
       rules: result.data.rules,
-      optional_knowledge: result.data.optional_knowledge,
     });
   };
 
@@ -74,7 +70,6 @@ export const useFrontmatterForm = (props: Pick<FrontmatterFormProps, 'initialTit
     description, setDescription,
     requiredKnowledgeInput, setRequiredKnowledgeInput,
     rulesInput, setRulesInput,
-    optionalKnowledgeInput, setOptionalKnowledgeInput,
     errors, tags, handleSubmit,
   };
 };

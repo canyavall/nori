@@ -4,6 +4,7 @@ import { EditForm } from '../knowledge-edit/EditForm/EditForm';
 import { EditAuditResults } from '../knowledge-edit/EditAuditResults/EditAuditResults';
 import { DeleteConfirmation } from '../knowledge-delete/DeleteConfirmation/DeleteConfirmation';
 import { DeleteResult } from '../knowledge-delete/DeleteResult/DeleteResult';
+import { MarkdownContent } from '../../../components/ui/MarkdownContent/MarkdownContent';
 import { useKnowledgeDetailSection } from './KnowledgeDetailSection.hook';
 
 export const KnowledgeDetailSection: Component = () => {
@@ -18,6 +19,8 @@ export const KnowledgeDetailSection: Component = () => {
     savedFilePath,
     deleteError,
     deleteProgressMessage,
+    contentViewMode,
+    handleContentViewModeChange,
     handleEdit,
     handleCancelEdit,
     handleSave,
@@ -140,9 +143,32 @@ export const KnowledgeDetailSection: Component = () => {
                 <span>Updated: {new Date(entryData()?.entry.updated_at ?? '').toLocaleDateString()}</span>
               </div>
 
-              <pre class="whitespace-pre-wrap font-mono text-sm rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] p-4 max-h-96 overflow-y-auto">
-                {entryData()?.content ?? ''}
-              </pre>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Content</p>
+                  <div class="flex rounded-md border border-[var(--color-border)] overflow-hidden text-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleContentViewModeChange('markdown')}
+                      class={contentViewMode() === 'markdown'
+                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                    >
+                      Markdown
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleContentViewModeChange('text')}
+                      class={contentViewMode() === 'text'
+                        ? 'px-2 py-1 bg-[var(--color-accent)] text-white transition-colors'
+                        : 'px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors'}
+                    >
+                      Plain text
+                    </button>
+                  </div>
+                </div>
+                <MarkdownContent content={entryData()?.content ?? ''} viewMode={contentViewMode()} />
+              </div>
             </div>
           </div>
         </Match>
@@ -158,7 +184,6 @@ export const KnowledgeDetailSection: Component = () => {
               initialDescription={entryData()?.entry.description ?? ''}
               initialRequiredKnowledge={entryData()?.entry.required_knowledge ?? []}
               initialRules={entryData()?.entry.rules ?? []}
-              initialOptionalKnowledge={entryData()?.frontmatter.optional_knowledge}
               initialContent={entryData()?.content ?? ''}
               error={saveError()}
               onSave={handleSave}

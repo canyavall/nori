@@ -1,0 +1,27 @@
+{
+  "type": "action",
+  "what": "Delete all knowledge entries belonging to the vault",
+  "why": "Knowledge entries must be removed before deleting the vault record to satisfy foreign key constraints and prevent orphaned data",
+  "where": {
+    "entry_point": "features/vault/vault-delete/vault-delete.ts",
+    "implementation": "features/vault/vault-delete/actions/delete-knowledge-entries.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "DELETE query executes without error",
+    "event": { "action": "vault:delete:deleting-knowledge-entries", "status": "success", "message": "Knowledge entries deleted", "data_fields": ["vault_id"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database error during deletion",
+      "criteria": "SQL error thrown",
+      "action": "Return DB_DELETE_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Delete knowledge entries first", "rationale": "Ensures no orphaned knowledge entries remain after vault is deleted" }
+  ],
+  "calls": ["features/vault/vault-delete/actions/delete-knowledge-entries.ts"]
+}

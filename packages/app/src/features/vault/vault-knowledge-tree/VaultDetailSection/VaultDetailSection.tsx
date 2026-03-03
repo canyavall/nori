@@ -7,6 +7,7 @@ import { KnowledgeCreateDialog } from '../../../knowledge/knowledge-create/Knowl
 import { VaultLinkProjectDialog } from '../../vault-link-project/VaultLinkProjectDialog/VaultLinkProjectDialog';
 import { VaultKnowledgeImportDialog } from '../../vault-knowledge-import/VaultKnowledgeImportDialog';
 import { VaultKnowledgeExportDialog } from '../../vault-knowledge-export/VaultKnowledgeExportDialog';
+import { VaultSettingsDialog } from '../../vault-settings/VaultSettingsDialog/VaultSettingsDialog';
 import { useVaultDetailSection } from './VaultDetailSection.hook';
 import type { VaultDetailSectionProps } from './VaultDetailSection.type';
 
@@ -18,6 +19,8 @@ export const VaultDetailSection: Component<VaultDetailSectionProps> = (props) =>
     selectedEntryId,
     linkProjectOpen,
     setLinkProjectOpen,
+    settingsOpen,
+    setSettingsOpen,
     importOpen,
     setImportOpen,
     exportOpen,
@@ -66,6 +69,7 @@ export const VaultDetailSection: Component<VaultDetailSectionProps> = (props) =>
           </button>
           <button
             type="button"
+            onClick={() => setSettingsOpen(true)}
             class="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
           >
             Vault Settings
@@ -166,6 +170,9 @@ export const VaultDetailSection: Component<VaultDetailSectionProps> = (props) =>
             </Show>
             <Show when={exportOpen()}>
               <VaultKnowledgeExportDialog vault={v} onClose={() => setExportOpen(false)} />
+            </Show>
+            <Show when={settingsOpen()}>
+              <VaultSettingsDialog vault={v} onClose={() => setSettingsOpen(false)} />
             </Show>
           </>
         )}

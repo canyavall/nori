@@ -13,6 +13,7 @@ import {
   runVaultUnlinkProject,
   runVaultKnowledgeImport,
   runVaultKnowledgeExport,
+  runVaultDelete,
   queryAll,
   queryOne,
 } from '@nori/core';
@@ -28,7 +29,13 @@ vault.get('/', async (c) => {
   const vaults = queryAll(db, `
     SELECT v.*,
       COUNT(DISTINCT vl.id) AS project_count,
-      COUNT(DISTINCT ke.id) AS knowledge_count
+      COUNT(DISTINCT ke.id) AS knowledge_count,
+      COUNT(DISTINCT CASE
+        WHEN ke.id IS NOT NULL AND (
+          ke.description IS NULL OR ke.description = '' OR
+          ke.category IS NULL OR ke.category = '' OR
+          ke.tags IS NULL OR ke.tags = '[]' OR json_array_length(ke.tags) < 3
+        ) THEN ke.id END) AS incomplete_knowledge_count
     FROM vaults v
     LEFT JOIN vault_links vl ON vl.vault_id = v.id
     LEFT JOIN knowledge_entries ke ON ke.vault_id = v.id
@@ -114,6 +121,19 @@ vault.get('/:id/links', async (c) => {
   const db = c.get('db');
   const links = queryAll(db, 'SELECT * FROM vault_links WHERE vault_id = ? ORDER BY created_at DESC', [vaultId]);
   return c.json({ data: links });
+});
+
+// Delete a vault (and local files for local vaults)
+vault.delete('/:id', async (c) => {
+  const vaultId = c.req.param('id');
+  const db = c.get('db');
+
+  return withSSE(c, async (emitter) => {
+    const result = await runVaultDelete({ vault_id: vaultId, db }, emitter);
+    if (!result.success) return { success: false, error: result.error };
+    saveDb();
+    return { success: true, data: result.data };
+  });
 });
 
 // Unlink a project from a vault

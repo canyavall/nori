@@ -137,19 +137,11 @@ export const KnowledgeCreateDialog = (props: KnowledgeCreateDialogProps) => {
                         class="w-full px-2.5 py-1.5 rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] resize-y disabled:opacity-50" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                      <div>
-                        <label class="block text-xs text-[var(--color-text-muted)] mb-1">Required Knowledge (comma sep.)</label>
-                        <input type="text" value={proposal.requiredKnowledgeInput} disabled={!proposal.included}
-                          onInput={(e) => updateProposal(i(), 'required_knowledge', e.currentTarget.value)}
-                          class="w-full px-2.5 py-1.5 rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] disabled:opacity-50" />
-                      </div>
-                      <div>
-                        <label class="block text-xs text-[var(--color-text-muted)] mb-1">Optional Knowledge (comma sep.)</label>
-                        <input type="text" value={proposal.optionalKnowledgeInput} disabled={!proposal.included}
-                          onInput={(e) => updateProposal(i(), 'optional_knowledge', e.currentTarget.value)}
-                          class="w-full px-2.5 py-1.5 rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] disabled:opacity-50" />
-                      </div>
+                    <div>
+                      <label class="block text-xs text-[var(--color-text-muted)] mb-1">Required Knowledge (comma sep.)</label>
+                      <input type="text" value={proposal.requiredKnowledgeInput} disabled={!proposal.included}
+                        onInput={(e) => updateProposal(i(), 'required_knowledge', e.currentTarget.value)}
+                        class="w-full px-2.5 py-1.5 rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)] disabled:opacity-50" />
                     </div>
 
                     <div>

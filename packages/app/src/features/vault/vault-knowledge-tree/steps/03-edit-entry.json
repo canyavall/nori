@@ -23,7 +23,7 @@
     "validation_schema": "@nori/shared:KnowledgeEditRequest"
   },
   "transitions": {
-    "on_edit_click": "edit mode (inline, no navigation)",
+    "on_row_click": "edit mode (inline, no navigation)",
     "on_save": "view mode (reload entry)",
     "on_cancel": "view mode"
   },
@@ -50,6 +50,11 @@
       "date": "2026-03-02",
       "reason": "View mode first, then edit mode on demand",
       "rationale": "User typically wants to read before editing; separating modes prevents accidental changes"
+    },
+    {
+      "date": "2026-03-03",
+      "reason": "Make the entire entry row the click target instead of a separate Edit button",
+      "rationale": "A small Edit button requires precise targeting and is invisible until hover. The whole row is a larger, always-visible hit area that is more discoverable and faster to click."
     }
   ]
 }

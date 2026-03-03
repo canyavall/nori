@@ -1,0 +1,19 @@
+{
+  "type": "ui_action",
+  "what": "Show vault settings with danger zone",
+  "why": "Entry point for vault management and deletion",
+  "where": { "component": "features/vault/vault-settings/VaultSettingsDialog/VaultSettingsView.tsx" },
+  "ui": {
+    "renders": "display",
+    "fields": [],
+    "validation_schema": null
+  },
+  "transitions": {
+    "on_delete_click": "01-enter-vault-name",
+    "on_close": "close_dialog"
+  },
+  "error_handling": [],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Single settings step with danger zone", "rationale": "Vault settings are minimal — just vault info and the delete action" }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "action",
+  "what": "Delete all project links associated with the vault",
+  "why": "Vault links must be removed before deleting the vault record to prevent orphaned link rows",
+  "where": {
+    "entry_point": "features/vault/vault-delete/vault-delete.ts",
+    "implementation": "features/vault/vault-delete/actions/delete-vault-links.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "DELETE query executes without error",
+    "event": { "action": "vault:delete:deleting-vault-links", "status": "success", "message": "Vault links deleted", "data_fields": ["vault_id"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Database error during deletion",
+      "criteria": "SQL error thrown",
+      "action": "Return DB_DELETE_FAILED error",
+      "severity": "fatal",
+      "recoverable": false
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Delete vault links before vault record", "rationale": "Prevents orphaned vault_links rows after vault record is removed" }
+  ],
+  "calls": ["features/vault/vault-delete/actions/delete-vault-links.ts"]
+}

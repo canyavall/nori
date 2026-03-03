@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@solidjs/testing-library';
 import type { KnowledgeEntry } from '@nori/shared';
-import { CategoryTree } from './CategoryTree';
+import { CategoryTree, getKnowledgeQualityIssues } from './CategoryTree';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -21,6 +21,15 @@ function makeEntry(overrides: Partial<KnowledgeEntry> = {}): KnowledgeEntry {
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
   };
+}
+
+function makeCompleteEntry(overrides: Partial<KnowledgeEntry> = {}): KnowledgeEntry {
+  return makeEntry({
+    category: 'General',
+    description: 'A proper description',
+    tags: ['tag-one', 'tag-two', 'tag-three'],
+    ...overrides,
+  });
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
@@ -125,15 +134,23 @@ describe('CategoryTree', () => {
     expect(screen.getByText('Entry B')).toBeDefined();
   });
 
-  it('calls onEditEntry with the entry id when Edit button is clicked', () => {
+  it('calls onEditEntry with the entry id when entry row is clicked', () => {
     const onEdit = vi.fn();
     const cats = {
       General: [makeEntry({ id: 'entry-99', title: 'Editable' })],
     };
     render(() => <CategoryTree categories={cats} onEditEntry={onEdit} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: /Editable/ }));
     expect(onEdit).toHaveBeenCalledWith('entry-99');
+  });
+
+  it('does not render a separate Edit button for entries', () => {
+    const cats = {
+      General: [makeEntry({ id: 'entry-1', title: 'Some Entry' })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
   });
 
   it('shows up to 3 tags per entry', () => {
@@ -161,5 +178,163 @@ describe('CategoryTree', () => {
     render(() => <CategoryTree categories={{}} onEditEntry={noop} />);
     // No crash — renders an empty list
     expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
+// ── Quality warning icon tests ─────────────────────────────────────────────────
+
+describe('CategoryTree — quality warning icon', () => {
+  const noop = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    cleanup();
+  });
+
+  it('shows warning icon for entry missing description', () => {
+    const cats = {
+      General: [makeEntry({ description: '' })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getByTestId('quality-warning')).toBeDefined();
+  });
+
+  it('shows warning icon for entry missing category', () => {
+    const cats = {
+      Uncategorized: [makeEntry({ category: '' })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getByTestId('quality-warning')).toBeDefined();
+  });
+
+  it('shows warning icon for entry with fewer than 3 tags', () => {
+    const cats = {
+      General: [makeEntry({ tags: ['only-one'] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getByTestId('quality-warning')).toBeDefined();
+  });
+
+  it('shows warning icon for entry with no tags', () => {
+    const cats = {
+      General: [makeEntry({ tags: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getByTestId('quality-warning')).toBeDefined();
+  });
+
+  it('does not show warning icon for complete entry', () => {
+    const cats = {
+      General: [makeCompleteEntry()],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.queryByTestId('quality-warning')).toBeNull();
+  });
+
+  it('shows warning popover content listing the missing fields', () => {
+    const cats = {
+      General: [makeEntry({ description: '', tags: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    // Popover content is in the DOM (CSS hides it visually)
+    expect(screen.getByText('Quality issues')).toBeDefined();
+    expect(screen.getByText('· Missing description')).toBeDefined();
+    expect(screen.getByText('· Tags: 0/3 minimum')).toBeDefined();
+  });
+
+  it('shows multiple warnings when multiple fields are missing', () => {
+    const cats = {
+      Uncategorized: [makeEntry({ category: '', description: '', tags: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getByText('· Missing category')).toBeDefined();
+    expect(screen.getByText('· Missing description')).toBeDefined();
+    expect(screen.getByText('· Tags: 0/3 minimum')).toBeDefined();
+  });
+
+  it('shows one warning per incomplete entry', () => {
+    const cats = {
+      General: [
+        makeCompleteEntry({ id: 'e1' }),
+        makeEntry({ id: 'e2', description: '' }),
+      ],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.getAllByTestId('quality-warning')).toHaveLength(1);
+  });
+
+  it('clicking entry row still works when warning icon is present', () => {
+    const onEdit = vi.fn();
+    const cats = {
+      General: [makeEntry({ id: 'entry-warn', title: 'Incomplete Entry', description: '' })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={onEdit} />);
+    fireEvent.click(screen.getByRole('button', { name: /Incomplete Entry/ }));
+    expect(onEdit).toHaveBeenCalledWith('entry-warn');
+  });
+});
+
+// ── getKnowledgeQualityIssues unit tests ──────────────────────────────────────
+
+describe('getKnowledgeQualityIssues', () => {
+  it('returns empty array for a complete entry', () => {
+    const entry = makeCompleteEntry();
+    expect(getKnowledgeQualityIssues(entry)).toEqual([]);
+  });
+
+  it('reports missing description', () => {
+    const entry = makeCompleteEntry({ description: '' });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Missing description');
+  });
+
+  it('reports missing category', () => {
+    const entry = makeCompleteEntry({ category: '' });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Missing category');
+  });
+
+  it('reports insufficient tags when fewer than 3', () => {
+    const entry = makeCompleteEntry({ tags: ['one', 'two'] });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Tags: 2/3 minimum');
+  });
+
+  it('reports insufficient tags when tags is empty', () => {
+    const entry = makeCompleteEntry({ tags: [] });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Tags: 0/3 minimum');
+  });
+
+  it('does not report tag issue when entry has exactly 3 tags', () => {
+    const entry = makeCompleteEntry({ tags: ['a', 'b', 'c'] });
+    const issues = getKnowledgeQualityIssues(entry);
+    expect(issues.some((i) => i.startsWith('Tags:'))).toBe(false);
+  });
+
+  it('does not report tag issue when entry has more than 3 tags', () => {
+    const entry = makeCompleteEntry({ tags: ['a', 'b', 'c', 'd'] });
+    const issues = getKnowledgeQualityIssues(entry);
+    expect(issues.some((i) => i.startsWith('Tags:'))).toBe(false);
+  });
+
+  it('reports all three issues when all required fields are missing', () => {
+    const entry = makeEntry({ category: '', description: '', tags: [] });
+    const issues = getKnowledgeQualityIssues(entry);
+    expect(issues).toHaveLength(3);
+    expect(issues).toContain('Missing category');
+    expect(issues).toContain('Missing description');
+    expect(issues).toContain('Tags: 0/3 minimum');
+  });
+
+  it('treats whitespace-only description as missing', () => {
+    const entry = makeCompleteEntry({ description: '   ' });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Missing description');
+  });
+
+  it('treats whitespace-only category as missing', () => {
+    const entry = makeCompleteEntry({ category: '   ' });
+    expect(getKnowledgeQualityIssues(entry)).toContain('Missing category');
+  });
+
+  it('does not report issues when rules and required_knowledge are empty (they are optional)', () => {
+    const entry = makeCompleteEntry({ rules: [], required_knowledge: [] });
+    expect(getKnowledgeQualityIssues(entry)).toEqual([]);
   });
 });

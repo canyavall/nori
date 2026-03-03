@@ -42,6 +42,31 @@ export const VaultCard: Component<VaultCardProps> = (props) => {
         </Show>
       </div>
 
+      {/* Incomplete knowledge warning */}
+      <Show when={(v.incomplete_knowledge_count ?? 0) > 0}>
+        <div class="flex items-center gap-1.5 text-xs text-[var(--color-warning)]">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5 flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <span>
+            <span class="font-medium">{v.incomplete_knowledge_count}</span>
+            {' '}
+            {v.incomplete_knowledge_count === 1 ? 'entry' : 'entries'} missing required fields
+          </span>
+        </div>
+      </Show>
+
       {/* Sync button */}
       <button
         type="button"

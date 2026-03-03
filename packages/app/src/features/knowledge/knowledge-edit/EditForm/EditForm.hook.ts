@@ -14,14 +14,13 @@ const parseLines = (input: string): string[] =>
     .map((l) => l.trim())
     .filter(Boolean);
 
-export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'initialOptionalKnowledge' | 'initialContent' | 'onSave'>) => {
+export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'initialContent' | 'onSave'>) => {
   const [title, setTitle] = createSignal(props.initialTitle);
   const [category, setCategory] = createSignal(props.initialCategory);
   const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
   const [description, setDescription] = createSignal(props.initialDescription);
   const [requiredKnowledgeInput, setRequiredKnowledgeInput] = createSignal(props.initialRequiredKnowledge.join(', '));
   const [rulesInput, setRulesInput] = createSignal(props.initialRules.join('\n'));
-  const [optionalKnowledgeInput, setOptionalKnowledgeInput] = createSignal((props.initialOptionalKnowledge ?? []).join(', '));
   const [content, setContent] = createSignal(props.initialContent);
   const [errors, setErrors] = createSignal<Record<string, string>>({});
 
@@ -32,7 +31,6 @@ export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initial
 
     const requiredKnowledge = parseTags(requiredKnowledgeInput());
     const rules = parseLines(rulesInput());
-    const optionalKnowledge = parseTags(optionalKnowledgeInput());
 
     const result = knowledgeFrontmatterSchema.safeParse({
       title: title(),
@@ -41,7 +39,6 @@ export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initial
       description: description(),
       required_knowledge: requiredKnowledge,
       rules,
-      optional_knowledge: optionalKnowledge.length > 0 ? optionalKnowledge : undefined,
     });
 
     if (!result.success) {
@@ -69,7 +66,6 @@ export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initial
       description: result.data.description,
       required_knowledge: result.data.required_knowledge,
       rules: result.data.rules,
-      optional_knowledge: result.data.optional_knowledge,
       content: content(),
     });
   };
@@ -81,7 +77,6 @@ export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initial
     description, setDescription,
     requiredKnowledgeInput, setRequiredKnowledgeInput,
     rulesInput, setRulesInput,
-    optionalKnowledgeInput, setOptionalKnowledgeInput,
     content, setContent,
     errors, tags, handleSubmit,
   };

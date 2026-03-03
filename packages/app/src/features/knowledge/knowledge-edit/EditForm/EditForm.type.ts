@@ -5,7 +5,6 @@ export interface EditFormProps {
   initialDescription: string;
   initialRequiredKnowledge: string[];
   initialRules: string[];
-  initialOptionalKnowledge?: string[];
   initialContent: string;
   error?: string;
   onSave: (data: {
@@ -15,7 +14,6 @@ export interface EditFormProps {
     description: string;
     required_knowledge: string[];
     rules: string[];
-    optional_knowledge?: string[];
     content: string;
   }) => void;
   onCancel: () => void;

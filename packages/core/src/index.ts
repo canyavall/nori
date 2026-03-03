@@ -26,6 +26,7 @@ export { runKnowledgeDelete } from './features/knowledge/knowledge-delete/knowle
 export { runVaultPull } from './features/vault/vault-pull/vault-pull.js';
 export { runVaultPush } from './features/vault/vault-push/vault-push.js';
 export { runVaultUnlinkProject } from './features/vault/vault-unlink-project/vault-unlink-project.js';
+export { runVaultDelete } from './features/vault/vault-delete/vault-delete.js';
 export { runVaultKnowledgeImport } from './features/vault/vault-knowledge-import/vault-knowledge-import.js';
 export { runVaultKnowledgeExport } from './features/vault/vault-knowledge-export/vault-knowledge-export.js';
 export { runSessionCreate } from './features/session/session-create/session-create.js';

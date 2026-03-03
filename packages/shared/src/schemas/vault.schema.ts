@@ -49,3 +49,8 @@ export const vaultKnowledgeExportSchema = z.object({
 });
 
 export type VaultKnowledgeExportInput = z.infer<typeof vaultKnowledgeExportSchema>;
+
+export const vaultDeleteSchema = z.object({
+  vault_id: z.string().min(1, 'Vault ID is required'),
+});
+export type VaultDeleteInput = z.infer<typeof vaultDeleteSchema>;

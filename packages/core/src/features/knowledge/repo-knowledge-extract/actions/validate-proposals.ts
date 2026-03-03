@@ -90,18 +90,6 @@ export function validateProposals(
       return false;
     });
 
-    // Validate optional_knowledge references
-    if (fixed.optional_knowledge) {
-      fixed.optional_knowledge = fixed.optional_knowledge.filter((ref) => {
-        if (allKnownTitles.has(ref)) return true;
-        warnings.push(`${label}: removed invalid optional_knowledge reference "${ref}"`);
-        return false;
-      });
-      if (fixed.optional_knowledge.length === 0) {
-        fixed.optional_knowledge = undefined;
-      }
-    }
-
     // Ensure category is lowercase slug
     fixed.category = fixed.category.toLowerCase().replace(/\s+/g, '-');
 

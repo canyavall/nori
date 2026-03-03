@@ -1,6 +1,7 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 import type { KnowledgeEntry, KnowledgeFrontmatter } from '@nori/shared';
+import type { ContentViewMode } from '../../../components/ui/MarkdownContent/MarkdownContent.type';
 import { apiGet } from '../../../lib/api';
 import { connectSSE } from '../../../lib/sse';
 import { updateKnowledgeEntry, removeKnowledgeEntry } from '../../../stores/knowledge.store';
@@ -26,6 +27,9 @@ export const useKnowledgeDetailSection = () => {
   const [savedFilePath, setSavedFilePath] = createSignal('');
   const [deleteError, setDeleteError] = createSignal('');
   const [deleteProgressMessage, setDeleteProgressMessage] = createSignal('');
+  const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
+
+  const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
 
   let sseController: AbortController | undefined;
 
@@ -96,7 +100,6 @@ export const useKnowledgeDetailSection = () => {
     description: string;
     required_knowledge: string[];
     rules: string[];
-    optional_knowledge?: string[];
     content: string;
   }) {
     setStep('saving');
@@ -111,7 +114,6 @@ export const useKnowledgeDetailSection = () => {
       description: data.description,
       required_knowledge: data.required_knowledge,
       rules: data.rules,
-      optional_knowledge: data.optional_knowledge,
       content: data.content,
     };
 
@@ -178,7 +180,6 @@ export const useKnowledgeDetailSection = () => {
                 description: body.description,
                 required_knowledge: body.required_knowledge,
                 rules: body.rules,
-                optional_knowledge: body.optional_knowledge,
                 updated: new Date().toISOString(),
               },
             });
@@ -278,6 +279,8 @@ export const useKnowledgeDetailSection = () => {
     savedFilePath,
     deleteError,
     deleteProgressMessage,
+    contentViewMode,
+    handleContentViewModeChange,
     handleEdit,
     handleCancelEdit,
     handleSave,

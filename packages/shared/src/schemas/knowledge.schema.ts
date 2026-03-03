@@ -9,7 +9,6 @@ export const knowledgeFrontmatterSchema = z.object({
   description: z.string().min(1, 'Description is required').max(300, 'Description must be at most 300 characters'),
   required_knowledge: z.array(z.string()).default([]),
   rules: z.array(z.string()).default([]),
-  optional_knowledge: z.array(z.string()).optional(),
   created: z.string().optional(),
   updated: z.string().optional(),
 });
@@ -24,7 +23,6 @@ export const knowledgeCreateSchema = z.object({
   description: z.string().min(1, 'Description is required').max(300, 'Description must be at most 300 characters'),
   required_knowledge: z.array(z.string()).default([]),
   rules: z.array(z.string()).default([]),
-  optional_knowledge: z.array(z.string()).optional(),
   content: z.string().min(1, 'Content is required'),
 });
 
@@ -37,7 +35,6 @@ export const knowledgeEditSchema = z.object({
   description: z.string().min(1, 'Description is required').max(300, 'Description must be at most 300 characters'),
   required_knowledge: z.array(z.string()).default([]),
   rules: z.array(z.string()).default([]),
-  optional_knowledge: z.array(z.string()).optional(),
   content: z.string().min(1, 'Content is required'),
 });
 

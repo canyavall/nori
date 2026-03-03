@@ -8,6 +8,12 @@ vi.mock('./KnowledgeDetailSection.hook', () => ({
   useKnowledgeDetailSection: vi.fn(),
 }));
 
+vi.mock('../../../components/ui/MarkdownContent/MarkdownContent', () => ({
+  MarkdownContent: (props: { content: string; viewMode: string }) => (
+    <div data-testid="markdown-content" data-view-mode={props.viewMode}>{props.content}</div>
+  ),
+}));
+
 vi.mock('../knowledge-edit/EditForm/EditForm', () => ({
   EditForm: () => <div data-testid="edit-form" />,
 }));
@@ -74,6 +80,8 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     savedFilePath: () => '',
     deleteError: () => '',
     deleteProgressMessage: () => '',
+    contentViewMode: () => 'markdown' as const,
+    handleContentViewModeChange: vi.fn(),
     handleEdit: vi.fn(),
     handleCancelEdit: vi.fn(),
     handleSave: vi.fn(),
@@ -164,5 +172,56 @@ describe('KnowledgeDetailSection', () => {
     }));
     render(() => <KnowledgeDetailSection />);
     expect(screen.getByTestId('delete-confirmation')).toBeDefined();
+  });
+
+  it('shows Markdown and Plain text toggle buttons in view mode', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '# Hello', frontmatter: makeFrontmatter() }),
+    }));
+    render(() => <KnowledgeDetailSection />);
+    expect(screen.getByRole('button', { name: 'Markdown' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Plain text' })).toBeDefined();
+  });
+
+  it('calls handleContentViewModeChange with markdown when Markdown button clicked', () => {
+    const handleContentViewModeChange = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '# Hello', frontmatter: makeFrontmatter() }),
+      contentViewMode: () => 'text' as const,
+      handleContentViewModeChange,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Markdown' }));
+    expect(handleContentViewModeChange).toHaveBeenCalledWith('markdown');
+  });
+
+  it('calls handleContentViewModeChange with text when Plain text button clicked', () => {
+    const handleContentViewModeChange = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '# Hello', frontmatter: makeFrontmatter() }),
+      contentViewMode: () => 'markdown' as const,
+      handleContentViewModeChange,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Plain text' }));
+    expect(handleContentViewModeChange).toHaveBeenCalledWith('text');
+  });
+
+  it('passes current contentViewMode to MarkdownContent', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entryData: () => ({ entry, content: '# Heading', frontmatter: makeFrontmatter() }),
+      contentViewMode: () => 'text' as const,
+    }));
+    render(() => <KnowledgeDetailSection />);
+    const mc = screen.getByTestId('markdown-content');
+    expect(mc.getAttribute('data-view-mode')).toBe('text');
   });
 });

@@ -1,0 +1,35 @@
+{
+  "type": "ui_action",
+  "what": "Display a knowledge entry with a markdown/plain-text content toggle",
+  "why": "Lets users read structured markdown visually or inspect raw content as needed",
+  "where": {
+    "component": "features/knowledge/knowledge-detail/KnowledgeDetailSection.tsx",
+    "panel_component": "features/knowledge/knowledge-detail/KnowledgeDetailPanel/KnowledgeDetailPanel.tsx",
+    "shared_ui": "components/ui/MarkdownContent/MarkdownContent.tsx"
+  },
+  "ui": {
+    "renders": "display",
+    "fields": [
+      "title", "category", "description", "tags", "rules",
+      "required_knowledge", "created_at", "updated_at", "content"
+    ],
+    "content_toggle": {
+      "modes": ["markdown", "text"],
+      "default": "markdown",
+      "position": "top-right of content section",
+      "description": "Segmented control with 'Markdown' and 'Plain text' buttons"
+    }
+  },
+  "transitions": {
+    "on_edit": "editing step (EditForm)",
+    "on_delete": "confirm-delete step",
+    "on_back": "navigate:/knowledge"
+  },
+  "decisions": [
+    {
+      "date": "2026-03-03",
+      "reason": "Add markdown rendering toggle to content view",
+      "rationale": "Users need to see both the rendered markdown (readable) and raw text (inspectable). Default is markdown since that is the primary use case. State is owned by the hook; MarkdownContent is a shared UI component driven by marked v17."
+    }
+  ]
+}

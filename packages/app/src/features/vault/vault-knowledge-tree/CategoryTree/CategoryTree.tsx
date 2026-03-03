@@ -1,6 +1,26 @@
 import { For, Show } from 'solid-js';
+import type { KnowledgeEntry } from '@nori/shared';
 import type { CategoryTreeProps } from './CategoryTree.type';
 import { useCategoryTree } from './CategoryTree.hook';
+
+// ── Quality check ──────────────────────────────────────────────────────────────
+
+export function getKnowledgeQualityIssues(entry: KnowledgeEntry): string[] {
+  const issues: string[] = [];
+  if (!entry.category || entry.category.trim() === '') {
+    issues.push('Missing category');
+  }
+  if (!entry.description || entry.description.trim() === '') {
+    issues.push('Missing description');
+  }
+  const tags = Array.isArray(entry.tags) ? entry.tags : [];
+  if (tags.length < 3) {
+    issues.push(`Tags: ${tags.length}/3 minimum`);
+  }
+  return issues;
+}
+
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export const CategoryTree = (props: CategoryTreeProps) => {
   const { categoryNames, toggleCategory, isCategoryCollapsed } = useCategoryTree(props);
@@ -32,10 +52,46 @@ export const CategoryTree = (props: CategoryTreeProps) => {
               <Show when={!isCategoryCollapsed(cat)}>
                 <div class="divide-y divide-[var(--color-border)]/50">
                   <For each={entries()}>
-                    {(entry) => (
-                      <div class="flex items-center justify-between px-4 py-2.5 bg-[var(--color-bg)] hover:bg-[var(--color-bg-tertiary)]/40 transition-colors group">
-                        <div class="min-w-0 flex-1">
-                          <p class="text-sm font-medium truncate">{entry.title}</p>
+                    {(entry) => {
+                      const issues = getKnowledgeQualityIssues(entry);
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => props.onEditEntry(entry.id)}
+                          class="w-full px-4 py-2.5 bg-[var(--color-bg)] hover:bg-[var(--color-bg-tertiary)]/40 transition-colors text-left"
+                        >
+                          <div class="flex items-start gap-1.5">
+                            <p class="text-sm font-medium truncate flex-1 min-w-0">{entry.title}</p>
+                            <Show when={issues.length > 0}>
+                              <span
+                                class="relative group/warn flex-shrink-0 mt-0.5"
+                                aria-hidden="true"
+                                data-testid="quality-warning"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="w-3.5 h-3.5 text-[var(--color-warning)]"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                >
+                                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                                  <path d="M12 9v4" />
+                                  <path d="M12 17h.01" />
+                                </svg>
+                                <div class="pointer-events-none absolute right-0 bottom-full mb-1 z-20 hidden group-hover/warn:block bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-md shadow-lg p-2 w-44">
+                                  <p class="text-[10px] font-semibold text-[var(--color-warning)] mb-1">Quality issues</p>
+                                  <ul class="text-[10px] text-[var(--color-text-muted)] space-y-0.5">
+                                    <For each={issues}>{(issue) => <li>· {issue}</li>}</For>
+                                  </ul>
+                                </div>
+                              </span>
+                            </Show>
+                          </div>
                           <Show when={Array.isArray(entry.tags) && entry.tags.length > 0}>
                             <div class="flex flex-wrap gap-1 mt-0.5">
                               <For each={entry.tags.slice(0, 3)}>
@@ -52,16 +108,9 @@ export const CategoryTree = (props: CategoryTreeProps) => {
                               </Show>
                             </div>
                           </Show>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => props.onEditEntry(entry.id)}
-                          class="ml-3 px-2.5 py-1 rounded text-xs border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-secondary)] transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          Edit
                         </button>
-                      </div>
-                    )}
+                      );
+                    }}
                   </For>
                 </div>
               </Show>

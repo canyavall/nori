@@ -51,7 +51,6 @@ function makeProposal(overrides: Record<string, unknown> = {}) {
     tagsInput: 'tag-one, tag-two, tag-three',
     requiredKnowledgeInput: '',
     rulesInput: 'src/**/*.ts',
-    optionalKnowledgeInput: '',
     ...overrides,
   };
 }

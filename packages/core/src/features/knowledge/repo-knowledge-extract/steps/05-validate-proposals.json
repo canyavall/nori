@@ -26,7 +26,7 @@
     {
       "date": "2026-02-23",
       "reason": "Reference validation",
-      "rationale": "required_knowledge and optional_knowledge references must point to other proposals in the batch or existing entries"
+      "rationale": "required_knowledge references must point to other proposals in the batch or existing entries"
     }
   ],
   "calls": ["features/knowledge/repo-knowledge-extract/actions/validate-proposals.ts"]

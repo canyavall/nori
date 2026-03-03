@@ -6,7 +6,7 @@ export const FrontmatterForm = (props: FrontmatterFormProps) => {
   const {
     title, setTitle, category, setCategory, tagsInput, setTagsInput,
     description, setDescription, requiredKnowledgeInput, setRequiredKnowledgeInput,
-    rulesInput, setRulesInput, optionalKnowledgeInput, setOptionalKnowledgeInput,
+    rulesInput, setRulesInput,
     errors, tags, handleSubmit,
   } = useFrontmatterForm(props);
 
@@ -123,20 +123,6 @@ export const FrontmatterForm = (props: FrontmatterFormProps) => {
         <Show when={errors().required_knowledge}>
           <p class="mt-1 text-xs text-[var(--color-error)]">{errors().required_knowledge}</p>
         </Show>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1" for="kc-optional-knowledge">
-          Optional Knowledge (comma separated)
-        </label>
-        <input
-          id="kc-optional-knowledge"
-          type="text"
-          value={optionalKnowledgeInput()}
-          onInput={(e) => setOptionalKnowledgeInput(e.currentTarget.value)}
-          placeholder="optional-topic-1, optional-topic-2"
-          class="w-full px-3 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
-        />
       </div>
 
       <Show when={props.error}>

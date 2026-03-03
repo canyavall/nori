@@ -66,7 +66,6 @@ If you have proposals ready:
       "description": "Max 300 char description of the knowledge entry.",
       "required_knowledge": ["titles of other entries this depends on"],
       "rules": ["glob patterns like src/components/**/*.tsx for path-based loading"],
-      "optional_knowledge": ["titles of related but not required entries"],
       "content": "# Heading\\n\\nMarkdown content with code examples, explanations, etc."
     }
   ]

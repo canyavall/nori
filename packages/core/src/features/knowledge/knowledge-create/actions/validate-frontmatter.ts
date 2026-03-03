@@ -7,8 +7,7 @@ export function validateFrontmatter(
   tags: string[],
   description: string,
   required_knowledge: string[],
-  rules: string[],
-  optional_knowledge?: string[]
+  rules: string[]
 ): StepResult<KnowledgeFrontmatter> | FlowError {
   const result = knowledgeFrontmatterSchema.safeParse({
     title,
@@ -17,7 +16,6 @@ export function validateFrontmatter(
     description,
     required_knowledge,
     rules,
-    optional_knowledge,
   });
 
   if (!result.success) {

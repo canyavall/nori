@@ -96,9 +96,6 @@ Content here (≤2500 tokens)
 - `required_knowledge`: Packages that MUST be read first (use `[]` if none)
 - `rules`: Array of glob patterns for path-based loading (folder paths + file patterns)
 
-**Optional**:
-- `optional_knowledge`: Related but not required packages
-
 ## Tag Rules
 
 **CRITICAL**: Tags must be domain-specific, NEVER generic.

@@ -34,7 +34,6 @@ ${titlesHint}
 
 Always respond with a valid JSON array (no markdown, no explanation — raw JSON only).
 Each entry must have: title (string), category (string, lowercase slug like "guide" or "reference"), tags (array of 3-12 lowercase kebab-case strings), description (string, max 300 chars), required_knowledge (string array of prerequisite topic names), rules (string array of rules this entry teaches), content (markdown string, max 10000 chars).
-Optionally include: optional_knowledge (string array).
 Generate 1 to 3 focused entries. Each entry should be self-contained and useful.`;
 
   const userMessage = `User request: ${prompt}
@@ -73,7 +72,6 @@ Return a JSON array of knowledge proposals. Example format:
       description: String(p.description ?? ''),
       required_knowledge: Array.isArray(p.required_knowledge) ? p.required_knowledge.map(String) : [],
       rules: Array.isArray(p.rules) ? p.rules.map(String) : [],
-      optional_knowledge: Array.isArray(p.optional_knowledge) ? p.optional_knowledge.map(String) : undefined,
       content: String(p.content ?? ''),
     }));
 

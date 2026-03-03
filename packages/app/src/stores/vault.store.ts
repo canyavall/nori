@@ -13,3 +13,7 @@ export function updateVault(id: string, updates: Partial<Vault>) {
     prev.map((v) => (v.id === id ? { ...v, ...updates } : v))
   );
 }
+
+export function removeVault(id: string) {
+  setVaults((prev) => prev.filter((v) => v.id !== id));
+}

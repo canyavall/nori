@@ -1,0 +1,27 @@
+{
+  "type": "action",
+  "what": "Confirm the vault exists in the database",
+  "why": "Cannot delete a vault that doesn't exist",
+  "where": {
+    "entry_point": "features/vault/vault-delete/vault-delete.ts",
+    "implementation": "features/vault/vault-link-project/actions/validate-vault-exists.ts"
+  },
+  "output": { "console": false, "file": false },
+  "success_handling": {
+    "criteria": "Vault row found in database",
+    "event": { "action": "vault:delete:validating-vault", "status": "success", "message": "Vault verified", "data_fields": ["vault_id"] }
+  },
+  "error_handling": [
+    {
+      "scenario": "Vault not found",
+      "criteria": "No row returned for vault_id",
+      "action": "Return VAULT_NOT_FOUND error",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "Reuse validate-vault-exists from vault-link-project", "rationale": "Identical logic — check vault exists and return its row" }
+  ],
+  "calls": ["features/vault/vault-link-project/actions/validate-vault-exists.ts"]
+}

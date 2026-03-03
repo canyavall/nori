@@ -51,7 +51,6 @@ export const KnowledgeEditDialog = (props: KnowledgeEditDialogProps) => {
               initialDescription={entry()?.description ?? ''}
               initialRequiredKnowledge={entry()?.required_knowledge ?? []}
               initialRules={entry()?.rules ?? []}
-              initialOptionalKnowledge={frontmatter()?.optional_knowledge}
               initialContent={content()}
               error={saveError()}
               onSave={handleSave}

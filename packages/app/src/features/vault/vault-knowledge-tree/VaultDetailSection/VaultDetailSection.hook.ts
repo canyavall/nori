@@ -14,6 +14,7 @@ export const useVaultDetailSection = (props: VaultDetailSectionProps) => {
 
   const [selectedEntryId, setSelectedEntryId] = createSignal<string | null>(null);
   const [linkProjectOpen, setLinkProjectOpen] = createSignal(false);
+  const [settingsOpen, setSettingsOpen] = createSignal(false);
   const [importOpen, setImportOpen] = createSignal(false);
   const [exportOpen, setExportOpen] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal('');
@@ -96,6 +97,8 @@ export const useVaultDetailSection = (props: VaultDetailSectionProps) => {
     setSelectedEntryId,
     linkProjectOpen,
     setLinkProjectOpen,
+    settingsOpen,
+    setSettingsOpen,
     importOpen,
     setImportOpen,
     exportOpen,

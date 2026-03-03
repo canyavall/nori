@@ -1,0 +1,36 @@
+{
+  "type": "api_call",
+  "what": "DELETE /api/vault/:id with SSE progress",
+  "why": "Calls the backend vault-delete flow and streams progress events",
+  "where": { "component": "features/vault/vault-settings/VaultSettingsDialog/VaultSettingsDialog.hook.ts" },
+  "contract": {
+    "endpoint": "DELETE /api/vault/:id",
+    "request_type": "none",
+    "response_type": "VaultDeleteResponse",
+    "sse_events": [
+      "vault:delete:started",
+      "vault:delete:validating-vault",
+      "vault:delete:deleting-knowledge-entries",
+      "vault:delete:deleting-vault-links",
+      "vault:delete:deleting-vault-record",
+      "vault:delete:deleting-local-files",
+      "vault:delete:completed"
+    ]
+  },
+  "transitions": {
+    "on_success": "navigate:/vaults",
+    "on_error": "00-settings"
+  },
+  "error_handling": [
+    {
+      "scenario": "Network or server error",
+      "criteria": "SSE onError fires",
+      "action": "Show error in settings step",
+      "severity": "error",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    { "date": "2026-03-03", "reason": "DELETE with empty body", "rationale": "Vault ID is in the URL path; no request body needed" }
+  ]
+}

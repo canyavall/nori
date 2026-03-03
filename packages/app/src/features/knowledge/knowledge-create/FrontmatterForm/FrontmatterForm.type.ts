@@ -5,7 +5,6 @@ export interface FrontmatterFormProps {
   initialDescription: string;
   initialRequiredKnowledge: string[];
   initialRules: string[];
-  initialOptionalKnowledge?: string[];
   error?: string;
   onNext: (data: {
     title: string;
@@ -14,7 +13,6 @@ export interface FrontmatterFormProps {
     description: string;
     required_knowledge: string[];
     rules: string[];
-    optional_knowledge?: string[];
   }) => void;
   onCancel: () => void;
 }

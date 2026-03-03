@@ -26,7 +26,6 @@ export const useRepoExtractDialog = (
       tagsInput: p.tags.join(', '),
       requiredKnowledgeInput: p.required_knowledge.join(', '),
       rulesInput: p.rules.join('\n'),
-      optionalKnowledgeInput: (p.optional_knowledge ?? []).join(', '),
     };
   }
 
@@ -197,10 +196,6 @@ export const useRepoExtractDialog = (
         const items = (value as string).split('\n').map((t) => t.trim()).filter(Boolean);
         return { ...p, rulesInput: value as string, rules: items };
       }
-      if (field === 'optional_knowledge') {
-        const items = (value as string).split(',').map((t) => t.trim()).filter(Boolean);
-        return { ...p, optionalKnowledgeInput: value as string, optional_knowledge: items.length > 0 ? items : undefined };
-      }
       return { ...p, [field]: value };
     }));
   }
@@ -227,7 +222,6 @@ export const useRepoExtractDialog = (
           description: p.description,
           required_knowledge: p.required_knowledge,
           rules: p.rules,
-          optional_knowledge: p.optional_knowledge,
           content: p.content,
         }, {
           onEvent: () => {},

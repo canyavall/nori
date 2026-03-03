@@ -51,7 +51,6 @@ export const useKnowledgeEditDialog = (entryId: string, onClose: () => void) => 
     description: string;
     required_knowledge: string[];
     rules: string[];
-    optional_knowledge?: string[];
     content: string;
   }) {
     setStep('saving');

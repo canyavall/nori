@@ -7,7 +7,7 @@
   },
   "ui": {
     "renders": "form",
-    "fields": ["title", "category", "description", "tags", "rules", "required_knowledge", "optional_knowledge", "content", "included"],
+    "fields": ["title", "category", "description", "tags", "rules", "required_knowledge", "content", "included"],
     "validation_schema": "@nori/shared:knowledgeFrontmatterSchema"
   },
   "transitions": {

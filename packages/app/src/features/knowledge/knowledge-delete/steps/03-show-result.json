@@ -3,7 +3,7 @@
   "what": "Display deletion confirmed message",
   "why": "Confirm to the user that the knowledge entry has been successfully deleted and guide them back to the knowledge list",
   "where": {
-    "component": "features/knowledge/knowledge-delete/KnowledgeDeleteDialog/KnowledgeDeleteDialog.tsx",
+    "component": "features/knowledge/knowledge-detail/KnowledgeDetailPanel/KnowledgeDetailPanel.tsx",
     "step_component": "features/knowledge/knowledge-delete/DeleteResult/DeleteResult.tsx"
   },
   "ui": {
@@ -14,11 +14,11 @@
     "validation_schema": null
   },
   "transitions": {
-    "on_continue": "navigate:/knowledge"
+    "on_continue": "onDeleted callback → clears selectedEntryId in VaultDetailSection"
   },
   "success_handling": {
-    "criteria": "User dismisses the success screen",
-    "transition": "navigate:/knowledge"
+    "criteria": "User clicks 'Back to Knowledge' — triggers onDeleted callback which clears panel selection and reloads sidebar",
+    "transition": "panel cleared, sidebar reloaded"
   },
   "error_handling": [
     {

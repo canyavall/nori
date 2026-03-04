@@ -1,6 +1,6 @@
 import type { Database } from 'sql.js';
 import type { StepResult, FlowError, KnowledgeEntry } from '@nori/shared';
-import { queryAll } from '../../../shared/utils/database.js';
+import { queryKnowledgeEntries } from '../../shared/knowledge-queries.js';
 
 export interface LoadIndexResult {
   entries: KnowledgeEntry[];
@@ -15,27 +15,7 @@ export function loadIndex(
   const start = Date.now();
 
   try {
-    const sql = vaultId
-      ? 'SELECT * FROM knowledge_entries WHERE vault_id = ?'
-      : 'SELECT * FROM knowledge_entries';
-    const params = vaultId ? [vaultId] : [];
-
-    const rows = queryAll(db, sql, params);
-
-    const entries: KnowledgeEntry[] = rows.map((row) => ({
-      id: row.id as string,
-      vault_id: row.vault_id as string,
-      file_path: row.file_path as string,
-      title: row.title as string,
-      category: row.category as string,
-      tags: JSON.parse((row.tags as string) || '[]') as string[],
-      description: (row.description as string) ?? '',
-      required_knowledge: JSON.parse((row.required_knowledge as string) || '[]') as string[],
-      rules: JSON.parse((row.rules as string) || '[]') as string[],
-      content_hash: row.content_hash as string,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
-    }));
+    const entries = queryKnowledgeEntries(db, vaultId);
 
     return {
       success: true,

@@ -3,6 +3,7 @@ export { createNoopEmitter, createFlowEmitter, prefixedEmitter } from './feature
 export { createEventLogger } from './features/shared/utils/event-logger.js';
 export { getNoriDataDir, getNoriDbPath, getVaultsDir, getVaultDir } from './features/shared/utils/path-resolver.js';
 export { openDatabase, saveDatabase, runMigrations, queryOne, queryAll, type DatabaseOptions } from './features/shared/utils/database.js';
+export { queryKnowledgeEntries, queryKnowledgeEntryById } from './features/knowledge/shared/knowledge-queries.js';
 
 // Flows
 export { runAppIntegrityCheck } from './features/app/app-integrity-check/app-integrity-check.js';

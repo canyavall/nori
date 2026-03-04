@@ -172,7 +172,7 @@ function walkDirectory(dir: string, rootDir: string, result: ScannedFile[]): voi
       continue;
     }
 
-    const relativePath = relative(rootDir, fullPath);
+    const relativePath = relative(rootDir, fullPath).replace(/\\/g, '/');
     result.push({
       relative_path: relativePath,
       absolute_path: fullPath,

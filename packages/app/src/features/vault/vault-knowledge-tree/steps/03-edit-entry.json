@@ -17,15 +17,22 @@
       "content"
     ],
     "modes": {
-      "view": "All fields displayed as read-only text; Edit button (top-right) and disabled Delete button",
-      "edit": "All fields as editable inputs using EditForm; Save Changes + Cancel buttons; Delete button enabled"
+      "view": "All fields displayed as read-only text; Edit button and Delete button in top-right",
+      "edit": "All fields as editable inputs using EditForm; Save Changes + Cancel buttons; Delete button top-right",
+      "confirm-delete": "DeleteConfirmation component inline in panel — shows entry title, confirm and cancel buttons",
+      "deleting": "Spinner with SSE progress message from DELETE /api/knowledge/:id",
+      "deleted": "DeleteResult component inline — 'Back to Knowledge' button clears panel selection"
     },
     "validation_schema": "@nori/shared:KnowledgeEditRequest"
   },
   "transitions": {
     "on_row_click": "edit mode (inline, no navigation)",
     "on_save": "view mode (reload entry)",
-    "on_cancel": "view mode"
+    "on_cancel": "view mode",
+    "on_delete_click": "confirm-delete mode",
+    "on_delete_confirm": "deleting mode → deleted mode",
+    "on_delete_cancel": "view mode",
+    "on_delete_done": "clears selectedEntryId via onDeleted callback"
   },
   "success_handling": {
     "criteria": "User saves changes to the entry; panel returns to view mode with updated data",
@@ -55,6 +62,11 @@
       "date": "2026-03-03",
       "reason": "Make the entire entry row the click target instead of a separate Edit button",
       "rationale": "A small Edit button requires precise targeting and is invisible until hover. The whole row is a larger, always-visible hit area that is more discoverable and faster to click."
+    },
+    {
+      "date": "2026-03-03",
+      "reason": "Implement delete inline in KnowledgeDetailPanel instead of a separate KnowledgeDeleteDialog",
+      "rationale": "The panel already owns the entry lifecycle (load, view, edit). Embedding delete (confirm-delete → deleting → deleted) avoids opening a second modal on top of the panel and keeps all state in one place. onDeleted callback clears selectedEntryId and reloads the sidebar."
     }
   ]
 }

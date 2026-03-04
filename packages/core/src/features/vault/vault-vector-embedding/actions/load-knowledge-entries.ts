@@ -1,19 +1,9 @@
 import type { Database } from 'sql.js';
-import type { StepResult, FlowError } from '@nori/shared';
-import { queryAll } from '../../../shared/utils/database.js';
-
-export interface KnowledgeEntryRow {
-  id: string;
-  vault_id: string;
-  file_path: string;
-  title: string;
-  category: string;
-  tags: string;
-  content_hash: string;
-}
+import type { StepResult, FlowError, KnowledgeEntry } from '@nori/shared';
+import { queryKnowledgeEntries } from '../../../knowledge/shared/knowledge-queries.js';
 
 export interface LoadKnowledgeEntriesResult {
-  entries: KnowledgeEntryRow[];
+  entries: KnowledgeEntry[];
   entry_count: number;
 }
 
@@ -22,8 +12,7 @@ export function loadKnowledgeEntries(
   vaultId: string
 ): StepResult<LoadKnowledgeEntriesResult> | FlowError {
   try {
-    const rows = queryAll(db, 'SELECT * FROM knowledge_entries WHERE vault_id = ?', [vaultId]);
-    const entries = rows as unknown as KnowledgeEntryRow[];
+    const entries = queryKnowledgeEntries(db, vaultId);
 
     return {
       success: true,

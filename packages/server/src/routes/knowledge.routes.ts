@@ -4,6 +4,8 @@ import {
   queryAll,
   queryOne,
   loadExisting,
+  queryKnowledgeEntries,
+  queryKnowledgeEntryById,
 } from '@nori/core';
 import { withSSE } from '../sse/emitter.js';
 import { saveDb } from '../middleware/database.js';
@@ -66,7 +68,7 @@ knowledge.get('/:id', async (c) => {
   const entryId = c.req.param('id');
   const db = c.get('db');
 
-  const entry = queryOne(db, 'SELECT * FROM knowledge_entries WHERE id = ?', [entryId]);
+  const entry = queryKnowledgeEntryById(db, entryId);
   if (!entry) {
     return c.json({ error: { code: 'NOT_FOUND', message: 'Entry not found' } }, 404);
   }
@@ -78,13 +80,7 @@ knowledge.get('/:id', async (c) => {
 knowledge.get('/', async (c) => {
   const vaultId = c.req.query('vault_id');
   const db = c.get('db');
-
-  const sql = vaultId
-    ? 'SELECT * FROM knowledge_entries WHERE vault_id = ? ORDER BY updated_at DESC'
-    : 'SELECT * FROM knowledge_entries ORDER BY updated_at DESC';
-  const params = vaultId ? [vaultId] : [];
-  const entries = queryAll(db, sql, params);
-
+  const entries = queryKnowledgeEntries(db, vaultId ?? undefined);
   return c.json({ data: entries });
 });
 

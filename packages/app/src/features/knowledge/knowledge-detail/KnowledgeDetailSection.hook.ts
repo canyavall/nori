@@ -46,31 +46,6 @@ export const useKnowledgeDetailSection = () => {
       const entryRes = await apiGet<{ data: KnowledgeEntry }>(`/api/knowledge/${params.id}`);
       const entry = entryRes.data;
 
-      if (typeof entry.tags === 'string') {
-        try {
-          entry.tags = JSON.parse(entry.tags);
-        } catch {
-          entry.tags = [];
-        }
-      }
-      if (typeof (entry as unknown as Record<string, unknown>).required_knowledge === 'string') {
-        try {
-          entry.required_knowledge = JSON.parse((entry as unknown as Record<string, unknown>).required_knowledge as string);
-        } catch {
-          entry.required_knowledge = [];
-        }
-      }
-      if (typeof (entry as unknown as Record<string, unknown>).rules === 'string') {
-        try {
-          entry.rules = JSON.parse((entry as unknown as Record<string, unknown>).rules as string);
-        } catch {
-          entry.rules = [];
-        }
-      }
-      entry.description = entry.description ?? '';
-      entry.required_knowledge = entry.required_knowledge ?? [];
-      entry.rules = entry.rules ?? [];
-
       const contentRes = await apiGet<{ data: { content: string; frontmatter: KnowledgeFrontmatter } }>(
         `/api/knowledge/${params.id}/content`
       );

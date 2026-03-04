@@ -12,6 +12,14 @@ vi.mock('../../knowledge-edit/EditForm/EditForm', () => ({
   EditForm: () => <div data-testid="edit-form" />,
 }));
 
+vi.mock('../../knowledge-delete/DeleteConfirmation/DeleteConfirmation', () => ({
+  DeleteConfirmation: () => <div data-testid="delete-confirmation" />,
+}));
+
+vi.mock('../../knowledge-delete/DeleteResult/DeleteResult', () => ({
+  DeleteResult: () => <div data-testid="delete-result" />,
+}));
+
 vi.mock('../../../../components/ui/MarkdownContent/MarkdownContent', () => ({
   MarkdownContent: (props: { content: string; viewMode: string }) => (
     <div data-testid="markdown-content" data-view-mode={props.viewMode}>{props.content}</div>
@@ -55,12 +63,17 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     contentViewMode: () => 'markdown' as const,
     mainFieldsOpen: () => true,
     additionalFieldsOpen: () => false,
+    deleteError: () => '',
+    deleteProgressMessage: () => '',
     handleContentViewModeChange: vi.fn(),
     toggleMainFields: vi.fn(),
     toggleAdditionalFields: vi.fn(),
     handleEdit: vi.fn(),
     handleCancelEdit: vi.fn(),
     handleSave: vi.fn(),
+    handleDeleteRequest: vi.fn(),
+    handleDeleteCancel: vi.fn(),
+    handleDeleteConfirm: vi.fn(),
     ...overrides,
   };
 }
@@ -344,7 +357,7 @@ describe('KnowledgeDetailPanel', () => {
     expect(screen.getByTestId('markdown-content').getAttribute('data-view-mode')).toBe('text');
   });
 
-  // ── Other states ──────────────────────────────────────────────────────────
+  // ── Edit mode ──────────────────────────────────────────────────────────────
 
   it('shows edit form in editing step', () => {
     const entry = makeEntry();
@@ -369,5 +382,93 @@ describe('KnowledgeDetailPanel', () => {
     render(() => <KnowledgeDetailPanel entryId="entry-1" />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(handleEdit).toHaveBeenCalledOnce();
+  });
+
+  // ── Delete flow ────────────────────────────────────────────────────────────
+
+  it('shows Delete button in view mode', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entry: () => entry,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDefined();
+  });
+
+  it('Delete button in view mode is not disabled', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entry: () => entry,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    const btn = screen.getByRole('button', { name: 'Delete' });
+    expect((btn as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('calls handleDeleteRequest when Delete button clicked in view mode', () => {
+    const handleDeleteRequest = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'view',
+      entry: () => entry,
+      handleDeleteRequest,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(handleDeleteRequest).toHaveBeenCalledOnce();
+  });
+
+  it('shows Delete button in edit mode', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'editing',
+      entry: () => entry,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDefined();
+  });
+
+  it('calls handleDeleteRequest when Delete button clicked in edit mode', () => {
+    const handleDeleteRequest = vi.fn();
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'editing',
+      entry: () => entry,
+      handleDeleteRequest,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(handleDeleteRequest).toHaveBeenCalledOnce();
+  });
+
+  it('shows delete-confirmation component in confirm-delete step', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'confirm-delete',
+      entry: () => entry,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    expect(screen.getByTestId('delete-confirmation')).toBeDefined();
+  });
+
+  it('shows progress spinner in deleting step', () => {
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'deleting',
+      deleteProgressMessage: () => 'Deleting file...',
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    expect(screen.getByText('Deleting file...')).toBeDefined();
+  });
+
+  it('shows delete-result component in deleted step', () => {
+    const entry = makeEntry();
+    mockUse.mockReturnValue(makeDefaultHook({
+      step: () => 'deleted',
+      entry: () => entry,
+    }));
+    render(() => <KnowledgeDetailPanel entryId="entry-1" />);
+    expect(screen.getByTestId('delete-result')).toBeDefined();
   });
 });

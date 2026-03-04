@@ -1,6 +1,8 @@
 import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { EditForm } from '../../knowledge-edit/EditForm/EditForm';
+import { DeleteConfirmation } from '../../knowledge-delete/DeleteConfirmation/DeleteConfirmation';
+import { DeleteResult } from '../../knowledge-delete/DeleteResult/DeleteResult';
 import { MarkdownContent } from '../../../../components/ui/MarkdownContent/MarkdownContent';
 import type { KnowledgeDetailPanelProps } from './KnowledgeDetailPanel.type';
 import { useKnowledgeDetailPanel } from './KnowledgeDetailPanel.hook';
@@ -30,12 +32,17 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
     contentViewMode,
     mainFieldsOpen,
     additionalFieldsOpen,
+    deleteError,
+    deleteProgressMessage,
     handleContentViewModeChange,
     toggleMainFields,
     toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,
+    handleDeleteRequest,
+    handleDeleteCancel,
+    handleDeleteConfirm,
   } = useKnowledgeDetailPanel(props);
 
   return (
@@ -69,6 +76,42 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
         </div>
       </Show>
 
+      {/* Deleting */}
+      <Show when={step() === 'deleting'}>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="text-center space-y-4">
+            <div class="inline-block w-8 h-8 border-2 border-[var(--color-error)] border-t-transparent rounded-full animate-spin" />
+            <p class="text-sm text-[var(--color-text-muted)]">{deleteProgressMessage()}</p>
+          </div>
+        </div>
+      </Show>
+
+      {/* Delete confirmation */}
+      <Show when={step() === 'confirm-delete' && entry()} keyed>
+        {(e) => (
+          <div class="flex-1 overflow-y-auto p-6">
+            <DeleteConfirmation
+              entryTitle={e.title}
+              error={deleteError()}
+              onConfirm={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
+            />
+          </div>
+        )}
+      </Show>
+
+      {/* Deleted */}
+      <Show when={step() === 'deleted' && entry()} keyed>
+        {(e) => (
+          <div class="flex-1 overflow-y-auto p-6">
+            <DeleteResult
+              entryTitle={e.title}
+              onDone={() => props.onDeleted?.()}
+            />
+          </div>
+        )}
+      </Show>
+
       {/* View mode */}
       <Show when={step() === 'view' && entry()} keyed>
         {(e) => (
@@ -86,8 +129,8 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
                 </button>
                 <button
                   type="button"
-                  disabled
-                  class="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-sm text-[var(--color-text-muted)] opacity-40 cursor-not-allowed"
+                  onClick={handleDeleteRequest}
+                  class="px-3 py-1.5 rounded-md border border-[var(--color-error)]/30 text-sm text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
                 >
                   Delete
                 </button>
@@ -231,6 +274,7 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
               <h2 class="text-lg font-semibold">Edit Entry</h2>
               <button
                 type="button"
+                onClick={handleDeleteRequest}
                 class="px-3 py-1.5 rounded-md border border-[var(--color-error)]/50 text-[var(--color-error)] text-sm hover:bg-[var(--color-error)]/10 transition-colors"
               >
                 Delete

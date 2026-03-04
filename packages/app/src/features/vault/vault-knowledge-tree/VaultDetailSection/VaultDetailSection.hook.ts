@@ -41,13 +41,7 @@ export const useVaultDetailSection = (props: VaultDetailSectionProps) => {
     setEntriesLoading(true);
     try {
       const res = await apiGet<{ data: KnowledgeEntry[] }>(`/api/knowledge?vault_id=${vaultId}`);
-      const normalized = res.data.map((e) => {
-        if (typeof e.tags === 'string') {
-          try { return { ...e, tags: JSON.parse(e.tags as unknown as string) }; } catch { return { ...e, tags: [] }; }
-        }
-        return e;
-      });
-      setEntries(normalized);
+      setEntries(res.data);
     } catch {
       // silently ignore — tree will be empty
     }
@@ -87,6 +81,15 @@ export const useVaultDetailSection = (props: VaultDetailSectionProps) => {
     if (v) loadEntries(v.id);
   }
 
+  function handleDeleteSuccess() {
+    const v = vault();
+    if (v) loadEntries(v.id);
+  }
+
+  function handleEntryDeleted() {
+    setSelectedEntryId(null);
+  }
+
   return {
     vault,
     vaultLoading,
@@ -111,5 +114,7 @@ export const useVaultDetailSection = (props: VaultDetailSectionProps) => {
     handleRefresh,
     handleEntrySelected,
     handleEntrySaved,
+    handleDeleteSuccess,
+    handleEntryDeleted,
   };
 };

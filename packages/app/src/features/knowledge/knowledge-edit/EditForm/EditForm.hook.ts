@@ -14,13 +14,19 @@ const parseLines = (input: string): string[] =>
     .map((l) => l.trim())
     .filter(Boolean);
 
+const toArray = (v: unknown): string[] => {
+  if (Array.isArray(v)) return v as string[];
+  if (typeof v === 'string') { try { return JSON.parse(v); } catch { return []; } }
+  return [];
+};
+
 export const useEditForm = (props: Pick<EditFormProps, 'initialTitle' | 'initialCategory' | 'initialTags' | 'initialDescription' | 'initialRequiredKnowledge' | 'initialRules' | 'initialContent' | 'onSave'>) => {
   const [title, setTitle] = createSignal(props.initialTitle);
   const [category, setCategory] = createSignal(props.initialCategory);
-  const [tagsInput, setTagsInput] = createSignal(props.initialTags.join(', '));
+  const [tagsInput, setTagsInput] = createSignal(toArray(props.initialTags).join(', '));
   const [description, setDescription] = createSignal(props.initialDescription);
-  const [requiredKnowledgeInput, setRequiredKnowledgeInput] = createSignal(props.initialRequiredKnowledge.join(', '));
-  const [rulesInput, setRulesInput] = createSignal(props.initialRules.join('\n'));
+  const [requiredKnowledgeInput, setRequiredKnowledgeInput] = createSignal(toArray(props.initialRequiredKnowledge).join(', '));
+  const [rulesInput, setRulesInput] = createSignal(toArray(props.initialRules).join('\n'));
   const [content, setContent] = createSignal(props.initialContent);
   const [errors, setErrors] = createSignal<Record<string, string>>({});
 

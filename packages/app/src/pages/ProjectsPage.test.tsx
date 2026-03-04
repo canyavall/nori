@@ -119,16 +119,20 @@ describe('ProjectsPage', () => {
     expect(selectProjectMock).toHaveBeenCalledWith(project);
   });
 
-  it('selected card has accent border class', async () => {
+  it('shows project dashboard when a project is active', async () => {
     const project = makeProject({ id: 'p1', name: 'alpha' });
-    mockApiGet.mockResolvedValue({ data: [project] });
+    mockApiGet.mockImplementation((url: string) => {
+      if (url.includes('claude/mcps')) return Promise.resolve({ data: { servers: [], raw: '' } });
+      return Promise.resolve({ data: [] });
+    });
     setMockProjects([project]);
     setMockActiveProject(project);
     render(() => <ProjectsPage />);
 
-    await waitFor(() => screen.getByText('alpha'));
-    const card = screen.getByText('alpha').closest('[class*="rounded-lg"]')!;
-    expect(card.className).toContain('border-[var(--color-accent)]');
+    await waitFor(() => {
+      const heading = screen.getByRole('heading', { level: 2 });
+      expect(heading.textContent).toBe('alpha');
+    });
   });
 
   it('shows "Add Project" button', async () => {

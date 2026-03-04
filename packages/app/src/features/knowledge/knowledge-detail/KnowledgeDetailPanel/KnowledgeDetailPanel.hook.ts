@@ -1,12 +1,12 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onMount, onCleanup } from 'solid-js';
 import type { KnowledgeEntry, KnowledgeFrontmatter } from '@nori/shared';
 import type { ContentViewMode } from '../../../../components/ui/MarkdownContent/MarkdownContent.type';
 import { apiGet } from '../../../../lib/api';
 import { connectSSE } from '../../../../lib/sse';
-import { updateKnowledgeEntry } from '../../../../stores/knowledge.store';
+import { updateKnowledgeEntry, removeKnowledgeEntry } from '../../../../stores/knowledge.store';
 import type { KnowledgeDetailPanelProps } from './KnowledgeDetailPanel.type';
 
-export type PanelStep = 'loading' | 'view' | 'editing' | 'saving' | 'error';
+export type PanelStep = 'loading' | 'view' | 'editing' | 'saving' | 'confirm-delete' | 'deleting' | 'deleted' | 'error';
 
 export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
   const [step, setStep] = createSignal<PanelStep>('loading');
@@ -19,10 +19,18 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
   const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
   const [mainFieldsOpen, setMainFieldsOpen] = createSignal(true);
   const [additionalFieldsOpen, setAdditionalFieldsOpen] = createSignal(false);
+  const [deleteError, setDeleteError] = createSignal('');
+  const [deleteProgressMessage, setDeleteProgressMessage] = createSignal('');
 
   const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
   const toggleMainFields = () => setMainFieldsOpen((v) => !v);
   const toggleAdditionalFields = () => setAdditionalFieldsOpen((v) => !v);
+
+  let sseController: AbortController | undefined;
+
+  onCleanup(() => {
+    sseController?.abort();
+  });
 
   const loadEntry = async () => {
     setStep('loading');
@@ -30,18 +38,6 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     try {
       const entryRes = await apiGet<{ data: KnowledgeEntry }>(`/api/knowledge/${props.entryId}`);
       const e = entryRes.data;
-      if (typeof e.tags === 'string') {
-        try { e.tags = JSON.parse(e.tags); } catch { e.tags = []; }
-      }
-      if (typeof (e as unknown as Record<string, unknown>).required_knowledge === 'string') {
-        try { e.required_knowledge = JSON.parse((e as unknown as Record<string, unknown>).required_knowledge as string); } catch { e.required_knowledge = []; }
-      }
-      if (typeof (e as unknown as Record<string, unknown>).rules === 'string') {
-        try { e.rules = JSON.parse((e as unknown as Record<string, unknown>).rules as string); } catch { e.rules = []; }
-      }
-      e.description = e.description ?? '';
-      e.required_knowledge = e.required_knowledge ?? [];
-      e.rules = e.rules ?? [];
 
       const contentRes = await apiGet<{ data: { content: string; frontmatter: KnowledgeFrontmatter } }>(
         `/api/knowledge/${props.entryId}/content`
@@ -131,6 +127,62 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     }, 'PUT');
   }
 
+  function handleDeleteRequest() {
+    setDeleteError('');
+    setStep('confirm-delete');
+  }
+
+  function handleDeleteCancel() {
+    setDeleteError('');
+    setStep('view');
+  }
+
+  function handleDeleteConfirm() {
+    setStep('deleting');
+    setDeleteProgressMessage('Starting deletion...');
+    setDeleteError('');
+
+    sseController = connectSSE(`/api/knowledge/${props.entryId}`, {}, {
+      onEvent: (event) => {
+        const messages: Record<string, string> = {
+          'knowledge:delete:started': 'Starting deletion...',
+          'knowledge:delete:validating-exists': 'Validating entry...',
+          'knowledge:delete:checking-dependencies': 'Checking dependencies...',
+          'knowledge:delete:deleting-file': 'Deleting file from vault...',
+          'knowledge:delete:regenerating-index': 'Rebuilding search index...',
+          'knowledge:delete:completed': 'Deletion complete!',
+        };
+        setDeleteProgressMessage(messages[event] ?? event);
+      },
+      onResult: (resultData) => {
+        interface KnowledgeDeleteResult {
+          success: boolean;
+          data?: { deleted_file_path: string };
+          error?: { message: string };
+        }
+        const isDeleteResult = (d: unknown): d is KnowledgeDeleteResult =>
+          typeof d === 'object' && d !== null && 'success' in d;
+
+        sseController?.abort();
+        if (!isDeleteResult(resultData)) return;
+
+        if (resultData.success) {
+          removeKnowledgeEntry(props.entryId);
+          props.onDeleteSuccess?.();
+          setStep('deleted');
+        } else {
+          setDeleteError(resultData.error?.message ?? 'Deletion failed');
+          setStep('confirm-delete');
+        }
+      },
+      onError: (errMsg) => {
+        sseController?.abort();
+        setDeleteError(errMsg);
+        setStep('confirm-delete');
+      },
+    }, 'DELETE');
+  }
+
   return {
     step,
     error,
@@ -142,11 +194,16 @@ export const useKnowledgeDetailPanel = (props: KnowledgeDetailPanelProps) => {
     contentViewMode,
     mainFieldsOpen,
     additionalFieldsOpen,
+    deleteError,
+    deleteProgressMessage,
     handleContentViewModeChange,
     toggleMainFields,
     toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,
+    handleDeleteRequest,
+    handleDeleteCancel,
+    handleDeleteConfirm,
   };
 };

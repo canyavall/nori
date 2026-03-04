@@ -7,7 +7,7 @@ export const SettingsSection: Component = () => {
   const { checking, detail, subscriptionLabel, runCheck } = useSettingsSection();
 
   return (
-    <div class="p-6 max-w-2xl">
+    <div class="p-6 max-w-2xl mx-auto">
       <h2 class="text-xl font-semibold mb-6">Settings</h2>
 
       {/* Appearance */}

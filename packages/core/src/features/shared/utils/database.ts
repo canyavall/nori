@@ -69,108 +69,172 @@ export function queryAll(db: Database, sql: string, params: unknown[] = []): Rec
   return rows;
 }
 
+export type ColumnSpec = {
+  jsonFields?: string[];
+  boolFields?: string[];
+};
+
+export function mapRow<T>(row: Record<string, unknown>, spec: ColumnSpec): T {
+  const result: Record<string, unknown> = { ...row };
+  for (const field of spec.jsonFields ?? []) {
+    if (typeof result[field] === 'string') {
+      try { result[field] = JSON.parse(result[field] as string); }
+      catch { result[field] = []; }
+    }
+  }
+  for (const field of spec.boolFields ?? []) {
+    result[field] = Boolean(result[field]);
+  }
+  return result as T;
+}
+
+export function mapRows<T>(rows: Record<string, unknown>[], spec: ColumnSpec): T[] {
+  return rows.map(row => mapRow<T>(row, spec));
+}
+
+interface Migration {
+  version: number;
+  up: (db: Database) => void;
+}
+
+const MIGRATIONS: Migration[] = [
+  {
+    version: 1,
+    up: (db) => {
+      db.run(`
+        CREATE TABLE IF NOT EXISTS vaults (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL UNIQUE,
+          git_url TEXT NOT NULL,
+          branch TEXT DEFAULT 'main',
+          local_path TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          last_synced_at TEXT
+        )
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS knowledge_entries (
+          id TEXT PRIMARY KEY,
+          vault_id TEXT NOT NULL,
+          file_path TEXT NOT NULL,
+          title TEXT NOT NULL,
+          category TEXT NOT NULL DEFAULT '',
+          tags TEXT NOT NULL DEFAULT '[]',
+          content_hash TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (vault_id) REFERENCES vaults(id)
+        )
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS vault_links (
+          id TEXT PRIMARY KEY,
+          vault_id TEXT NOT NULL,
+          project_path TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (vault_id) REFERENCES vaults(id),
+          UNIQUE(vault_id, project_path)
+        )
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id TEXT PRIMARY KEY,
+          vault_id TEXT,
+          title TEXT NOT NULL DEFAULT '',
+          status TEXT NOT NULL DEFAULT 'active',
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (vault_id) REFERENCES vaults(id)
+        )
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS projects (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          path TEXT NOT NULL UNIQUE,
+          is_git INTEGER NOT NULL DEFAULT 0,
+          connected_vaults TEXT NOT NULL DEFAULT '[]',
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+      `);
+    },
+  },
+  {
+    version: 2,
+    up: (db) => {
+      // vault_type requires changing NOT NULL on git_url — SQLite needs table recreate
+      db.run(`ALTER TABLE vaults RENAME TO vaults_legacy`);
+      db.run(`
+        CREATE TABLE vaults (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL UNIQUE,
+          vault_type TEXT NOT NULL DEFAULT 'git',
+          git_url TEXT,
+          branch TEXT DEFAULT 'main',
+          local_path TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          last_synced_at TEXT
+        )
+      `);
+      db.run(`
+        INSERT INTO vaults
+          SELECT id, name, 'git', git_url, branch, local_path, created_at, updated_at, last_synced_at
+          FROM vaults_legacy
+      `);
+      db.run(`DROP TABLE vaults_legacy`);
+    },
+  },
+  {
+    version: 3,
+    up: (db) => {
+      db.run(`ALTER TABLE knowledge_entries ADD COLUMN description TEXT NOT NULL DEFAULT ''`);
+      db.run(`ALTER TABLE knowledge_entries ADD COLUMN required_knowledge TEXT NOT NULL DEFAULT '[]'`);
+      db.run(`ALTER TABLE knowledge_entries ADD COLUMN rules TEXT NOT NULL DEFAULT '[]'`);
+    },
+  },
+];
+
+function detectExistingVersion(db: Database): number {
+  const vaultCols = new Set(
+    queryAll(db, 'PRAGMA table_info(vaults)').map((c) => c.name as string)
+  );
+  if (!vaultCols.has('id')) return 0; // No tables at all — fresh DB
+
+  const keCols = new Set(
+    queryAll(db, 'PRAGMA table_info(knowledge_entries)').map((c) => c.name as string)
+  );
+  if (keCols.has('description') && keCols.has('rules')) return 3;
+  if (vaultCols.has('vault_type')) return 2;
+  return 1;
+}
+
 export function runMigrations(db: Database): void {
-  // v1 schema — vault_type + nullable git_url/branch for local vaults
   db.run(`
-    CREATE TABLE IF NOT EXISTS vaults (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      vault_type TEXT NOT NULL DEFAULT 'git',
-      git_url TEXT,
-      branch TEXT DEFAULT 'main',
-      local_path TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_synced_at TEXT
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version    INTEGER PRIMARY KEY,
+      applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
 
-  // Migration: existing databases have git_url NOT NULL and no vault_type column.
-  // Recreate the table with the new schema if vault_type is missing.
-  const cols = queryAll(db, 'PRAGMA table_info(vaults)');
-  const colNames = new Set(cols.map((c) => c.name as string));
-  if (!colNames.has('vault_type')) {
-    db.run(`ALTER TABLE vaults RENAME TO vaults_legacy`);
-    db.run(`
-      CREATE TABLE vaults (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL UNIQUE,
-        vault_type TEXT NOT NULL DEFAULT 'git',
-        git_url TEXT,
-        branch TEXT DEFAULT 'main',
-        local_path TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-        last_synced_at TEXT
-      )
-    `);
-    db.run(`
-      INSERT INTO vaults
-        SELECT id, name, 'git', git_url, branch, local_path, created_at, updated_at, last_synced_at
-        FROM vaults_legacy
-    `);
-    db.run(`DROP TABLE vaults_legacy`);
+  const versionRow = queryOne(db, 'SELECT MAX(version) as v FROM schema_migrations');
+  let currentVersion = (versionRow?.v as number | null) ?? 0;
+
+  if (currentVersion === 0) {
+    const detected = detectExistingVersion(db);
+    if (detected > 0) {
+      const placeholders = Array.from({ length: detected }, (_, i) => `(${i + 1})`).join(', ');
+      db.run(`INSERT INTO schema_migrations (version) VALUES ${placeholders}`);
+      currentVersion = detected;
+    }
   }
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS knowledge_entries (
-      id TEXT PRIMARY KEY,
-      vault_id TEXT NOT NULL,
-      file_path TEXT NOT NULL,
-      title TEXT NOT NULL,
-      category TEXT NOT NULL DEFAULT '',
-      tags TEXT NOT NULL DEFAULT '[]',
-      content_hash TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (vault_id) REFERENCES vaults(id)
-    )
-  `);
-
-  // Migration: add description, required_knowledge, rules columns to knowledge_entries
-  const keCols = queryAll(db, 'PRAGMA table_info(knowledge_entries)');
-  const keColNames = new Set(keCols.map((c) => c.name as string));
-  if (!keColNames.has('description')) {
-    db.run(`ALTER TABLE knowledge_entries ADD COLUMN description TEXT NOT NULL DEFAULT ''`);
+  for (const migration of MIGRATIONS) {
+    if (migration.version > currentVersion) {
+      migration.up(db);
+      db.run('INSERT INTO schema_migrations (version) VALUES (?)', [migration.version]);
+      currentVersion = migration.version;
+    }
   }
-  if (!keColNames.has('required_knowledge')) {
-    db.run(`ALTER TABLE knowledge_entries ADD COLUMN required_knowledge TEXT NOT NULL DEFAULT '[]'`);
-  }
-  if (!keColNames.has('rules')) {
-    db.run(`ALTER TABLE knowledge_entries ADD COLUMN rules TEXT NOT NULL DEFAULT '[]'`);
-  }
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS vault_links (
-      id TEXT PRIMARY KEY,
-      vault_id TEXT NOT NULL,
-      project_path TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (vault_id) REFERENCES vaults(id),
-      UNIQUE(vault_id, project_path)
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS sessions (
-      id TEXT PRIMARY KEY,
-      vault_id TEXT,
-      title TEXT NOT NULL DEFAULT '',
-      status TEXT NOT NULL DEFAULT 'active',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (vault_id) REFERENCES vaults(id)
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS projects (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      path TEXT NOT NULL UNIQUE,
-      is_git INTEGER NOT NULL DEFAULT 0,
-      connected_vaults TEXT NOT NULL DEFAULT '[]',
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )
-  `);
 }

@@ -50,6 +50,11 @@
     {
       "condition": "Database write fails",
       "outcome": "Abort regeneration"
+    },
+    {
+      "date": "2026-03-03",
+      "reason": "Migrations use versioned MIGRATIONS array tracked by schema_migrations table",
+      "rationale": "Versioned migrations (v1–v3 as of this date) replace PRAGMA table_info() column checks. write-database receives an already-migrated db — it never runs or checks migrations itself. Future schema changes add a new version entry to the MIGRATIONS array in database.ts."
     }
   ],
   "calls": [

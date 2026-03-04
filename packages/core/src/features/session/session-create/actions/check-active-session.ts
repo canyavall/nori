@@ -1,6 +1,6 @@
 import type { Database } from 'sql.js';
 import type { StepResult, FlowError, Session } from '@nori/shared';
-import { queryOne } from '../../../shared/utils/database.js';
+import { queryActiveSession } from '../../shared/session-queries.js';
 
 export interface CheckActiveResult {
   had_active: boolean;
@@ -11,13 +11,11 @@ export function checkActiveSession(
   db: Database
 ): StepResult<CheckActiveResult> | FlowError {
   try {
-    const row = queryOne(db, `SELECT * FROM sessions WHERE status = 'active' LIMIT 1`);
+    const previous = queryActiveSession(db);
 
-    if (!row) {
+    if (!previous) {
       return { success: true, data: { had_active: false } };
     }
-
-    const previous = row as unknown as Session;
 
     // Archive the previously active session (non-fatal if fails)
     try {

@@ -9,22 +9,20 @@ export const useVaultKnowledgeTree = (props: VaultKnowledgeTreeProps) => {
   const [entries, setEntries] = createSignal<KnowledgeEntry[]>([]);
   const [editEntryId, setEditEntryId] = createSignal<string | null>(null);
 
+  const normalizeTags = (tags: unknown): string[] => {
+    if (Array.isArray(tags)) return tags as string[];
+    if (typeof tags === 'string') {
+      try { return JSON.parse(tags); } catch { return []; }
+    }
+    return [];
+  };
+
   const loadEntries = async (vaultId: string) => {
     setLoading(true);
     setError('');
     try {
       const res = await apiGet<{ data: KnowledgeEntry[] }>(`/api/knowledge?vault_id=${vaultId}`);
-      const normalized = res.data.map((e) => {
-        if (typeof e.tags === 'string') {
-          try {
-            return { ...e, tags: JSON.parse(e.tags as unknown as string) };
-          } catch {
-            return { ...e, tags: [] };
-          }
-        }
-        return e;
-      });
-      setEntries(normalized);
+      setEntries(res.data.map((e) => ({ ...e, tags: normalizeTags(e.tags) })));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load knowledge entries');
     }

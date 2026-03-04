@@ -32,6 +32,8 @@ export const VaultDetailSection: Component<VaultDetailSectionProps> = (props) =>
     categorized,
     handleEntrySelected,
     handleEntrySaved,
+    handleDeleteSuccess,
+    handleEntryDeleted,
   } = useVaultDetailSection(props);
 
   return (
@@ -147,6 +149,8 @@ export const VaultDetailSection: Component<VaultDetailSectionProps> = (props) =>
                 <KnowledgeDetailPanel
                   entryId={entryId}
                   onSaved={handleEntrySaved}
+                  onDeleteSuccess={handleDeleteSuccess}
+                  onDeleted={handleEntryDeleted}
                 />
               )}
             </Show>

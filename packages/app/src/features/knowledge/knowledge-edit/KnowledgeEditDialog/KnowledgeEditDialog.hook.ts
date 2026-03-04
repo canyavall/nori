@@ -18,18 +18,6 @@ export const useKnowledgeEditDialog = (entryId: string, onClose: () => void) => 
     try {
       const entryRes = await apiGet<{ data: KnowledgeEntry }>(`/api/knowledge/${entryId}`);
       const e = entryRes.data;
-      if (typeof e.tags === 'string') {
-        try { e.tags = JSON.parse(e.tags); } catch { e.tags = []; }
-      }
-      if (typeof (e as unknown as Record<string, unknown>).required_knowledge === 'string') {
-        try { e.required_knowledge = JSON.parse((e as unknown as Record<string, unknown>).required_knowledge as string); } catch { e.required_knowledge = []; }
-      }
-      if (typeof (e as unknown as Record<string, unknown>).rules === 'string') {
-        try { e.rules = JSON.parse((e as unknown as Record<string, unknown>).rules as string); } catch { e.rules = []; }
-      }
-      e.description = e.description ?? '';
-      e.required_knowledge = e.required_knowledge ?? [];
-      e.rules = e.rules ?? [];
 
       const contentRes = await apiGet<{ data: { content: string; frontmatter: KnowledgeFrontmatter } }>(
         `/api/knowledge/${entryId}/content`

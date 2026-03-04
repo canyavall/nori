@@ -10,7 +10,7 @@
     "fields": [],
     "layout": {
       "sub_header": "Back arrow + vault name + 'Link Projects' button + 'Vault Settings' button",
-      "left_sidebar": "Create / Import / Export / Search toolbar + CategoryTree (collapsible by category)",
+      "left_sidebar": "Create / Import / Export / Search toolbar + CategoryTree (collapsible by category; each entry shows compact metadata: tag icon + count, code icon + rules count if any, link icon + required_knowledge count if any)",
       "main_content": "KnowledgeDetailPanel when entry selected, placeholder text when not"
     },
     "actions": [

@@ -154,4 +154,53 @@ describe('KnowledgeListSection', () => {
     render(() => <KnowledgeListSection />);
     expect(screen.getByText('Knowledge')).toBeDefined();
   });
+
+  it('shows tag count indicator when entry has tags', () => {
+    const entries = [makeEntry({ tags: ['a', 'b', 'c'] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    const tagCount = screen.getByTestId('tag-count');
+    expect(tagCount).toBeDefined();
+    expect(tagCount.textContent).toContain('3');
+  });
+
+  it('does not show individual tag names', () => {
+    const entries = [makeEntry({ tags: ['alpha', 'beta'] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    expect(screen.queryByText('alpha')).toBeNull();
+    expect(screen.queryByText('beta')).toBeNull();
+  });
+
+  it('shows rules count indicator when entry has rules', () => {
+    const entries = [makeEntry({ rules: ['rule one', 'rule two'] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    const rulesCount = screen.getByTestId('rules-count');
+    expect(rulesCount).toBeDefined();
+    expect(rulesCount.textContent).toContain('2');
+  });
+
+  it('does not show rules indicator when entry has no rules', () => {
+    const entries = [makeEntry({ rules: [] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    expect(screen.queryByTestId('rules-count')).toBeNull();
+  });
+
+  it('shows links count indicator when entry has required_knowledge', () => {
+    const entries = [makeEntry({ required_knowledge: ['entry-x', 'entry-y'] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    const linksCount = screen.getByTestId('links-count');
+    expect(linksCount).toBeDefined();
+    expect(linksCount.textContent).toContain('2');
+  });
+
+  it('does not show links indicator when entry has no required_knowledge', () => {
+    const entries = [makeEntry({ required_knowledge: [] })];
+    mockUse.mockReturnValue(makeDefaultHook({ knowledgeEntries: () => entries }));
+    render(() => <KnowledgeListSection />);
+    expect(screen.queryByTestId('links-count')).toBeNull();
+  });
 });

@@ -11,7 +11,7 @@ export const useMcpsAccordion = (
   const [open, setOpen] = createSignal(true);
   const [editing, setEditing] = createSignal(false);
   const [editorContent, setEditorContent] = createSignal('');
-  const [localServers, setLocalServers] = createSignal<ClaudeMcpServer[]>(servers());
+  const [localServers, setLocalServers] = createSignal<ClaudeMcpServer[]>(servers() ?? []);
   const [saving, setSaving] = createSignal(false);
   const [saveError, setSaveError] = createSignal('');
 

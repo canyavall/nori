@@ -1,15 +1,15 @@
 import type { Database } from 'sql.js';
 import type { StepResult, FlowError, Session } from '@nori/shared';
-import { queryOne } from '../../../shared/utils/database.js';
+import { querySessionById } from '../../shared/session-queries.js';
 
 export function validateSessionExists(
   db: Database,
   sessionId: string
 ): StepResult<Session> | FlowError {
   try {
-    const row = queryOne(db, `SELECT * FROM sessions WHERE id = ?`, [sessionId]);
+    const session = querySessionById(db, sessionId);
 
-    if (!row) {
+    if (!session) {
       return {
         success: false,
         error: {
@@ -23,7 +23,7 @@ export function validateSessionExists(
       };
     }
 
-    return { success: true, data: row as unknown as Session };
+    return { success: true, data: session };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return {

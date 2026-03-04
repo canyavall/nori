@@ -182,8 +182,8 @@ describe('VaultKnowledgeTree', () => {
     vi.mocked(apiGet).mockResolvedValue({ data: [entry] });
     render(() => <VaultKnowledgeTree vault={makeVault()} />);
     await waitFor(() => {
-      expect(screen.getByText('a')).toBeDefined();
-      expect(screen.getByText('b')).toBeDefined();
+      const tagCount = screen.getByTestId('tag-count');
+      expect(tagCount.textContent).toContain('2');
     });
   });
 

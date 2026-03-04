@@ -20,8 +20,8 @@ export function writeDatabase(
     // Insert all entries
     for (const entry of entries) {
       db.run(
-        `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, content_hash, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO knowledge_entries (id, vault_id, file_path, title, category, tags, description, required_knowledge, rules, content_hash, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           entry.id,
           entry.vault_id,
@@ -29,6 +29,9 @@ export function writeDatabase(
           entry.title,
           entry.category,
           JSON.stringify(entry.tags),
+          entry.description,
+          JSON.stringify(entry.required_knowledge),
+          JSON.stringify(entry.rules),
           entry.content_hash,
           entry.created_at,
           entry.updated_at,

@@ -1,15 +1,15 @@
 import type { Database } from 'sql.js';
 import type { StepResult, FlowError, Session } from '@nori/shared';
-import { queryOne } from '../../../shared/utils/database.js';
+import { querySessionById } from '../../shared/session-queries.js';
 
 export function checkActive(
   db: Database,
   sessionId: string
 ): StepResult<Session> | FlowError {
   try {
-    const row = queryOne(db, `SELECT * FROM sessions WHERE id = ?`, [sessionId]);
+    const session = querySessionById(db, sessionId);
 
-    if (!row) {
+    if (!session) {
       return {
         success: false,
         error: {
@@ -22,8 +22,6 @@ export function checkActive(
         },
       };
     }
-
-    const session = row as unknown as Session;
 
     if (session.status === 'archived') {
       return {

@@ -148,15 +148,39 @@ export const KnowledgeListSection: Component = () => {
                         </button>
                       </div>
                     </div>
-                    <Show when={Array.isArray(entry.tags) && entry.tags.length > 0}>
-                      <div class="flex gap-1.5 mt-2">
-                        <For each={entry.tags}>
-                          {(tag) => (
-                            <span class="px-1.5 py-0.5 rounded text-xs bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
-                              {tag}
-                            </span>
-                          )}
-                        </For>
+                    <Show when={
+                      (Array.isArray(entry.tags) && entry.tags.length > 0) ||
+                      (Array.isArray(entry.rules) && entry.rules.length > 0) ||
+                      (Array.isArray(entry.required_knowledge) && entry.required_knowledge.length > 0)
+                    }>
+                      <div class="flex items-center gap-2 mt-2">
+                        <Show when={Array.isArray(entry.tags) && entry.tags.length > 0}>
+                          <span class="flex items-center gap-0.5 text-xs text-[var(--color-text-muted)]" data-testid="tag-count">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                              <path d="M7 7h.01"/>
+                            </svg>
+                            {entry.tags.length}
+                          </span>
+                        </Show>
+                        <Show when={Array.isArray(entry.rules) && entry.rules.length > 0}>
+                          <span class="flex items-center gap-0.5 text-xs text-[var(--color-text-muted)]" data-testid="rules-count">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="16 18 22 12 16 6"/>
+                              <polyline points="8 6 2 12 8 18"/>
+                            </svg>
+                            {entry.rules.length}
+                          </span>
+                        </Show>
+                        <Show when={Array.isArray(entry.required_knowledge) && entry.required_knowledge.length > 0}>
+                          <span class="flex items-center gap-0.5 text-xs text-[var(--color-text-muted)]" data-testid="links-count">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                            </svg>
+                            {entry.required_knowledge.length}
+                          </span>
+                        </Show>
                       </div>
                     </Show>
                   </div>

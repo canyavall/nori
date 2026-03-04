@@ -153,25 +153,69 @@ describe('CategoryTree', () => {
     expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
   });
 
-  it('shows up to 3 tags per entry', () => {
+  it('shows tag count indicator when entry has tags', () => {
     const cats = {
       General: [makeEntry({ tags: ['a', 'b', 'c', 'd', 'e'] })],
     };
     render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
-    expect(screen.getByText('a')).toBeDefined();
-    expect(screen.getByText('b')).toBeDefined();
-    expect(screen.getByText('c')).toBeDefined();
-    expect(screen.queryByText('d')).toBeNull();
-    // overflow indicator
-    expect(screen.getByText('+2')).toBeDefined();
+    const tagCount = screen.getByTestId('tag-count');
+    expect(tagCount).toBeDefined();
+    expect(tagCount.textContent).toContain('5');
   });
 
-  it('does not show overflow indicator when entry has 3 or fewer tags', () => {
+  it('does not show individual tag names', () => {
     const cats = {
-      General: [makeEntry({ tags: ['x', 'y', 'z'] })],
+      General: [makeEntry({ tags: ['alpha', 'beta', 'gamma'] })],
     };
     render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
-    expect(screen.queryByText(/^\+/)).toBeNull();
+    expect(screen.queryByText('alpha')).toBeNull();
+    expect(screen.queryByText('beta')).toBeNull();
+  });
+
+  it('shows rules count indicator when entry has rules', () => {
+    const cats = {
+      General: [makeEntry({ rules: ['rule one', 'rule two'] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    const rulesCount = screen.getByTestId('rules-count');
+    expect(rulesCount).toBeDefined();
+    expect(rulesCount.textContent).toContain('2');
+  });
+
+  it('does not show rules indicator when entry has no rules', () => {
+    const cats = {
+      General: [makeEntry({ rules: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.queryByTestId('rules-count')).toBeNull();
+  });
+
+  it('shows required_knowledge count indicator when entry has required_knowledge', () => {
+    const cats = {
+      General: [makeEntry({ required_knowledge: ['entry-a', 'entry-b', 'entry-c'] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    const linksCount = screen.getByTestId('links-count');
+    expect(linksCount).toBeDefined();
+    expect(linksCount.textContent).toContain('3');
+  });
+
+  it('does not show links indicator when entry has no required_knowledge', () => {
+    const cats = {
+      General: [makeEntry({ required_knowledge: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.queryByTestId('links-count')).toBeNull();
+  });
+
+  it('does not show metadata row when entry has no tags, rules, or required_knowledge', () => {
+    const cats = {
+      General: [makeEntry({ tags: [], rules: [], required_knowledge: [] })],
+    };
+    render(() => <CategoryTree categories={cats} onEditEntry={noop} />);
+    expect(screen.queryByTestId('tag-count')).toBeNull();
+    expect(screen.queryByTestId('rules-count')).toBeNull();
+    expect(screen.queryByTestId('links-count')).toBeNull();
   });
 
   it('renders empty categories object without crashing', () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import type { ClaudeSkill, FlowEmitter } from '@nori/shared';
 
 // Mock llm-client before importing the module under test
@@ -29,8 +29,9 @@ import { runSkillChat } from './project-skill-chat.js';
 import { resolveAuth } from '../../shared/utils/llm-client.js';
 import { streamText } from 'ai';
 
-const mockResolveAuth = vi.mocked(resolveAuth);
-const mockStreamText = vi.mocked(streamText);
+// vi.mocked is a type-only helper; cast directly for cross-runner compatibility
+const mockResolveAuth = resolveAuth as unknown as Mock;
+const mockStreamText = streamText as unknown as Mock;
 
 function makeAsyncIterable(chunks: string[]): AsyncIterable<string> {
   return {

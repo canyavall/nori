@@ -211,7 +211,7 @@ knowledge.post('/:id/audit', async (c) => {
   return withSSE(c, async (emitter) => {
     const { runKnowledgeAudit } = await import('@nori/core');
     const result = await runKnowledgeAudit(
-      { file_path: entry.file_path as string },
+      { file_path: entry.file_path as string, vault_id: entry.vault_id as string, db },
       emitter
     );
     return result;

@@ -1,0 +1,47 @@
+{
+  "type": "api_call",
+  "what": "Trigger a deep LLM audit of the knowledge entry and display structured results",
+  "why": "Provides actionable quality feedback on token size, LLM-friendliness, tag correctness, uniqueness, and more — with one-click suggestions apply",
+  "where": {
+    "component": "features/knowledge/knowledge-detail/KnowledgeDetailSection.tsx"
+  },
+  "contract": {
+    "endpoint": "POST /api/knowledge/:id/audit",
+    "request_type": "{}",
+    "response_type": "KnowledgeAuditResponse",
+    "sse_events": [
+      "knowledge:audit:started",
+      "knowledge:audit:loading-entry",
+      "knowledge:audit:validating-frontmatter",
+      "knowledge:audit:validating-content",
+      "knowledge:audit:checking-originality",
+      "knowledge:audit:loading-vault-entries",
+      "knowledge:audit:calling-llm",
+      "knowledge:audit:generating-result",
+      "knowledge:audit:completed"
+    ]
+  },
+  "transitions": {
+    "on_result": "audit-result (renders AuditResults component)",
+    "on_error": "view (shows error in auditProgressMessage)",
+    "on_apply_suggestions": "editing (EditForm pre-filled with suggestions)",
+    "on_dismiss": "view"
+  },
+  "error_handling": [
+    {
+      "scenario": "LLM unavailable",
+      "action": "Show result with all findings as warn/LLM unavailable — still useful for token count"
+    },
+    {
+      "scenario": "Network / server error",
+      "action": "Return to view step, auditProgressMessage shows error"
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-03-04",
+      "reason": "Standalone audit separate from edit-save audit",
+      "rationale": "The existing post-edit audit (step 'audit') shows EditAuditResults for save warnings. This new step provides deep LLM analysis on demand from the view mode action bar."
+    }
+  ]
+}

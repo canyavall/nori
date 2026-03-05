@@ -30,6 +30,10 @@ vi.mock('../knowledge-delete/DeleteResult/DeleteResult', () => ({
   DeleteResult: () => <div data-testid="delete-result" />,
 }));
 
+vi.mock('./AuditResults/AuditResults', () => ({
+  AuditResults: () => <div data-testid="audit-results-panel" />,
+}));
+
 import { useKnowledgeDetailSection } from './KnowledgeDetailSection.hook';
 import { KnowledgeDetailSection } from './KnowledgeDetailSection';
 
@@ -83,6 +87,9 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     contentViewMode: () => 'markdown' as const,
     mainFieldsOpen: () => true,
     additionalFieldsOpen: () => false,
+    auditResult: () => null,
+    auditProgressMessage: () => '',
+    auditInitialValues: () => null,
     handleContentViewModeChange: vi.fn(),
     toggleMainFields: vi.fn(),
     toggleAdditionalFields: vi.fn(),
@@ -90,6 +97,9 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     handleCancelEdit: vi.fn(),
     handleSave: vi.fn(),
     handleAuditDone: vi.fn(),
+    handleAudit: vi.fn(),
+    handleApplySuggestions: vi.fn(),
+    handleAuditDismiss: vi.fn(),
     handleDeleteRequest: vi.fn(),
     handleDeleteCancel: vi.fn(),
     handleDeleteConfirm: vi.fn(),

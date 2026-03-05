@@ -20,6 +20,10 @@ vi.mock('../../knowledge-delete/DeleteResult/DeleteResult', () => ({
   DeleteResult: () => <div data-testid="delete-result" />,
 }));
 
+vi.mock('../AuditResults/AuditResults', () => ({
+  AuditResults: () => <div data-testid="audit-results-panel" />,
+}));
+
 vi.mock('../../../../components/ui/MarkdownContent/MarkdownContent', () => ({
   MarkdownContent: (props: { content: string; viewMode: string }) => (
     <div data-testid="markdown-content" data-view-mode={props.viewMode}>{props.content}</div>
@@ -65,12 +69,18 @@ function makeDefaultHook(overrides: Record<string, unknown> = {}) {
     additionalFieldsOpen: () => false,
     deleteError: () => '',
     deleteProgressMessage: () => '',
+    auditResult: () => null,
+    auditProgressMessage: () => '',
+    auditInitialValues: () => null,
     handleContentViewModeChange: vi.fn(),
     toggleMainFields: vi.fn(),
     toggleAdditionalFields: vi.fn(),
     handleEdit: vi.fn(),
     handleCancelEdit: vi.fn(),
     handleSave: vi.fn(),
+    handleAudit: vi.fn(),
+    handleApplySuggestions: vi.fn(),
+    handleAuditDismiss: vi.fn(),
     handleDeleteRequest: vi.fn(),
     handleDeleteCancel: vi.fn(),
     handleDeleteConfirm: vi.fn(),

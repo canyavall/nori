@@ -1,7 +1,7 @@
 // Types
 export type { FlowEmitter, StepResult, FlowError, FlowResult } from './types/flow.js';
 export type { Vault, VaultLink, VaultSyncStatus } from './types/vault.js';
-export type { KnowledgeEntry, KnowledgeFrontmatter, KnowledgeProposal } from './types/knowledge.js';
+export type { KnowledgeEntry, KnowledgeFrontmatter, KnowledgeProposal, KnowledgeLlmFinding, KnowledgeLlmAuditResult } from './types/knowledge.js';
 export type { Session, Message } from './types/session.js';
 export type { Project, ProjectSettings, ProjectSource, DiscoveredProject } from './types/project.js';
 export type {

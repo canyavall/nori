@@ -1,0 +1,19 @@
+{
+  "integration": [
+    {
+      "file": "packages/server/src/integration/knowledge.integration.test.ts",
+      "suite": "GET /api/knowledge/search (keyword search)",
+      "test": "returns matching entries for keyword query",
+      "covers": [
+        "01-load-index",
+        "02-parse-query",
+        "03-match-entries",
+        "04-score-relevance",
+        "05-semantic-search",
+        "06-merge-results",
+        "07-output-results"
+      ]
+    }
+  ],
+  "unit": []
+}

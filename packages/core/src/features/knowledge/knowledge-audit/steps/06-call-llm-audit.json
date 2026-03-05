@@ -1,0 +1,53 @@
+{
+  "type": "action",
+  "what": "Call Claude to perform a deep quality audit of the knowledge entry",
+  "why": "Structural checks alone cannot evaluate semantic quality, tag relevance, description accuracy, or uniqueness — only an LLM can do this reliably",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/knowledge-audit.ts",
+    "implementation": "features/knowledge/knowledge-audit/actions/call-llm-audit.ts"
+  },
+  "output": {
+    "console": false,
+    "file": false
+  },
+  "success_handling": {
+    "criteria": "LLM returns valid JSON matching KnowledgeLlmAuditResult schema",
+    "event": {
+      "action": "knowledge_audit_calling_llm",
+      "status": "success",
+      "message": "LLM audit complete for {file_path}",
+      "data_fields": ["file_path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No Anthropic credentials",
+      "criteria": "resolveAuth() returns { type: 'none' }",
+      "action": "Return unavailable result — all findings set to warn with 'LLM unavailable' message",
+      "severity": "warning",
+      "recoverable": true
+    },
+    {
+      "scenario": "LLM API call fails or returns invalid JSON",
+      "criteria": "fetch() throws or JSON.parse() fails",
+      "action": "Return unavailable result with error message in summary field",
+      "severity": "warning",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-03-04",
+      "reason": "Non-fatal LLM step",
+      "rationale": "If the LLM is unavailable or fails, the audit still returns structural findings. The UI shows 'LLM unavailable' for all 10 checks rather than crashing the flow."
+    },
+    {
+      "date": "2026-03-04",
+      "reason": "Use claude-sonnet-4-6-20250514 model",
+      "rationale": "Sonnet provides the quality needed for accurate semantic evaluation without the cost of Opus. Haiku would miss subtle issues."
+    }
+  ],
+  "calls": [
+    "features/knowledge/knowledge-audit/actions/call-llm-audit.ts"
+  ]
+}

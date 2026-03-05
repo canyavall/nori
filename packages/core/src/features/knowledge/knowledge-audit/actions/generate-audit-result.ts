@@ -1,4 +1,4 @@
-import type { StepResult } from '@nori/shared';
+import type { StepResult, KnowledgeLlmAuditResult } from '@nori/shared';
 import type { FrontmatterSchemaResult } from './validate-frontmatter-schema.js';
 import type { ContentQualityResult } from './validate-content-quality.js';
 import type { AiOriginalityResult } from './check-ai-originality.js';
@@ -7,13 +7,15 @@ export interface KnowledgeAuditResult {
   file_path: string;
   status: 'pass' | 'warn' | 'fail';
   findings: string[];
+  llm_result?: KnowledgeLlmAuditResult;
 }
 
 export function generateAuditResult(
   filePath: string,
   frontmatter: FrontmatterSchemaResult,
   contentQuality: ContentQualityResult,
-  aiOriginality: AiOriginalityResult
+  aiOriginality: AiOriginalityResult,
+  llmResult?: KnowledgeLlmAuditResult
 ): StepResult<KnowledgeAuditResult> {
   const findings: string[] = [];
 
@@ -36,12 +38,22 @@ export function generateAuditResult(
     status = 'warn';
   }
 
+  // If LLM result is more severe than structural result, escalate
+  if (llmResult) {
+    if (llmResult.overall_status === 'fail' && status !== 'fail') {
+      status = 'fail';
+    } else if (llmResult.overall_status === 'warn' && status === 'pass') {
+      status = 'warn';
+    }
+  }
+
   return {
     success: true,
     data: {
       file_path: filePath,
       status,
       findings,
+      llm_result: llmResult,
     },
   };
 }

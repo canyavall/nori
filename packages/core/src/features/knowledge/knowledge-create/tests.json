@@ -1,0 +1,17 @@
+{
+  "integration": [
+    {
+      "file": "packages/server/src/integration/knowledge.integration.test.ts",
+      "suite": "POST /api/knowledge (create entry)",
+      "test": "creates entry in DB and writes markdown file",
+      "covers": [
+        "01-validate-frontmatter",
+        "02-validate-content",
+        "03-write-markdown-file",
+        "04-audit-knowledge",
+        "05-regenerate-index"
+      ]
+    }
+  ],
+  "unit": []
+}

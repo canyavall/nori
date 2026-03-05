@@ -48,6 +48,7 @@ export interface KnowledgeSearchResponse {
 export interface KnowledgeAuditResponse {
   file_path: string;
   status: string;
+  llm_result?: import('../types/knowledge.js').KnowledgeLlmAuditResult;
 }
 
 export interface KnowledgeContentResponse {
@@ -115,6 +116,8 @@ export interface KnowledgeAuditEvents {
   'knowledge:audit:validating-frontmatter': { file_path: string };
   'knowledge:audit:validating-content': { file_path: string };
   'knowledge:audit:checking-originality': { file_path: string };
+  'knowledge:audit:loading-vault-entries': { file_path: string };
+  'knowledge:audit:calling-llm': { file_path: string };
   'knowledge:audit:generating-result': { file_path: string };
   'knowledge:audit:completed': { file_path: string; status: string };
 }

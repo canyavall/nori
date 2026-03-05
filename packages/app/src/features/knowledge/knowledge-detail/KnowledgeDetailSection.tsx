@@ -5,6 +5,7 @@ import { EditAuditResults } from '../knowledge-edit/EditAuditResults/EditAuditRe
 import { DeleteConfirmation } from '../knowledge-delete/DeleteConfirmation/DeleteConfirmation';
 import { DeleteResult } from '../knowledge-delete/DeleteResult/DeleteResult';
 import { MarkdownContent } from '../../../components/ui/MarkdownContent/MarkdownContent';
+import { AuditResults } from './AuditResults/AuditResults';
 import { useKnowledgeDetailSection } from './KnowledgeDetailSection.hook';
 
 const Chevron: Component<{ open: boolean }> = (props) => (
@@ -35,6 +36,9 @@ export const KnowledgeDetailSection: Component = () => {
     contentViewMode,
     mainFieldsOpen,
     additionalFieldsOpen,
+    auditResult,
+    auditProgressMessage,
+    auditInitialValues,
     handleContentViewModeChange,
     toggleMainFields,
     toggleAdditionalFields,
@@ -42,6 +46,9 @@ export const KnowledgeDetailSection: Component = () => {
     handleCancelEdit,
     handleSave,
     handleAuditDone,
+    handleAudit,
+    handleApplySuggestions,
+    handleAuditDismiss,
     handleDeleteRequest,
     handleDeleteCancel,
     handleDeleteConfirm,
@@ -97,7 +104,14 @@ export const KnowledgeDetailSection: Component = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={handleEdit}
+                  onClick={handleAudit}
+                  class="px-4 py-2 rounded-md text-sm border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+                >
+                  Audit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEdit()}
                   class="px-4 py-2 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
                   Edit
@@ -238,11 +252,11 @@ export const KnowledgeDetailSection: Component = () => {
             <h2 class="text-lg font-semibold">Edit Knowledge Entry</h2>
             <EditForm
               initialTitle={entryData()?.entry.title ?? ''}
-              initialCategory={entryData()?.entry.category ?? ''}
-              initialTags={entryData()?.entry.tags ?? []}
-              initialDescription={entryData()?.entry.description ?? ''}
-              initialRequiredKnowledge={entryData()?.entry.required_knowledge ?? []}
-              initialRules={entryData()?.entry.rules ?? []}
+              initialCategory={auditInitialValues()?.category ?? entryData()?.entry.category ?? ''}
+              initialTags={auditInitialValues()?.tags ?? entryData()?.entry.tags ?? []}
+              initialDescription={auditInitialValues()?.description ?? entryData()?.entry.description ?? ''}
+              initialRequiredKnowledge={auditInitialValues()?.required_knowledge ?? entryData()?.entry.required_knowledge ?? []}
+              initialRules={auditInitialValues()?.rules ?? entryData()?.entry.rules ?? []}
               initialContent={entryData()?.content ?? ''}
               error={saveError()}
               onSave={handleSave}
@@ -259,7 +273,7 @@ export const KnowledgeDetailSection: Component = () => {
           </div>
         </Match>
 
-        {/* Audit results */}
+        {/* Audit results (post-edit) */}
         <Match when={step() === 'audit'}>
           <div class="space-y-4">
             <h2 class="text-lg font-semibold">Update Results</h2>
@@ -269,6 +283,45 @@ export const KnowledgeDetailSection: Component = () => {
               warnings={auditWarnings()}
               onDone={handleAuditDone}
             />
+          </div>
+        </Match>
+
+        {/* Auditing (progress) */}
+        <Match when={step() === 'auditing'}>
+          <div class="py-12 text-center space-y-4">
+            <div class="inline-block w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+            <p class="text-sm text-[var(--color-text-muted)]">{auditProgressMessage()}</p>
+          </div>
+        </Match>
+
+        {/* Audit result (standalone LLM audit) */}
+        <Match when={step() === 'audit-result'}>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold">Audit Results</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">{entryData()?.entry.title ?? ''}</p>
+            </div>
+            <Show
+              when={auditResult()}
+              fallback={
+                <div class="py-8 text-center text-sm text-[var(--color-text-muted)]">
+                  No LLM result available — structural checks only.
+                  <button
+                    type="button"
+                    onClick={handleAuditDismiss}
+                    class="block mx-auto mt-4 px-4 py-2 rounded-md text-sm border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              }
+            >
+              <AuditResults
+                result={auditResult()!}
+                onApplySuggestions={handleApplySuggestions}
+                onDismiss={handleAuditDismiss}
+              />
+            </Show>
           </div>
         </Match>
 

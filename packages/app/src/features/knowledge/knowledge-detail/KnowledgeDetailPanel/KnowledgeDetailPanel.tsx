@@ -4,6 +4,7 @@ import { EditForm } from '../../knowledge-edit/EditForm/EditForm';
 import { DeleteConfirmation } from '../../knowledge-delete/DeleteConfirmation/DeleteConfirmation';
 import { DeleteResult } from '../../knowledge-delete/DeleteResult/DeleteResult';
 import { MarkdownContent } from '../../../../components/ui/MarkdownContent/MarkdownContent';
+import { AuditResults } from '../AuditResults/AuditResults';
 import type { KnowledgeDetailPanelProps } from './KnowledgeDetailPanel.type';
 import { useKnowledgeDetailPanel } from './KnowledgeDetailPanel.hook';
 
@@ -28,18 +29,23 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
     progressMessage,
     entry,
     content,
-    frontmatter,
     contentViewMode,
     mainFieldsOpen,
     additionalFieldsOpen,
     deleteError,
     deleteProgressMessage,
+    auditResult,
+    auditProgressMessage,
+    auditInitialValues,
     handleContentViewModeChange,
     toggleMainFields,
     toggleAdditionalFields,
     handleEdit,
     handleCancelEdit,
     handleSave,
+    handleAudit,
+    handleApplySuggestions,
+    handleAuditDismiss,
     handleDeleteRequest,
     handleDeleteCancel,
     handleDeleteConfirm,
@@ -73,6 +79,47 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
             <div class="inline-block w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
             <p class="text-sm text-[var(--color-text-muted)]">{progressMessage()}</p>
           </div>
+        </div>
+      </Show>
+
+      {/* Auditing (progress) */}
+      <Show when={step() === 'auditing'}>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="text-center space-y-4">
+            <div class="inline-block w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+            <p class="text-sm text-[var(--color-text-muted)]">{auditProgressMessage()}</p>
+          </div>
+        </div>
+      </Show>
+
+      {/* Audit result */}
+      <Show when={step() === 'audit-result'}>
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Audit Results</h2>
+            <p class="text-sm text-[var(--color-text-muted)] truncate ml-4">{entry()?.title ?? ''}</p>
+          </div>
+          <Show
+            when={auditResult()}
+            fallback={
+              <div class="py-8 text-center text-sm text-[var(--color-text-muted)]">
+                No LLM result available — structural checks only.
+                <button
+                  type="button"
+                  onClick={handleAuditDismiss}
+                  class="block mx-auto mt-4 px-4 py-2 rounded-md text-sm border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            }
+          >
+            <AuditResults
+              result={auditResult()!}
+              onApplySuggestions={handleApplySuggestions}
+              onDismiss={handleAuditDismiss}
+            />
+          </Show>
         </div>
       </Show>
 
@@ -122,7 +169,14 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
               <div class="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={handleEdit}
+                  onClick={handleAudit}
+                  class="px-3 py-1.5 rounded-md border border-[var(--color-border)] text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+                >
+                  Audit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEdit()}
                   class="px-3 py-1.5 rounded-md bg-[var(--color-accent)] text-white text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
                   Edit
@@ -282,11 +336,11 @@ export const KnowledgeDetailPanel: Component<KnowledgeDetailPanelProps> = (props
             </div>
             <EditForm
               initialTitle={e.title}
-              initialCategory={e.category ?? ''}
-              initialTags={e.tags ?? []}
-              initialDescription={e.description ?? ''}
-              initialRequiredKnowledge={e.required_knowledge ?? []}
-              initialRules={e.rules ?? []}
+              initialCategory={auditInitialValues()?.category ?? e.category ?? ''}
+              initialTags={auditInitialValues()?.tags ?? e.tags ?? []}
+              initialDescription={auditInitialValues()?.description ?? e.description ?? ''}
+              initialRequiredKnowledge={auditInitialValues()?.required_knowledge ?? e.required_knowledge ?? []}
+              initialRules={auditInitialValues()?.rules ?? e.rules ?? []}
               initialContent={content()}
               error={saveError()}
               onSave={handleSave}

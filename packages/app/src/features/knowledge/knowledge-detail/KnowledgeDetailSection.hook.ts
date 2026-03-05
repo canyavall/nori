@@ -1,17 +1,25 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
-import type { KnowledgeEntry, KnowledgeFrontmatter } from '@nori/shared';
+import type { KnowledgeEntry, KnowledgeFrontmatter, KnowledgeLlmAuditResult } from '@nori/shared';
 import type { ContentViewMode } from '../../../components/ui/MarkdownContent/MarkdownContent.type';
 import { apiGet } from '../../../lib/api';
 import { connectSSE } from '../../../lib/sse';
 import { updateKnowledgeEntry, removeKnowledgeEntry } from '../../../stores/knowledge.store';
 
-export type PageStep = 'loading' | 'view' | 'editing' | 'saving' | 'audit' | 'confirm-delete' | 'deleting' | 'deleted' | 'error';
+export type PageStep = 'loading' | 'view' | 'editing' | 'saving' | 'audit' | 'auditing' | 'audit-result' | 'confirm-delete' | 'deleting' | 'deleted' | 'error';
 
 export interface EntryData {
   entry: KnowledgeEntry;
   content: string;
   frontmatter: KnowledgeFrontmatter;
+}
+
+export interface AuditInitialValues {
+  tags: string[];
+  description: string;
+  rules: string[];
+  required_knowledge: string[];
+  category: string;
 }
 
 export const useKnowledgeDetailSection = () => {
@@ -30,6 +38,9 @@ export const useKnowledgeDetailSection = () => {
   const [contentViewMode, setContentViewMode] = createSignal<ContentViewMode>('markdown');
   const [mainFieldsOpen, setMainFieldsOpen] = createSignal(true);
   const [additionalFieldsOpen, setAdditionalFieldsOpen] = createSignal(false);
+  const [auditResult, setAuditResult] = createSignal<KnowledgeLlmAuditResult | null>(null);
+  const [auditProgressMessage, setAuditProgressMessage] = createSignal('');
+  const [auditInitialValues, setAuditInitialValues] = createSignal<AuditInitialValues | null>(null);
 
   const handleContentViewModeChange = (mode: ContentViewMode) => setContentViewMode(mode);
   const toggleMainFields = () => setMainFieldsOpen((v) => !v);
@@ -62,13 +73,19 @@ export const useKnowledgeDetailSection = () => {
     }
   });
 
-  function handleEdit() {
+  function handleEdit(initialValues?: AuditInitialValues) {
     setSaveError('');
+    if (initialValues) {
+      setAuditInitialValues(initialValues);
+    } else {
+      setAuditInitialValues(null);
+    }
     setStep('editing');
   }
 
   function handleCancelEdit() {
     setSaveError('');
+    setAuditInitialValues(null);
     setStep('view');
   }
 
@@ -190,6 +207,78 @@ export const useKnowledgeDetailSection = () => {
     setStep('view');
   }
 
+  function handleAudit() {
+    setAuditResult(null);
+    setAuditProgressMessage('Starting audit...');
+    setStep('auditing');
+
+    sseController?.abort();
+    sseController = connectSSE(`/api/knowledge/${params.id}/audit`, {}, {
+      onEvent: (event) => {
+        const messages: Record<string, string> = {
+          'knowledge:audit:started': 'Starting audit...',
+          'knowledge:audit:loading-entry': 'Loading entry...',
+          'knowledge:audit:validating-frontmatter': 'Validating frontmatter...',
+          'knowledge:audit:validating-content': 'Checking content quality...',
+          'knowledge:audit:checking-originality': 'Checking originality...',
+          'knowledge:audit:loading-vault-entries': 'Loading vault entries...',
+          'knowledge:audit:calling-llm': 'Running LLM analysis...',
+          'knowledge:audit:generating-result': 'Compiling results...',
+          'knowledge:audit:completed': 'Audit complete!',
+        };
+        setAuditProgressMessage(messages[event] ?? event);
+      },
+      onResult: (resultData) => {
+        interface AuditFlowResult {
+          success: boolean;
+          data?: {
+            file_path: string;
+            status: string;
+            findings: string[];
+            llm_result?: KnowledgeLlmAuditResult;
+          };
+          error?: { message: string };
+        }
+        const isAuditResult = (d: unknown): d is AuditFlowResult =>
+          typeof d === 'object' && d !== null && 'success' in d;
+
+        if (!isAuditResult(resultData)) return;
+
+        if (resultData.success && resultData.data) {
+          setAuditResult(resultData.data.llm_result ?? null);
+          setStep('audit-result');
+        } else {
+          setAuditProgressMessage(resultData.error?.message ?? 'Audit failed');
+          setStep('view');
+        }
+      },
+      onError: (errMsg) => {
+        setAuditProgressMessage(errMsg);
+        setStep('view');
+      },
+    }, 'POST');
+  }
+
+  function handleApplySuggestions() {
+    const result = auditResult();
+    if (!result) return;
+    const initialValues: AuditInitialValues = {
+      tags: result.suggestions.tags.length > 0 ? result.suggestions.tags : (entryData()?.entry.tags ?? []),
+      description: result.suggestions.description || (entryData()?.entry.description ?? ''),
+      rules: result.suggestions.rules.length > 0 ? result.suggestions.rules : (entryData()?.entry.rules ?? []),
+      required_knowledge: result.suggestions.required_knowledge.length > 0
+        ? result.suggestions.required_knowledge
+        : (entryData()?.entry.required_knowledge ?? []),
+      category: result.suggestions.category || (entryData()?.entry.category ?? ''),
+    };
+    handleEdit(initialValues);
+  }
+
+  function handleAuditDismiss() {
+    setAuditResult(null);
+    setStep('view');
+  }
+
   function handleDeleteRequest() {
     setDeleteError('');
     setStep('confirm-delete');
@@ -261,6 +350,9 @@ export const useKnowledgeDetailSection = () => {
     contentViewMode,
     mainFieldsOpen,
     additionalFieldsOpen,
+    auditResult,
+    auditProgressMessage,
+    auditInitialValues,
     handleContentViewModeChange,
     toggleMainFields,
     toggleAdditionalFields,
@@ -268,9 +360,12 @@ export const useKnowledgeDetailSection = () => {
     handleCancelEdit,
     handleSave,
     handleAuditDone,
+    handleAudit,
+    handleApplySuggestions,
+    handleAuditDismiss,
     handleDeleteRequest,
     handleDeleteCancel,
     handleDeleteConfirm,
     navigateToKnowledge,
   };
-}
+};

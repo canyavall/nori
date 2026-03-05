@@ -1,9 +1,9 @@
 {
   "type": "action",
-  "what": "Compile audit findings into structured result",
-  "why": "Aggregate all audit step findings into a single actionable report",
+  "what": "Merge structural and LLM findings into a single structured audit result",
+  "why": "Aggregate all audit step findings (frontmatter, content quality, originality, and optional LLM analysis) into one actionable report with an overall status",
   "where": {
-    "entry_point": "features/knowledge/knowledge-audit/steps/05-generate-audit-result.json",
+    "entry_point": "features/knowledge/knowledge-audit/steps/07-generate-audit-result.json",
     "implementation": "features/knowledge/knowledge-audit/actions/generate-audit-result.ts"
   },
   "output": {

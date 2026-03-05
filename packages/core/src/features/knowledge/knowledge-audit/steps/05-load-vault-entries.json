@@ -1,0 +1,41 @@
+{
+  "type": "action",
+  "what": "Load sibling vault entries for uniqueness comparison",
+  "why": "The LLM needs to know what other entries exist in the vault to flag duplicates and validate category/tag choices",
+  "where": {
+    "entry_point": "features/knowledge/knowledge-audit/knowledge-audit.ts",
+    "implementation": "features/knowledge/shared/knowledge-queries.ts"
+  },
+  "output": {
+    "console": false,
+    "file": false
+  },
+  "success_handling": {
+    "criteria": "Vault entries loaded and mapped to {title, category, tags} summaries",
+    "event": {
+      "action": "knowledge_audit_loading_vault_entries",
+      "status": "success",
+      "message": "Loaded {count} vault entries for comparison",
+      "data_fields": ["file_path"]
+    }
+  },
+  "error_handling": [
+    {
+      "scenario": "No db or vault_id provided",
+      "criteria": "Input missing optional db/vault_id fields",
+      "action": "Skip step — proceed with empty vault entries list",
+      "severity": "info",
+      "recoverable": true
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-03-04",
+      "reason": "Optional step — only runs when db + vault_id are provided",
+      "rationale": "The standalone audit route passes db context; the internal audit (called from create/edit) does not, so it skips this step to avoid overhead."
+    }
+  ],
+  "calls": [
+    "features/knowledge/shared/knowledge-queries.ts"
+  ]
+}

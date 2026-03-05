@@ -1,0 +1,16 @@
+{
+  "integration": [
+    {
+      "file": "packages/server/src/integration/vault.integration.test.ts",
+      "suite": "POST /api/vault (local registration)",
+      "test": "creates vault in DB and initialises directory",
+      "covers": [
+        "01-validate-name",
+        "02-create-directory",
+        "03-write-config",
+        "04-build-index"
+      ]
+    }
+  ],
+  "unit": []
+}
